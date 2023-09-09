@@ -1,0 +1,14 @@
+/** Voucher Print CSS */
+
+@media print {
+    
+    #printArea { 
+      font-size: 82px !important; /* Your desired font size for printing */
+    }
+    body{
+        font-size: 82px !important;
+    }
+    p{
+        font-size: 82px !important;
+    }
+  } 
