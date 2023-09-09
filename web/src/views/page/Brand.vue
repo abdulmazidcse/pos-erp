@@ -165,6 +165,7 @@
                                                 {{errors.website[0]}}
                                             </div>
                                         </div>
+                                        
 
                                         <div class="row">
                                             <div class="form-group col-md-12"
@@ -185,6 +186,18 @@
                                             </div>
                                         </div>
 
+                                        <div class="form-group ">
+                                            <label for="bstatus">Status</label>
+                                            <select class="form-control border" v-model="form.status"
+                                                @change="onkeyPress('status')" id="bstatus">
+                                                <option value="1">Active</option>
+                                                <option value="0">In Active</option>
+                                            </select>
+                                            <div class="invalid-feedback" v-if="errors.status">
+                                                {{errors.status[0]}}
+                                            </div>
+                                        </div>
+
                                         <div class="row">
                                             <div class="form-group col-md-6">
                                                 <div class="form-group">
@@ -202,19 +215,8 @@
                                                         {{errors.logo[0]}}
                                                     </div>
                                                 </div>
-                                            </div>
-
-                                            <div class="form-group col-md-6">
-                                                <label for="bstatus">Status</label>
-                                                <select class="form-control border" v-model="form.status"
-                                                    @change="onkeyPress('status')" id="bstatus">
-                                                    <option value="1">Active</option>
-                                                    <option value="0">Inactive</option>
-                                                </select>
-                                                <div class="invalid-feedback" v-if="errors.status">
-                                                    {{errors.status[0]}}
-                                                </div>
-                                            </div>
+                                            </div> 
+                                            
                                         </div>
 
                                     </div>

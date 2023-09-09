@@ -53,9 +53,7 @@ class SizeAPIController extends AppBaseController
         // dd($query->toSql());
         $data = $query->paginate($length);  
         $results = new SizeCollection($data);
-        return $results; 
-
-        return $this->sendResponse($sizes->toArray(), 'Sizes retrieved successfully');
+        return $results;  
     }
 
     /**

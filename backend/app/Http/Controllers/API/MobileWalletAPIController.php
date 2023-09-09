@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateMobileWalletAPIRequest;
 use App\Http\Requests\API\UpdateMobileWalletAPIRequest;
+use App\Http\Resources\MobileWalletCollection;
 use App\Models\MobileWallet;
 use App\Repositories\MobileWalletRepository;
 use Illuminate\Http\Request;
@@ -33,12 +34,28 @@ class MobileWalletAPIController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-        $mobileWallets = $this->mobileWalletRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+    { 
+        $columns = ['mobile_wallet', 'agent_name','mobile_number', 'charge_percent','status'];
+        $length = $request->input('length');
+        $column = $request->input('column');
+        $dir = $request->input('dir'); 
+        $searchValue = $request->input('search');
+
+        $query =  $this->mobileWalletRepository->allQuery()->orderBy($columns[$column], $dir);  
+
+        if($searchValue) {
+            $query->where(function ($query) use ($searchValue) {
+                $query->where('mobile_wallet', 'like', '%' .$searchValue. '%');
+                $query->orWhere('agent_name', 'like', '%' .$searchValue. '%');
+                $query->orWhere('mobile_number', 'like', '%' .$searchValue. '%');
+                $query->orWhere('charge_percent', 'like', '%' .$searchValue. '%');
+                $query->orWhere('status', 'like', '%' .$searchValue. '%');
+            });
+        }
+        // dd($query->toSql());
+        $data = $query->paginate($length);  
+        $results = new MobileWalletCollection($data);
+        return $results; 
 
         return $this->sendResponse($mobileWallets->toArray(), 'Mobile Wallets retrieved successfully');
     }

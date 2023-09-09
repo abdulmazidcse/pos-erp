@@ -11,8 +11,8 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal" v-if="permission['mobile-create']">
-                          Add New
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal" v-if="permission['mobile-create']">
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New
                         </button> 
                     </div>
                 </div>
@@ -22,27 +22,76 @@
             <div class="col-12">
                 <div class="card">
                     <div class="card-body">   
-                        <table id="basic-datatable" class="table table-striped dt-responsive nowrap w-100"  v-if="!loading">
-                            <thead> 
-                                <tr class="border success item-head">
-                                    <th width="20%">Mobile wallet type </th>
-                                    <th width="20%">Agent name</th>
-                                    <th width="20%">Mobile number</th>
-                                    <th width="5%">Action</th>
-                                </tr>
-                            </thead> 
-                            <tbody v-if="items.length > 0">
-                                <tr class="border" v-for="(item, i) in items" :key="i">
-                                    <td>{{ item.mobile_wallet}} </td>
-                                    <td>{{ item.agent_name}} </td> 
-                                    <td>{{ item.mobile_number}} </td> 
-                                    <td>
-                                        <a href="#" @click="edit(item)" v-if="permission['mobile-wallet-edit']"><i class="fas fa-edit"></i> </a>
-                                        <a href="#" @click="deleteItem(item)" v-if="permission['mobile-wallet-delete']"><i class="fas fa-trash"></i> </a>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
+                        <Datatable 
+                            :columns="columns" 
+                            :sortKey="tableData.sortKey"  
+                            @sort="sortBy" 
+                            v-if="!loading">
+                            <template #header > 
+                                <div class="tableFilters" style="margin-bottom: 10px;">
+                                    <div class="row">
+                                        <div class="col-md-6">
+                                            <div class="control" style="float: left;">
+                                                <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
+                                                <div class="select" style="float: left;">
+                                                    <select class="form-select" v-model="tableData.length" @change="fetchData()">  
+                                                        <option value="10" selected="selected">10</option> 
+                                                        <option value="25">25</option>
+                                                        <option value="50">50</option>
+                                                        <option value="100">100</option>
+                                                        <option value="500">500</option>
+                                                    </select>
+                                                </div>
+                                                <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="col-md-2">
+                                            
+                                        </div>
+                                        <div class="col-md-4">
+                                            <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="fetchData()">
+                                        </div>
+                                    </div>
+                                </div>   
+                            </template> 
+                            <template #body >                            
+                                <tbody v-if="items.length > 0">
+                                    <tr class=" " v-for="(item, i) in items" :key="i">                                            
+                                        <td>{{ item.mobile_wallet}} </td>
+                                        <td>{{ item.agent_name}} </td> 
+                                        <td>{{ item.mobile_number}} </td> 
+                                        <td>{{ item.charge_percent}} </td> 
+                                        <td> <span v-if="item.status==1" class="badge bg-success">Active</span>
+                                            <span v-if="item.status==0" class="badge bg-warning">In-Active</span> </td>
+                                        <td>
+                                            <div class="dropdown float-end">
+                                                <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="mdi mdi-dots-vertical"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end"> 
+                                                    <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['mobile-wallet-edit']">
+                                                    <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                    <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['mobile-wallet-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                                </div>
+                                            </div> 
+                                        </td> 
+                                    </tr>
+                                </tbody> 
+                                <tbody v-else>
+                                    <tr>
+                                        <td colspan="3"> No Data Available Here!</td>
+                                    </tr>
+                                </tbody>
+                            </template> 
+                            <template #footer>
+                                <Pagination 
+                                    :pagination="pagination"  
+                                    :language="lang"
+                                    @onChangePage="setPage" > 
+                                </Pagination> 
+                            </template> 
+                        </Datatable>  
                         <div class="tab-pane show active" v-if="loading">
                             <div class="row"> 
                                 <div class="col-md-5">  
@@ -109,6 +158,25 @@
                                         </div>
                                     </div>
                                 </div>  
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="charge_percent">Charge Percent *</label>
+                                        <input type="text" class="form-control border " @keypress="onkeyPress('charge_percent')" v-model="form.charge_percent" id="charge_percent" placeholder="Charge Percent" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errors.charge_percent">
+                                            {{errors.charge_percent[0]}}
+                                        </div>
+                                    </div>
+                                </div>  
+                                <div class="form-group">
+                                    <label for="ustatus">Status</label>
+                                    <select class="form-control border" v-model="form.status" @change="onkeyPress('status')" id="ustatus">
+                                        <option value="1">Active</option>
+                                        <option value="0">Inactive</option>
+                                    </select>
+                                    <div class="invalid-feedback" v-if="errors.status">
+                                        {{errors.status[0]}}
+                                    </div>
+                                </div>
                             </div>
 
                         </div>
@@ -130,13 +198,29 @@
 <script>
 import {mapGetters, mapActions} from "vuex";
 import Modal from "../helper/Modal.vue";
-import { ref, onMounted } from "vue";
+import Datatable from '@/components/Datatable.vue';
+import Pagination from '@/components/Pagination.vue';
 import Form from "vform";
 import axios from "axios";
 export default {
-    name: "PosLeftbar",
+    name: "MobileWallets",
     components: {
-        Modal
+        Modal,
+        Datatable,
+        Pagination,
+    },
+    props:{
+        language: {
+          type: Object,
+          default: () => {
+            return {
+              lengthMenu: null,
+              info: null,
+              zeroRecords: null, 
+              search: null
+            }
+          },
+        },
     },
     data() {
         return {
@@ -155,8 +239,71 @@ export default {
                 mobile_wallet: '',
                 agent_name: '',
                 mobile_number:'',
-                company_id:''
-            }),
+                charge_percent:'',
+                company_id:'',
+                status: 1,
+            }), 
+            columns: [ 
+                {
+                    label: 'Mobile wallet type ',
+                    name: 'name',           
+                    width: '25%'
+                }, 
+                {
+                    label: 'Agent name',
+                    name: 'value',           
+                    width: '20%'
+                }, 
+                {
+                    label: 'Mobile number',
+                    name: 'value',           
+                    width: '20%'
+                }, 
+                {
+                    label: 'Charge %',
+                    name: 'value',           
+                    width: '15%'
+                }, 
+                {
+                    label: 'Status',
+                    name: 'status',
+                    isSearch: false, 
+                    width: '10%'
+                },
+                {
+                    label: 'Actions',            
+                    name: '',
+                    isSearch: false, 
+                    isAction: true,
+                    width: '10%',
+
+                }
+            ],  
+            tableData: {
+                draw: 0,
+                length: 10,
+                search: '',
+                column: 0,
+                dir: 'desc',
+                sortKey: 'name', 
+            }, 
+            lang: {
+                lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
+                info: this.$props.language.info ? this.$props.language.info : 'Showing_FROM_to_TO_of_TOTAL_entries',
+                zeroRecords: this.$props.language.zeroRecords ? this.$props.language.zeroRecords : 'No data available in table.', 
+                search: this.$props.language.search ? this.$props.language.search : 'Search'
+            },
+            pagination: {
+                lastPage: '',
+                currentPage: '',
+                total: '',
+                lastPageUrl: '',
+                nextPageUrl: '',
+                prevPageUrl: '',
+                from: '',
+                to: '',
+                links:[],
+            } 
         }
     },
     created() {
@@ -174,19 +321,7 @@ export default {
             this.errors = '';
             this.isSubmit = false;
             this.form.reset();
-        },
-        fetchData() { 
-            axios.get(this.apiUrl+'/mobile_wallets', this.headerjson)
-            .then((res) => {
-                this.items = res.data.data; 
-            })
-            .catch((err) => {
-                this.$toast.error(err.response.data.message); 
-            })
-            .finally((ress) => {
-                this.loading = false; 
-            });
-        },
+        }, 
 
         fetchCompany() { 
             axios.get(this.apiUrl+'/companies',this.headerjson)
@@ -217,7 +352,7 @@ export default {
                 this.disabled = false;
                 if(res.status == 200){
                     this.toggleModal();
-                    this.fetchData();
+                    this.fetchData(this.apiUrl+'/mobile_wallets?page='+this.pagination.currentPage);
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
@@ -252,7 +387,7 @@ export default {
                     axios.delete(this.apiUrl+'/mobile_wallets/'+item.id, this.headerjson)
                     .then(res => {
                         if(res.status == 200){ 
-                            this.fetchData();
+                            this.fetchData(this.apiUrl+'/mobile_wallets?page='+this.pagination.currentPage);
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);
@@ -270,6 +405,46 @@ export default {
                 }
             }); 
         },
+        fetchData(url = this.apiUrl+'/mobile_wallets') {
+            this.tableData.draw++;
+            axios.get(url, {params:this.tableData, headers: this.headerparams})
+            .then((response) => { 
+                this.items = response.data.data;   
+                this.configPagination(response.data.meta); 
+            })
+            .catch(errors => {
+                this.$toast.error(errors);
+            })
+            .finally((fres) => {
+                this.loading = false;
+            });
+        },
+
+        configPagination(data){
+            this.pagination.lastPage = data.last_page;
+            this.pagination.currentPage = data.current_page;
+            this.pagination.total   = data.total ? data.total : 0;
+            this.pagination.lastPageUrl = data.last_page_url;
+            this.pagination.nextPageUrl = data.next_page_url;
+            this.pagination.prevPageUrl = data.prev_page_url;
+            this.pagination.from = data.from ? data.from : 0;
+            this.pagination.to = data.to ? data.to : 0;  
+            this.pagination.links = data.links;
+        },
+
+        sortBy(key,sortable) {
+            this.tableData.sortKey = key; 
+            this.tableData.column = this.getIndex(this.columns, 'name', key);
+            this.tableData.dir = sortable;  
+            this.fetchData();
+        },
+        setPage(data){  
+            this.fetchData(data.url); 
+        },
+        getIndex(array, key, value) {
+            return array.findIndex(i => i[key] == value)
+        }
+          
     },
     destroyed() {},
     mounted() {

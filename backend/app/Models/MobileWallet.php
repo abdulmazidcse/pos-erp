@@ -35,6 +35,7 @@ class MobileWallet extends Model
         'mobile_number',
         'company_id',
         'charge_percent',
+        'status',
     ];
 
     /**
