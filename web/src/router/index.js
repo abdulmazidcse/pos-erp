@@ -62,8 +62,7 @@ import PermissionModule from "@/views/menu_and_permissions/ModuleOrMenu.vue";
 import PermissionAction from "@/views/menu_and_permissions/PermissionAction.vue";
 
 // for test
-import VoucherEdit from "@/views/accounts/VoucherEntryEdit.vue";
-import PosTest from "@/views/pos/PosLeftbarTestOld.vue";
+import VoucherEdit from "@/views/accounts/VoucherEntryEdit.vue"; 
 
 
 
@@ -120,13 +119,7 @@ route_list_array.push(
     name: 'VoucherEdit',
     component: VoucherEdit,
     icon_name: 'fas fa-folder',
-  },
-  {
-    path: '/pos/test',
-    name: 'PosTest',
-    component: PosTest,
-    icon_name: 'fas fa-folder',
-  }
+  } 
 
 )
 

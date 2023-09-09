@@ -12,8 +12,8 @@
                             </ol>
                         </div>
                         <div class="page-title-right float-right "> 
-                            <button type="button" class="btn btn-primary float-right" @click="toggleModal" v-if="permission['color-create']">
-                              Add New
+                            <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal" v-if="permission['color-create']">
+                                <i class="mdi mdi-camera-timer me-1"></i> Create New
                             </button> 
                         </div>
                     </div>
@@ -36,7 +36,7 @@
                                                 <div class="control" style="float: left;">
                                                     <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                     <div class="select" style="float: left;">
-                                                        <select class="form-select" v-model="tableData.length" @change="getDataItems()">  
+                                                        <select class="form-select" v-model="tableData.length" @change="fetchData()">  
                                                             <option value="10" selected="selected">10</option> 
                                                             <option value="25">25</option>
                                                             <option value="50">50</option>
@@ -52,7 +52,7 @@
                                                 
                                             </div>
                                             <div class="col-md-4">
-                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="getDataItems()">
+                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="fetchData()">
                                             </div>
                                         </div>
                                     </div>   
@@ -171,7 +171,7 @@ import Pagination from '@/components/Pagination.vue';
 import Form from "vform";
 import axios from "axios";
 export default {
-    name: "Color",
+    name: "Colors",
     components: {
         Modal,
         Datatable,
@@ -277,16 +277,7 @@ export default {
             this.isSubmit = false;
             this.form.reset(); 
             console.log('then',this.isSubmit)
-        },
-        // fetchData() { 
-        //     axios.get(this.apiUrl+'/colors', this.headerjson)
-        //     .then((res) => { 
-        //         this.items = res.data.data;
-        //     })
-        //     .finally((ress) => {
-        //       this.loading = false; 
-        //     });
-        // }, 
+        }, 
         edit: function(item) {
             this.btn='Update';
             this.editMode = true;
@@ -317,8 +308,7 @@ export default {
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
-                }
-                console.log(res.data)
+                } 
             }).catch(err => {  
                 this.isSubmit = false;
                 this.disabled = false;
@@ -354,8 +344,7 @@ export default {
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);
-                        }
-                        console.log(res.data)
+                        } 
                     }).catch(err => {  
                         this.$toast.error(err.response.data.message);
                         if(err.response.status == 422){
@@ -373,8 +362,7 @@ export default {
         fetchData(url = this.apiUrl+'/colors') {
             this.tableData.draw++;
             axios.get(url, {params:this.tableData, headers: this.headerparams})
-            .then((response) => {
-                console.log('response', response.data.data);
+            .then((response) => { 
                 this.items = response.data.data;   
                 this.configPagination(response.data.meta); 
             })
@@ -433,8 +421,7 @@ export default {
 </script>
 
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 600px;
 }
 

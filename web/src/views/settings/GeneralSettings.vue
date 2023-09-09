@@ -278,8 +278,7 @@ export default {
     padding: 13px 0;
 }
 
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 900px;
 }
 
@@ -304,9 +303,7 @@ label {
   position: relative;
   vertical-align: middle;
 }
-.modal-content.scrollbar-width-thin {
-    border: none !important; 
-} 
+ 
 label {
     display: inline-block;
     margin: 0px 0px 4px 2px;

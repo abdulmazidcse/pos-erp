@@ -12,8 +12,8 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['unit-create']">
-                            Add New
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['unit-create']">
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New
                         </button> 
                     </div>
                 </div>
@@ -493,8 +493,7 @@ export default {
 </script>
 
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 800px;
 }
 

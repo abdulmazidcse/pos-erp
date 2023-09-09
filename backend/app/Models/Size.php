@@ -29,7 +29,8 @@ class Size extends Model
 
     public $fillable = [
         'name',
-        'value'
+        'value',
+        'status'
     ];
 
     /**

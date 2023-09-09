@@ -180,9 +180,7 @@ export default {
 };
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important; 
-} 
+ 
 label {
     display: inline-block;
     margin: 0px 0px 4px 2px;

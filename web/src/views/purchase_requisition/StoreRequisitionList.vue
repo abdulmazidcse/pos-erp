@@ -553,8 +553,7 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 100%;
 }
 

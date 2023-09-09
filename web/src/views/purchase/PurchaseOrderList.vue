@@ -658,8 +658,7 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin.orderPreview {
-    border: none !important;
+.modal-content.scrollbar-width-thin.orderPreview { 
     width: 900px;
 }
 

@@ -12,8 +12,8 @@
                             </ol>
                         </div>
                         <div class="page-title-right float-right "> 
-                            <button type="button" class="btn btn-primary float-right" @click="toggleModal" v-if="permission['sizes-create']">
-                              Add New
+                            <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal" v-if="permission['sizes-create']">
+                                <i class="mdi mdi-camera-timer me-1"></i> Create New
                             </button> 
                         </div>
                     </div>
@@ -23,25 +23,74 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">   
-                            <table class="table table-bordered table-sm ">
-                                <thead class="tableFloatingHeaderOriginal">
-                                    <tr class="border success item-head">
-                                        <th width="20%">Size Name </th>
-                                        <th width="20%">Value</th>
-                                        <th width="5%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody v-if="items.length > 0">
-                                    <tr class="border" v-for="(item, i) in items" :key="i">
-                                        <td>{{ item.name}} </td>
-                                        <td>{{ item.value}} </td> 
-                                        <td>
-                                            <a href="#" @click="edit(item)" v-if="permission['sizes-edit']"><i class="fas fa-edit"></i> </a>
-                                            <a href="#" @click="deleteItem(item)" v-if="permission['sizes-delete']"><i class="fas fa-trash"></i> </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <Datatable 
+                                :columns="columns" 
+                                :sortKey="tableData.sortKey"  
+                                @sort="sortBy" 
+                                v-if="!loading">
+                                <template #header > 
+                                    <div class="tableFilters" style="margin-bottom: 10px;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="control" style="float: left;">
+                                                    <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
+                                                    <div class="select" style="float: left;">
+                                                        <select class="form-select" v-model="tableData.length" @change="fetchData()">  
+                                                            <option value="10" selected="selected">10</option> 
+                                                            <option value="25">25</option>
+                                                            <option value="50">50</option>
+                                                            <option value="100">100</option>
+                                                            <option value="500">500</option>
+                                                        </select>
+                                                    </div>
+                                                    <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-2">
+                                                
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="fetchData()">
+                                            </div>
+                                        </div>
+                                    </div>   
+                                </template> 
+                                <template #body >                            
+                                    <tbody v-if="items.length > 0">
+                                        <tr class=" " v-for="(item, i) in items" :key="i">                                            
+                                            <td>{{ item.name}} </td>
+                                            <td>{{ item.value}} </td> 
+                                            <td> <span v-if="item.status==1" class="badge bg-success">Active</span>
+                                                <span v-if="item.status==0" class="badge bg-warning">In-Active</span> </td>
+                                            <td>
+                                                <div class="dropdown float-end">
+                                                    <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="mdi mdi-dots-vertical"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-end"> 
+                                                        <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['sizes-edit']">
+                                                        <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                        <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['sizes-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                                    </div>
+                                                </div> 
+                                            </td> 
+                                        </tr>
+                                    </tbody> 
+                                    <tbody v-else>
+                                        <tr>
+                                            <td colspan="3"> No Data Available Here!</td>
+                                        </tr>
+                                    </tbody>
+                                </template> 
+                                <template #footer>
+                                    <Pagination 
+                                        :pagination="pagination"  
+                                        :language="lang"
+                                        @onChangePage="setPage" > 
+                                    </Pagination> 
+                                </template> 
+                            </Datatable>  
                             <div class="tab-pane show active" v-if="loading">
                                 <div class="row"> 
                                     <div class="col-md-5">  
@@ -85,6 +134,16 @@
                                             </div>
                                         </div>
                                     </div>  
+                                    <div class="form-group">
+                                        <label for="ustatus">Status</label>
+                                        <select class="form-control border" v-model="form.status" @change="onkeyPress('status')" id="ustatus">
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
+                                        <div class="invalid-feedback" v-if="errors.status">
+                                            {{errors.status[0]}}
+                                        </div>
+                                    </div>
                                 </div>
 
                             </div>
@@ -106,13 +165,30 @@
 <script>
 import {mapGetters, mapActions} from "vuex";
 import Modal from "../helper/Modal.vue";
+import Datatable from '@/components/Datatable.vue';
+import Pagination from '@/components/Pagination.vue';
 import { ref, onMounted } from "vue";
 import Form from "vform";
 import axios from "axios";
 export default {
-    name: "PosLeftbar",
+    name: "Sizes",
     components: {
-        Modal
+        Modal,
+        Datatable,
+        Pagination,
+    },
+    props:{
+        language: {
+          type: Object,
+          default: () => {
+            return {
+              lengthMenu: null,
+              info: null,
+              zeroRecords: null, 
+              search: null
+            }
+          },
+        },
     },
     data() {
         return {
@@ -129,8 +205,60 @@ export default {
             form: new Form({
                 id: '',
                 name: '',
-                value: 1,
+                value: '',
+                status: 1,
             }),
+            columns: [ 
+                {
+                    label: 'Name',
+                    name: 'name',           
+                    width: '35%'
+                }, 
+                {
+                    label: 'Value',
+                    name: 'value',           
+                    width: '25%'
+                }, 
+                {
+                    label: 'Status',
+                    name: 'status',
+                    isSearch: false, 
+                    width: '15%'
+                },
+                {
+                    label: 'Actions',            
+                    name: '',
+                    isSearch: false, 
+                    isAction: true,
+                    width: '10%',
+
+                }
+            ],  
+            tableData: {
+                draw: 0,
+                length: 10,
+                search: '',
+                column: 0,
+                dir: 'desc',
+                sortKey: 'name', 
+            }, 
+            lang: {
+                lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
+                info: this.$props.language.info ? this.$props.language.info : 'Showing_FROM_to_TO_of_TOTAL_entries',
+                zeroRecords: this.$props.language.zeroRecords ? this.$props.language.zeroRecords : 'No data available in table.', 
+                search: this.$props.language.search ? this.$props.language.search : 'Search'
+            },
+            pagination: {
+                lastPage: '',
+                currentPage: '',
+                total: '',
+                lastPageUrl: '',
+                nextPageUrl: '',
+                prevPageUrl: '',
+                from: '',
+                to: '',
+                links:[],
+            }
         }
     },
     created() {
@@ -146,19 +274,8 @@ export default {
             } 
             this.errors = '';
             this.isSubmit = false;
-            this.form.reset(); 
-            console.log('then',this.isSubmit)
+            this.form.reset();  
         },
-        fetchData() { 
-            axios.get(this.apiUrl+'/sizes', this.headerjson)
-            .then((res) => { 
-                this.items = res.data.data;
-            })
-            .finally((ress) => {
-              this.loading = false; 
-            });;
-        }, 
-
         edit: function(item) {
             this.btn='Update';
             this.editMode = true;
@@ -172,6 +289,7 @@ export default {
             const formData = new FormData();  
             formData.append('name', this.form.name);
             formData.append('value', this.form.value); 
+            formData.append('status', this.form.status); 
             if(this.editMode){
                 formData.append('_method', 'put');
                 var postEvent = axios.post(this.apiUrl+'/sizes/'+this.form.id, formData,  this.headers);
@@ -185,12 +303,11 @@ export default {
                 this.disabled = false;
                 if(res.status == 200){
                     this.toggleModal();
-                    this.fetchData();
+                    this.fetchData(this.apiUrl+'/sizes?page='+this.pagination.currentPage);
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
-                }
-                console.log(res.data)
+                } 
             }).catch(err => {  
                 this.isSubmit = false;
                 this.disabled = false;
@@ -221,12 +338,11 @@ export default {
                 if (result.value) { 
                     axios.delete(this.apiUrl+'/sizes/'+item.id, this.headers).then(res => {
                         if(res.status == 200){ 
-                            this.fetchData();
+                            this.fetchData(this.apiUrl+'/sizes?page='+this.pagination.currentPage);
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);
-                        }
-                        console.log(res.data)
+                        } 
                     }).catch(err => {  
                         this.$toast.error(err.response.data.message);
                         if(err.response.status == 422){
@@ -240,6 +356,45 @@ export default {
                 }
             }); 
         },
+        fetchData(url = this.apiUrl+'/sizes') {
+            this.tableData.draw++;
+            axios.get(url, {params:this.tableData, headers: this.headerparams})
+            .then((response) => { 
+                this.items = response.data.data;   
+                this.configPagination(response.data.meta); 
+            })
+            .catch(errors => {
+                this.$toast.error(errors);
+            })
+            .finally((fres) => {
+                this.loading = false;
+            });
+        },
+
+        configPagination(data){
+            this.pagination.lastPage = data.last_page;
+            this.pagination.currentPage = data.current_page;
+            this.pagination.total   = data.total ? data.total : 0;
+            this.pagination.lastPageUrl = data.last_page_url;
+            this.pagination.nextPageUrl = data.next_page_url;
+            this.pagination.prevPageUrl = data.prev_page_url;
+            this.pagination.from = data.from ? data.from : 0;
+            this.pagination.to = data.to ? data.to : 0;  
+            this.pagination.links = data.links;
+        },
+
+        sortBy(key,sortable) {
+            this.tableData.sortKey = key; 
+            this.tableData.column = this.getIndex(this.columns, 'name', key);
+            this.tableData.dir = sortable;  
+            this.fetchData();
+        },
+        setPage(data){  
+            this.fetchData(data.url); 
+        },
+        getIndex(array, key, value) {
+            return array.findIndex(i => i[key] == value)
+        }
     },
     destroyed() {},
     mounted() {
@@ -264,8 +419,7 @@ export default {
 </script>
 
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 600px;
 }
 

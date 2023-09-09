@@ -875,8 +875,7 @@ export default {
     z-index: 9999;
     display: none;
 }
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 90%;
     display: block;
     margin: 0 auto;

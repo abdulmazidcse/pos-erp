@@ -4,6 +4,7 @@ namespace App\Http\Controllers\API;
 
 use App\Http\Requests\API\CreateSizeAPIRequest;
 use App\Http\Requests\API\UpdateSizeAPIRequest;
+use App\Http\Resources\SizeCollection;
 use App\Models\Size;
 use App\Repositories\SizeRepository;
 use Illuminate\Http\Request;
@@ -33,12 +34,26 @@ class SizeAPIController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-        $sizes = $this->sizeRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+    { 
+        $columns = ['name', 'value', 'status'];
+        $length = $request->input('length');
+        $column = $request->input('column');
+        $dir = $request->input('dir'); 
+        $searchValue = $request->input('search');
+
+        $query =  $this->sizeRepository->allQuery()->orderBy($columns[$column], $dir);  
+
+        if($searchValue) {
+            $query->where(function ($query) use ($searchValue) {
+                $query->where('name', 'like', '%' .$searchValue. '%');
+                $query->orWhere('value', 'like', '%' .$searchValue. '%');
+                $query->orWhere('status', 'like', '%' .$searchValue. '%');
+            });
+        }
+        // dd($query->toSql());
+        $data = $query->paginate($length);  
+        $results = new SizeCollection($data);
+        return $results; 
 
         return $this->sendResponse($sizes->toArray(), 'Sizes retrieved successfully');
     }

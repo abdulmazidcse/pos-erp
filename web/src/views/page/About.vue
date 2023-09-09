@@ -274,10 +274,7 @@ export default {
     computed: {}
 }
 </script>
-<style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
-}
+<style scoped> 
 
 label {
     display: inline-block;

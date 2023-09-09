@@ -1276,12 +1276,10 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 1000px;
 }
-.modal-content.scrollbar-width-thin.supplier-add-modal {
-    border: none !important;
+.modal-content.scrollbar-width-thin.supplier-add-modal { 
     width: 600px;
 }
 

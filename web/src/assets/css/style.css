@@ -253,7 +253,17 @@ ul.breadcrumb li a:hover {
 }
 
 
-/* Mazid */
+.modal-header{
+  background-color: #038286 !important;
+  color: white !important;
+  padding: 0.2rem 1rem !important; 
+}
+.modal-header button{
+  color: white !important;
+}
+.modal-inner{
+  border: 2px solid cadetblue !important;
+}
 
 .leftside-menu {
   width: 230px; 

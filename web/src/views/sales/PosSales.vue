@@ -1102,9 +1102,6 @@ font-size: 0.5em;
 overflow: hidden;
 position: relative;
 vertical-align: middle;
-}
-.modal-content.scrollbar-width-thin {
-  border: none !important; 
 } 
 label {
   display: inline-block;

@@ -1192,8 +1192,7 @@ export default {
     width: 60vw;
     margin: 0 auto;
 }
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 600px;
 }
 

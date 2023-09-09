@@ -486,8 +486,7 @@ export default {
     padding: 13px 0;
 }
 
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 900px;
 }
 

@@ -547,8 +547,7 @@ export default {
 }
 </script>
 <style  >
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 70vw;
 }
 
