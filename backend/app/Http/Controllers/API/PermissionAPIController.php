@@ -8,6 +8,7 @@ use App\Http\Resources\PermissionResource;
 use App\Models\Permission;
 use App\Models\PermissionModule;
 use App\Repositories\PermissionRepository;
+use App\Repositories\RoleRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\Auth;
@@ -23,10 +24,12 @@ class PermissionAPIController extends AppBaseController
 {
     /** @var  PermissionRepository */
     private $permissionRepository;
+    private $roleRepository;
 
-    public function __construct(PermissionRepository $permissionRepo)
+    public function __construct(PermissionRepository $permissionRepo, RoleRepository $roleRepo)
     {
         $this->permissionRepository = $permissionRepo;
+        $this->roleRepository = $roleRepo;
     }
 
     /**
@@ -42,7 +45,7 @@ class PermissionAPIController extends AppBaseController
             $request->except(['skip', 'limit']),
             $request->get('skip'),
             $request->get('limit')
-        );
+        ); 
 
         return $this->sendResponse($permissions->toArray(), 'Permissions retrieved successfully');
     }
@@ -242,18 +245,24 @@ class PermissionAPIController extends AppBaseController
         return $this->sendSuccess('Permission deleted successfully');
     }
 
-    public function getUserMenuAndRolePermissions() {
+    public function getUserMenuAndRolePermissions(Request $request) {
 
         $user = auth()->user();
-
-        $user_all_permissions = $user->getAllPermissions();
+        $user_all_permissions = $user->getAllPermissions();        
+        $userRoles = $user->getRoleNames()->toArray(); 
+        if (in_array('Super Admin', $userRoles) || in_array('IT', $userRoles)) { 
+            if (count($user_all_permissions) === 0) { 
+                $this->insertUserPermission();
+                $user2 = auth()->user();
+                $user_all_permissions = $user2->getAllPermissions();  
+            } 
+        }  
         $user_route_list_array = [];
         $menu_index = [];
         $menu_action = [];
         $permission_with_module = [];
         if(!empty($user_all_permissions)) {
             foreach ($user_all_permissions as $permission) {
-
                 if($permission->is_route_action) {
                     $user_route_list_array[] = [
                         'path' => $permission->url_path,
@@ -263,14 +272,11 @@ class PermissionAPIController extends AppBaseController
                         'parent_module' => $permission->permission_modules->parents ? $permission->permission_modules->parents->name : ""
                     ];
                 }
-
                 if($permission->is_nav == 1) {
                     $menu_index[$permission->module_id] = $permission;
                 }else{
                     $menu_action[$permission->module_id][] = $permission;
                 }
-
-
                 $permission_with_module[$permission->module_id][$permission->slug] = $permission;
             }
         }
@@ -386,13 +392,7 @@ class PermissionAPIController extends AppBaseController
             'user_routes'   => $user_route_list_array,
             'user_navigations'  => $user_navigation_array,
             'data_check'    => 1,
-            'module_based_navigation'   => $user_navigation_with_module,
-//            'module_array'   => $module_array,
-//            'menu_index'    => $menu_index,
-//            'menu_action'    => $menu_action['1'],
-//            'sub_modules'   => $sub_modules_array,
-//            'sub_modules_menus'   => $sub_module_menus,
-//            'permission_with_module'  => $permission_with_module,
+            'module_based_navigation'   => $user_navigation_with_module, 
         ];
         return $this->sendResponse($return_data, 'Data Retrieve Successfully');
 
@@ -484,4 +484,20 @@ class PermissionAPIController extends AppBaseController
         return $this->sendResponse($return_data, 'Data Retrieve Successfully');
 
     }
+
+    public function insertUserPermission(){
+            $user = auth()->user();
+            $roles = $user->getRoleNames();
+            $userRoles = $user->getRoleNames()->toArray(); 
+            if ($roles->isNotEmpty()) {            
+                if (in_array('Super Admin', $userRoles) || in_array('IT', $userRoles)) { 
+                    $firstRoleId = $user->roles->first()->id;
+                    $role = $this->roleRepository->find($firstRoleId); 
+                    $permissions = $this->permissionRepository->allQuery() 
+                        ->select('id')
+                        ->get()->pluck('id'); 
+                    $role->syncPermissions($permissions); 
+                }
+            }   
+    } 
 }
