@@ -176,8 +176,7 @@ class SaleReturnAPIController extends AppBaseController
         }
         $input = $request->all();
 
-        echo "specific returns==== ";
-        return $input;
+        return "specific returns==== ".$input;
 
 
         $sale_items = $input['returnInfo']['sales_items'];

@@ -182,7 +182,7 @@
                                     </div>
                                     <div class="col-md-12">
                                         <div class="mb-3">
-                                            <label for="global_note"> Note</label>
+                                            <label for="global_note"> Note *</label>
                                             <textarea class="form-control border" rows="3" v-model="vform.global_note" @keypress="onkeyPress('global_note')"></textarea>
                                             <div class="invalid-feedback" v-if="errors.global_note">
                                                 {{errors.global_note[0]}}
@@ -191,13 +191,13 @@
                                     </div>
 
                                     <div class="col-md-12">
-                                        <button type="submit" class="btn-sm btn btn-primary float-right" :disabled="disabled"> 
+                                        <button type="submit" class="btn btn-primary float-right" :disabled="disabled"> 
                                             <span v-show="isSubmit">
                                                 <i class="fas fa-spinner fa-spin" ></i>
                                             </span>
                                             <i class="mdi mdi-content-save-all"></i> Save
                                         </button>
-                                        <button type="button" class="btn-sm btn btn-danger float-right" style="margin-right: 5px;"> <i class="mdi mdi-close"></i> Cancel</button>
+                                        <button type="button" class="btn btn-danger float-right" style="margin-right: 5px;"> <i class="mdi mdi-close"></i> Cancel</button>
                                     </div>
                                 </form>                        
                             </div>
@@ -479,7 +479,10 @@ export default {
                 return false;
             }
             this.isSubmit = true; 
-            this.disabled = true;  
+            this.disabled = true; 
+            
+            console.log('selectedItems', this.selectedItems) 
+            console.log('payments', this.payments) 
 
             if((this.payments.length > 0) && (this.vform.payment_type)) {
                 var formData = new FormData();
@@ -496,17 +499,17 @@ export default {
                 .then((resp) => {
                     this.isSubmit = false;
                     this.disabled = false;
-                    if(resp.status == 200){ 
+                    if(resp.status == 200){
+                        console.log("datatdatata==", resp.data.data );
                         this.vform.reset(); 
                         this.vtype_value = this.$route.query.type ?? '';
                         this.vitem  = resp.data.data;
                         this.forceRerender(); 
                         this.vform.fiscalyear_id = this.fiscal_years[0].id;
                         this.$toast.success(resp.data.message); 
-                        this.payments=[];
-                        // setTimeout(() => {
-                        //     this.printContent("printArea");
-                        // }, 3000);
+                        setTimeout(() => {
+                            this.printContent("printArea");
+                        }, 3000);
 
                     }else{
                         this.$toast.error(resp.data.message);
@@ -523,7 +526,6 @@ export default {
             }else{
                 this.isSubmit = false; 
                 this.disabled = false;
-                this.loading = true;
                 this.$toast.error("Debit and Credit account must be equal");
             }
         },
@@ -608,19 +610,17 @@ export default {
                 }
 
                 let paymentMapData = this.invoices.map(function(element){
-                    return {    pay_amount: (element.grand_total - element.total_payment) , 
+                    return {    pay_amount: (element.grand_total - element.paid_amount) , 
                                 inv_id:element.id, 
                                 invoice_number:element.invoice_number, 
                                 paid_amount:element.paid_amount, 
                                 collection_amount:element.collection_amount, 
                                 collection_amount:element.collection_amount, 
                                 total_amount:element.total_amount, 
-                                total_payment:element.total_payment, 
                                 selected:false, 
                             };
                 }) 
                 this.payments = paymentMapData; 
-                this.invoiceLoading = false;
             })
             .catch((err) => {
                 this.$toast.error(err.response.data.message)
@@ -659,8 +659,7 @@ export default {
     z-index: 9999;
     display: none;
 }
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 90%;
     display: block;
     margin: 0 auto;

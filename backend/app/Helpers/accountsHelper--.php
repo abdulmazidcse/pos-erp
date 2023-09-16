@@ -94,16 +94,9 @@ function getAccountTypesWithBalance($types, $class_id, $from=false, $to=false, $
             $accounts = getAccounts($type->id);
             if(isset($accounts)) {
                 foreach ($accounts as $account) {
-                    if($prevCloseBalance)
-                    {
-
-                        $ledger_amount_data = ledgerClosingBalance($account->id, $from, $to);
-                        $opening_balance = $ledger_amount_data['opening_balance'];
-                        $closing_balance = $ledger_amount_data['balance'];
-                    }else{
-                        $opening_balance = 0;
-                        $closing_balance = 0;
-                    }
+                    $ledger_amount_data = ledgerClosingBalance($account->id, $from, $to);
+                    $opening_balance = $ledger_amount_data['opening_balance'];
+                    $closing_balance = $ledger_amount_data['balance'];
 
                     $debit_amount   = getLedgerAmount($account, 'dr', $from, $to);
                     $credit_amount  = getLedgerAmount($account, 'cr', $from, $to);

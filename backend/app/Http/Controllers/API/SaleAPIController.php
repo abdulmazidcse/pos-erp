@@ -1212,7 +1212,7 @@ class SaleAPIController extends AppBaseController
     }
 
 
-    protected function collectionAccountTransaction($data=array())
+    public function collectionAccountTransaction($data=array())
     {
         $entry_type = EntryType::where('label', 'journal')->first();
         $voucher_code   = $this->returnVoucherCode('journal');
@@ -1270,7 +1270,7 @@ class SaleAPIController extends AppBaseController
             }
         }
         $voucher_save = AccountVoucher::create($account_voucher_inputs);
-        $transactions_save = $voucher_save->account_voucher_transactions()->saveMany($transaction_array);
+        $voucher_save->account_voucher_transactions()->saveMany($transaction_array);
 
         return $voucher_save;
 

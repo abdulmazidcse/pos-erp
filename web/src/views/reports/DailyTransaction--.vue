@@ -137,7 +137,7 @@
                             <div class="modal-content scrollbar-width-thin orderPreview" >
                                 <div class="modal-header"> 
                                     <button @click="toggleModal()" type="button" class="btn btn-default">X</button>
-                                    <h3 style="width: 100%">Daily Transaction</h3>
+                                    <h3 style="width: 100%">Product Sales Report</h3>
                                 </div>
                                 <div class="modal-body " id="printArea" >
                                     <div class="table-responsive product_table">
@@ -158,7 +158,7 @@
                                                     <th width="15%" style="text-align: center">Voucher Code</th>
                                                     <th width="10%" style="text-align: center">Voucher Type</th>
                                                     <th width="20%" style="text-align: center">Account Head </th>
-                                                    <th width="25%" style="text-align: center; max-width: 400px !important;">Notes</th>
+                                                    <th width="25%" style="text-align: center">Notes</th>
                                                     <th width="10%" style="text-align: center">Debit Amount</th>
                                                     <th width="10%" style="text-align: center">Credit Amount</th>
                                                 </tr>
@@ -170,7 +170,7 @@
                                                     <td style="text-align: left">{{ item.vcode }} </td> 
                                                     <td style="text-align: left">{{ item.vtype }} </td> 
                                                     <td style="text-align: left">{{ item.ledger_head }}</td>
-                                                    <td class="text-wrap" style="text-align: left; max-width: 400px !important;">{{ item.notes }}</td>
+                                                    <td style="text-align: left; max-width: 400px !important;">{{ item.notes }}</td>
                                                     <td style="text-align: right">{{ item.debit_amount }}</td>
                                                     <td style="text-align: right">{{ item.credit_amount }}</td>
                                                 </tr>
@@ -312,8 +312,7 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 90%;
     display: block;
     margin: 0 auto;

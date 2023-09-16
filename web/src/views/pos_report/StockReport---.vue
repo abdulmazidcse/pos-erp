@@ -129,13 +129,13 @@
                                                 <div class="control" style="float: left;">
                                                     <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                     <div class="select" style="float: left;">
-                                                        <select class="form-select" v-model="tableData.length" @change="getStockReport()">  
+                                                        <select class="form-select" v-model="tableData.length" @change="getStockReport()"> 
+                                                            <option value="2" selected="selected">2</option>
                                                             <option value="5" selected="selected">5</option>
                                                             <option value="10" selected="selected">10</option>
                                                             <option value="25">25</option>
                                                             <option value="50">50</option>
                                                             <option value="100">100</option>
-                                                            <option :value="pagination.total">All</option>
                                                         </select>
                                                     </div>
                                                     <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
@@ -163,7 +163,7 @@
                                             <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
                                             <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
                                             <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                            <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td>
+                                            <td class="text-center">{{ item.product.purchase_unit.unit_code.toUpperCase() ?? '' }} </td>
                                             <!-- <td class="text-right" v-if="checkUnitCode(item.product.purchase_measuring_unit) == 'kg'">{{ item.stock_weight * item.product.mrp_price }} </td> -->
                                             <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
                                             <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td>
@@ -272,7 +272,7 @@
                                                 <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
                                                 <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
                                                 <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                                <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td> 
+                                                <td class="text-center">{{ item.product.purchase_unit.unit_code.toUpperCase() ?? '' }} </td> 
                                                 <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
                                                 <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td> 
                                                 <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.cost_price).toFixed(2) }} </td>
@@ -701,8 +701,7 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 90%;
     display: block;
     margin: 0 auto;
@@ -725,9 +724,5 @@ label {
 
 .actions a{
     margin-right: 5px;
-}
-
-tr:nth-child(even) {
-  background-color: #F4F4F4;
 }
 </style>

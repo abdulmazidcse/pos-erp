@@ -12,8 +12,8 @@
                             </ol>
                         </div>
                         <div class="page-title-right float-right "> 
-                            <button type="button" class="btn btn-primary float-right" @click="toggleModal" v-if="permission['coupons-create']">
-                              Add New
+                            <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal" v-if="permission['coupons-create']">
+                                <i class="mdi mdi-camera-timer me-1"></i> Create New
                             </button> 
                         </div>
                     </div>
@@ -23,46 +23,85 @@
                 <div class="col-12">
                     <div class="card">
                         <div class="card-body">   
-                            <table class="table table-bordered table-sm ">
-                                <thead class="tableFloatingHeaderOriginal">
-                                    <tr class="border success item-head">
-                                        <th width="10%">Coupon Name </th>
-                                        <th width="5%">Code</th>
-                                        <th width="10%">Discount amount</th>
-                                        <th width="10%">Description</th>
-                                        <th width="5%">Number of Uses</th>
-                                        <th width="10%">Max uses</th>
-                                        <th width="10%">Fixed Or Percent</th>
-                                        <th width="10%">Start at</th> 
-                                        <th width="10%">Expires at</th> 
-                                        <th width="5%">status</th> 
-                                        <th width="5%">Action</th>
-                                    </tr>
-                                </thead>
-                                <tbody v-if="items.length > 0">
-                                    <tr class="border" v-for="(item, i) in items" :key="i">
-                                        <td>{{ item.name}} </td>
-                                        <td>{{ item.code}} </td> 
-                                        <td>{{ item.discount_amount}} </td> 
-                                        <td>{{ item.description}} </td> 
-                                        <td>{{ item.uses}} </td> 
-                                        <td>{{ item.max_uses}} </td> 
-                                        <td> 
-                                            <span class="badge btn bg-warning" v-if="item.is_fixed==1">Fixed</span>  
-                                            <span class="badge btn bg-success"  v-else>Percent</span> </td> 
-                                        <td>{{ item.start_at}} </td> 
-                                        <td>{{ item.expires_at}} </td> 
-                                        <td>
-                                            <span class="badge btn bg-success" v-if="item.status==1">Active</span> 
-                                            <span class="badge btn bg-info" v-else>Inactive</span> 
-                                        </td>  
-                                        <td>
-                                            <a href="#" @click="edit(item)" v-if="permission['coupons-edit']"><i class="fas fa-edit"></i> </a>
-                                            <a href="#" @click="deleteItem(item)" v-if="permission['coupons-delete']"><i class="fas fa-trash"></i> </a>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
+                            <Datatable 
+                                :columns="columns" 
+                                :sortKey="tableData.sortKey"  
+                                @sort="sortBy" 
+                                v-if="!loading">
+                                <template #header > 
+                                    <div class="tableFilters" style="margin-bottom: 10px;">
+                                        <div class="row">
+                                            <div class="col-md-6">
+                                                <div class="control" style="float: left;">
+                                                    <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
+                                                    <div class="select" style="float: left;">
+                                                        <select class="form-select" v-model="tableData.length" @change="fetchData()">  
+                                                            <option value="10" selected="selected">10</option> 
+                                                            <option value="25">25</option>
+                                                            <option value="50">50</option>
+                                                            <option value="100">100</option>
+                                                            <option value="500">500</option>
+                                                        </select>
+                                                    </div>
+                                                    <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
+                                                </div>
+                                            </div>
+                                            
+                                            <div class="col-md-2">
+                                                
+                                            </div>
+                                            <div class="col-md-4">
+                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="fetchData()">
+                                            </div>
+                                        </div>
+                                    </div>   
+                                </template> 
+                                <template #body >                            
+                                    <tbody v-if="items.length > 0">
+                                        <tr class=" " v-for="(item, i) in items" :key="i">                                            
+                                            <td>{{ item.name}} </td>
+                                            <td>{{ item.code}} </td> 
+                                            <td>{{ item.discount_amount}} </td> 
+                                            <td>{{ item.description}} </td> 
+                                            <td>{{ item.uses}} </td> 
+                                            <td>{{ item.uses}} </td> 
+                                            <td>{{ item.max_uses}} </td> 
+                                            <td> 
+                                                <span class="badge btn bg-warning" v-if="item.is_fixed==1">Fixed</span>  
+                                                <span class="badge btn bg-success"  v-else>Percent</span> </td> 
+                                            <td>{{ item.start_at}} </td> 
+                                            <td>{{ item.expires_at}} </td> 
+                                            <td> <span v-if="item.status==1" class="badge bg-success">Active</span>
+                                                <span v-if="item.status==0" class="badge bg-warning">In-Active</span> 
+                                            </td>
+                                            <td>
+                                                <div class="dropdown float-end">
+                                                    <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                        <i class="mdi mdi-dots-vertical"></i>
+                                                    </a>
+                                                    <div class="dropdown-menu dropdown-menu-end"> 
+                                                        <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['coupons-edit']">
+                                                        <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                        <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['coupons-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                                    </div>
+                                                </div> 
+                                            </td> 
+                                        </tr>
+                                    </tbody> 
+                                    <tbody v-else>
+                                        <tr>
+                                            <td colspan="3"> No Data Available Here!</td>
+                                        </tr>
+                                    </tbody>
+                                </template> 
+                                <template #footer>
+                                    <Pagination 
+                                        :pagination="pagination"  
+                                        :language="lang"
+                                        @onChangePage="setPage" > 
+                                    </Pagination> 
+                                </template> 
+                            </Datatable>  
                             <div class="tab-pane show active" v-if="loading">
                                 <div class="row"> 
                                     <div class="col-md-5">  
@@ -189,13 +228,30 @@
 <script>
 import {mapGetters, mapActions} from "vuex";
 import Modal from "../helper/Modal.vue";
+import Datatable from '@/components/Datatable.vue';
+import Pagination from '@/components/Pagination.vue';
 import { ref, onMounted } from "vue";
 import Form from "vform";
 import axios from "axios";
 export default {
-    name: "PosLeftbar",
+    name: "Coupons",
     components: {
-        Modal
+        Modal,
+        Datatable,
+        Pagination,
+    },
+    props:{
+        language: {
+          type: Object,
+          default: () => {
+            return {
+              lengthMenu: null,
+              info: null,
+              zeroRecords: null, 
+              search: null
+            }
+          },
+        },
     },
     data() {
         return {
@@ -212,15 +268,105 @@ export default {
             form: new Form({
                 id: '',
                 name: '',
-                code: '',
-                type:'voucher',
+                code: '', 
                 is_fixed:1,
                 discount_amount:'',
                 status:1,
                 start_at:'',
                 expires_at:'',
                 description:''
-            }),
+            }),          
+            columns: [ 
+                {
+                    label: 'Name',
+                    name: 'name',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Code',
+                    name: 'value',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Dis Amount',
+                    name: 'discount_amount',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Description',
+                    name: 'description',           
+                    width: '15%'
+                }, 
+                {
+                    label: 'Usesed',
+                    name: 'uses',           
+                    width: '5%'
+                }, 
+                {
+                    label: 'Max uses',
+                    name: 'value',           
+                    width: '5%'
+                }, 
+                {
+                    label: 'Max Usesed',
+                    name: 'max_uses',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Fixed Or %',
+                    name: 'is_fixed',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Start at',
+                    name: 'start_at',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Expires at',
+                    name: 'expires_at',           
+                    width: '10%'
+                }, 
+                {
+                    label: 'Status',
+                    name: 'status',
+                    isSearch: false, 
+                    width: '10%'
+                },
+                {
+                    label: 'Actions',            
+                    name: '',
+                    isSearch: false, 
+                    isAction: true,
+                    width: '10%',
+
+                }
+            ],  
+            tableData: {
+                draw: 0,
+                length: 10,
+                search: '',
+                column: 0,
+                dir: 'desc',
+                sortKey: 'name', 
+            }, 
+            lang: {
+                lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
+                info: this.$props.language.info ? this.$props.language.info : 'Showing_FROM_to_TO_of_TOTAL_entries',
+                zeroRecords: this.$props.language.zeroRecords ? this.$props.language.zeroRecords : 'No data available in table.', 
+                search: this.$props.language.search ? this.$props.language.search : 'Search'
+            },
+            pagination: {
+                lastPage: '',
+                currentPage: '',
+                total: '',
+                lastPageUrl: '',
+                nextPageUrl: '',
+                prevPageUrl: '',
+                from: '',
+                to: '',
+                links:[],
+            }
         }
     },
     created() {
