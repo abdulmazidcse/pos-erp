@@ -1003,14 +1003,11 @@ import { ref } from "vue";
 import Form from 'vform'  
 import Vue3Barcode from 'vue3-barcode'
 import axios from 'axios';
-import { reactive, toRefs } from 'vue'
-import { Vue3JsonEditor } from 'vue3-json-editor'
+import { reactive, toRefs } from 'vue' 
 import Bulkupload from './Bulkupload'; 
 import Datatable from '@/components/Datatable.vue';
 import Pagination from '@/components/Pagination.vue';
-
-import { Editor, EditorContent } from '@tiptap/vue-3'
-import StarterKit from '@tiptap/starter-kit'
+ 
 import BarcodeGenerator from "@/components/BarcodeGenerator.vue"; 
 import BarcodeDemo from "@/views/product/BarcodeDemo"; 
 
@@ -1018,12 +1015,10 @@ export default {
     name: 'Products',
     components: { 
       Modal,
-      Vue3Barcode,
-      Vue3JsonEditor,
+      Vue3Barcode, 
       Bulkupload:Bulkupload,
       Datatable,
-      Pagination,
-      EditorContent,
+      Pagination, 
       BarcodeGenerator,
       BarcodeDemo
     },
@@ -1226,15 +1221,7 @@ export default {
     },
     beforeUnmount() {
       //this.editor.destroy()
-    },
-    mounted() {
-      this.editor = new Editor({
-        content: '<p>I’m running Tiptap with Vue.js. 🎉</p>',
-        extensions: [
-          StarterKit,
-        ],
-      })
-    },
+    }, 
     methods: {
         toggleModal: function() {
           this.modalActive = !this.modalActive;    

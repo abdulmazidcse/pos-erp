@@ -12,8 +12,8 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['department-create']">
-                            Add New
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['department-create']">
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New
                         </button> 
                     </div>
                 </div>
@@ -39,9 +39,17 @@
                                     <td>{{ item.name}} </td>
                                     <td>{{ item.company_name }} </td>
                                     <td>
-                                        <a href="#" @click="edit(item)" v-if="['department-edit']"><i class="fas fa-edit"></i> </a>
-                                        <a href="#" @click="deleteItem(item)" v-if="['department-edit']"><i class="fas fa-trash"></i> </a>
-                                    </td>
+                                        <div class="dropdown float-end">
+                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi mdi-dots-vertical"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end"> 
+                                                <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['department-edit']">
+                                                <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['department-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                            </div>
+                                        </div> 
+                                    </td> 
                                 </tr>
                             </tbody>
                         </table>

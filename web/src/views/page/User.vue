@@ -7,28 +7,18 @@
                     <div class="page-title-box">
                         <div class="page-title-right float-left">
                             <h4 style="margin: 0; padding: 8px 0 1.5rem 0;">User List</h4>
-                        </div>
-                        <div class="page-title-right float-right">
-                            <ol class="breadcrumb m-0">
-                                <li class="breadcrumb-item active">Users </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">User List</a></li>
-
-                            </ol>
-                        </div>
+                        </div> 
                         <div class="page-title-right float-right ">
-
+                            <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['user-create']">
+                                <i class="mdi mdi-plus-outline"></i> Add New
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col-md-12 ">
-                    <div class="card">
-                        <div class="card-header">
-                            <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['user-create']">
-                                <i class="mdi mdi-plus-outline"></i> Add New
-                            </button>
-                        </div>
+                    <div class="card"> 
                         <div class="card-body">
                             <Datatable :columns="columns" :sortKey="tableData.sortKey" @sort="sortBy" v-if="!loading">
                                 <template #header>
@@ -46,6 +36,7 @@
                                                             <option value="25">25</option>
                                                             <option value="50">50</option>
                                                             <option value="100">100</option>
+                                                            <option :value="pagination.total">All</option>
                                                         </select>
                                                     </div>
                                                     <span style="float: left; margin-left: 10px; padding: 7px 0px;">

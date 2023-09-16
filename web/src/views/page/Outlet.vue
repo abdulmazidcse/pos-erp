@@ -11,8 +11,8 @@
                             </ol>
                         </div>
                         <div class="page-title-right float-right "> 
-                            <button type="button" class="btn btn-primary float-right" @click="toggleModal" v-if="permission['outlet-create']">
-                              Add New
+                            <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal" v-if="permission['outlet-create']">
+                                <i class="mdi mdi-camera-timer me-1"></i> Create New
                             </button> 
                         </div>
                     </div>
@@ -39,9 +39,18 @@
                                         <td>{{ item.outlet_number }}</td>
                                         <td>{{ item.address }}</td>
                                         <td>
-                                            <a href="#" v-if="permission['outlet-edit']" @click="edit(item)"><i class="fas fa-edit"></i> </a>
-                                            <a href="#" v-if="permission['outlet-delete']" @click="deleteItem(item)"><i class="fas fa-trash"></i> </a>
+                                            <div class="dropdown float-end">
+                                                <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                    <i class="mdi mdi-dots-vertical"></i>
+                                                </a>
+                                                <div class="dropdown-menu dropdown-menu-end">  
+                                                    <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['outlet-edit']">
+                                                    <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                    <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['outlet-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                                </div>
+                                            </div>  
                                         </td>
+                                         
                                     </tr>
                                 </tbody>
                             </table>
@@ -425,8 +434,7 @@ export default {
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);
-                        }
-                        console.log(res.data)
+                        } 
                     }).catch(err => {  
                         this.$toast.error(err.response.data.message); 
                     }) 
@@ -442,10 +450,7 @@ export default {
         this.fetchIndexData();
         this.fetchCompany()
         this.fetchDistrict()
-        this.fetchArea();
-        //this.$on('AfterCreated',() => {  
-         
-        //});
+        this.fetchArea(); 
     },
     destroyed() {},
     mounted() {

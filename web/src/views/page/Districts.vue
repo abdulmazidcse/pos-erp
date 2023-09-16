@@ -11,8 +11,8 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['districts-create']">
-                            Add New
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['districts-create']">
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New
                         </button> 
                     </div>
                 </div>
@@ -103,7 +103,7 @@
                                                         <option value="25">25</option>
                                                         <option value="50">50</option>
                                                         <option value="100">100</option>
-                                                        <option value="500">500</option>
+                                                        <option :value="pagination.total">All</option>
                                                     </select>
                                                 </div>
                                                 <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>

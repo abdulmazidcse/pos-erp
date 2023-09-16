@@ -7,18 +7,11 @@
                     <div class="page-title-right float-left">
                         <h4 style="margin: 0; padding: 8px 0 1.5rem 0;">Role List</h4>
                     </div>
-                    <div class="page-title-right float-right">
-                        <ol class="breadcrumb m-0"> 
-                            <li class="breadcrumb-item active">Role </li>
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Role List</a></li>
-                            
-                        </ol>
-                    </div>
-                    <!-- <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()">
-                            Add New
-                        </button> 
-                    </div> -->
+                    <div class="page-title-right float-right"> 
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['role-create']">
+                            <i class="mdi mdi-plus-outline"></i> Add New
+                        </button>  
+                    </div> 
                 </div>
             </div>
         </div>
@@ -78,11 +71,7 @@
         <div class="row">
             <div class="col-md-12 ">
                 <div class="card">
-                    <div class="card-header">
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['role-create']">
-                            <i class="mdi mdi-plus-outline"></i> Add New
-                        </button> 
-                    </div>
+                    
                     <div class="card-body table-responsive">   
                         <table class="table table-centered table-bordered table-nowrap w-100"  v-if="!loading">
                             <thead class="table-light">
@@ -98,10 +87,19 @@
                                     <td class="text-center">{{ i + 1 }} </td>
                                     <td>{{ item.name }} </td>
                                     <td>{{ item.description }} </td>
-                                    <td class="text-center">
-                                        <a href="#" @click="changePermission(item.id)" title="Change Permission" class="changePermission" v-if="permission['role-permission']"><i class="fas fa-list"></i> </a>
-                                        <a href="#" @click="edit(item)"  v-if="permission['role-edit']"><i class="fas fa-edit"></i> </a>
-                                        <a href="#" @click="deleteItem(item)"  v-if="permission['role-delete']"><i class="fas fa-trash"></i> </a>
+                                    <td>
+                                        <div class="dropdown float-end">
+                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
+                                                <i class="mdi mdi-dots-vertical"></i>
+                                            </a>
+                                            <div class="dropdown-menu dropdown-menu-end"> 
+                                                <a href="#" @click="changePermission(item.id)" title="Change Permission" class="text-success dropdown-item changePermission" v-if="permission['role-permission']">
+                                                    <i class="mdi mdi-lock-open me-1"></i> Permission</a>
+                                                <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)" v-if="permission['role-edit']">
+                                                <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a> 
+                                                <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)" v-if="permission['role-delete']" ><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                            </div>
+                                        </div>  
                                     </td>
                                 </tr>
                             </tbody>

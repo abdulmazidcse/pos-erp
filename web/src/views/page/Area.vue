@@ -12,8 +12,8 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <button type="button" class="btn btn-primary float-right" @click="toggleModal()" v-if="permission['areas-create']">
-                            Add New
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['areas-create']">
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New
                         </button> 
                     </div>
                 </div>
@@ -99,13 +99,12 @@
                                             <div class="control" style="float: left;">
                                                 <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                 <div class="select" style="float: left;">
-                                                    <select class="form-select" v-model="tableData.length" @change="getAreas()"> 
-                                                        <option value="2" selected="selected">2</option>
-                                                        <option value="5" selected="selected">5</option>
+                                                    <select class="form-select" v-model="tableData.length" @change="getAreas()">  
                                                         <option value="10" selected="selected">10</option>
                                                         <option value="25">25</option>
                                                         <option value="50">50</option>
                                                         <option value="100">100</option>
+                                                        <option :value="pagination.total">All</option>
                                                     </select>
                                                 </div>
                                                 <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
