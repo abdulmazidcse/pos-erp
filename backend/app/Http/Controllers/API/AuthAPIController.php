@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Validator;
 class AuthAPIController extends AppBaseController
 {
     // User Login
-    public function login(Request $request){ 
+    public function login(Request $request){  
         $request->validate([
             'email' => 'required',
             'password' => 'required',
@@ -43,23 +43,7 @@ class AuthAPIController extends AppBaseController
 
         $userToken    = $user->createToken('authToken');
         $accessToken    = $userToken->accessToken;
-        $token          = $userToken->token;
- 
-        // get a list of all permissions directly assigned to the user
-        // $permissionNames = $user->getPermissionNames(); // collection of name strings
-        // $user_permissions = $user->permissions; // collection of permission objects
-
-        // get all permissions for the user, either directly, or from roles, or from both
-        // $user_direct_permissions = $user->getDirectPermissions();
-        // $user_role_permissions = $user->getPermissionsViaRoles();
-   
-        // $permissionNames = $user->getPermissionNames(); // collection of name strings
-        // $user_permissions = $user->permissions; // collection of permission objects
-
-        // get all permissions for the user, either directly, or from roles, or from both
-        // $user_direct_permissions = $user->getDirectPermissions();
-        // $user_role_permissions = $user->getPermissionsViaRoles();
-
+        $token          = $userToken->token; 
         $user_all_permissions = $user->getAllPermissions();
 
         $user_role_status = $user->roles->map(function ($item) {
@@ -67,13 +51,10 @@ class AuthAPIController extends AppBaseController
                 return true;
             }
             return false;
-        });
-        //dd( $user_role_status );
+        }); 
 
-        if(!empty($user_role_status) && $user_role_status[0]) {
+        if(!empty($user_role_status)) {
             $user_outlet_id = 0;
-
-            // return $user->outlets;
             if(sizeof($user->outlets) > 0) {
                 $user_outlet_id = $user->outlets[0]->id;
             }
@@ -84,11 +65,7 @@ class AuthAPIController extends AppBaseController
             'user' => new UserResource(auth()->user()),
             'access_token' => $accessToken,
             'token_type' => 'Bearer',
-            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(),
-            // 'user_permission_names' => $permissionNames,
-            // 'user_permissions'  => $user_permissions,
-            // 'user_direct_permissions'   => $user_direct_permissions,
-            // 'user_role_permissions' => $user_role_permissions,
+            'expires_at' => Carbon::parse($token->expires_at)->toDateTimeString(), 
             'user_all_permissions'  => $user_all_permissions,
             'data_check'    => 1
         ]; 

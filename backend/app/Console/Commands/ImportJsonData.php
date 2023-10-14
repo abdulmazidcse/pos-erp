@@ -62,6 +62,7 @@ class ImportJsonData extends Command
         Role::truncate();
         User::truncate();
         DB::table('role_has_permissions')->truncate();
+        DB::table('model_has_roles')->truncate();
         Schema::enableForeignKeyConstraints();
     }
 
@@ -121,6 +122,17 @@ class ImportJsonData extends Command
                 'guard_name' => $item['guard_name'],   
                 'created_at' => date('Y-m-d h:i:s'),
                 'updated_at' => date('Y-m-d h:i:s') 
+            ]);
+        }
+    }
+    protected function modelHasRole(){
+        $modelHasRoleJsonFilejsonFile = public_path('needle/model-has-role.json');
+        $modelHasRolejsonData = json_decode(file_get_contents($modelHasRoleJsonFilejsonFile), true);
+        foreach ($modelHasRolejsonData[0]['data'] as $item) {
+            Role::create([
+                'role_id' => $item['role_id'], 
+                'model_type' => $item['model_type'],
+                'model_id' => $item['model_id']
             ]);
         }
     }

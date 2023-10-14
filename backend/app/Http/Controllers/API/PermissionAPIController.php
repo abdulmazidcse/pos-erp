@@ -263,13 +263,20 @@ class PermissionAPIController extends AppBaseController
         $permission_with_module = [];
         if(!empty($user_all_permissions)) {
             foreach ($user_all_permissions as $permission) {
-                if($permission->is_route_action) {
+                if($permission->is_route_action) { 
+
+                    if ($permission->permission_modules && $permission->permission_modules->parents) {
+                        $parentsName = $permission->permission_modules->parents->name;
+                    } else {
+                        $parentsName = "";
+                    }
+
                     $user_route_list_array[] = [
                         'path' => $permission->url_path,
                         'name' => $permission->slug,
                         'component' => $permission->component_path,
                         'module_name'   => $permission->permission_modules ? $permission->permission_modules->name : "",
-                        'parent_module' => $permission->permission_modules->parents ? $permission->permission_modules->parents->name : ""
+                        'parent_module' => $parentsName
                     ];
                 }
                 if($permission->is_nav == 1) {
