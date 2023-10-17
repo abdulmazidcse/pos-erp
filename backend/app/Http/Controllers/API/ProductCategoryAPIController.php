@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\Validator;
 use Response;
+use Auth;
 
 /**
  * Class ProductCategoryController
@@ -36,11 +37,11 @@ class ProductCategoryAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-//        $productCategories = $this->productCategoryRepository->all(
-//            $request->except(['skip', 'limit']),
-//            $request->get('skip'),
-//            $request->get('limit')
-//        );
+        //        $productCategories = $this->productCategoryRepository->all(
+        //            $request->except(['skip', 'limit']),
+        //            $request->get('skip'),
+        //            $request->get('limit')
+        //        );
 
         $parent_id = $request->get('parent_id');
 
@@ -58,6 +59,7 @@ class ProductCategoryAPIController extends AppBaseController
 
     public function categoryList(Request $request)
     {
+        
         $columns = ['id', 'name', 'parent_id', 'image', 'discount', 'description'];
 
         $length = $request->input('length');
@@ -97,13 +99,14 @@ class ProductCategoryAPIController extends AppBaseController
             'name'      => 'required',
             'is_featured'   => 'required',
             'image'     => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2000'
-        ]);
+        ]); 
 
+        
 
-        $input = $request->all();
+        $input = $request->all(); 
 
-//        return Request::file('image');
-        //return $request->file('image');
+        // return Request::file('image');
+        // return $request->file('image');
 
         if($request->hasFile('image')){
 
@@ -112,6 +115,10 @@ class ProductCategoryAPIController extends AppBaseController
 
             $input['image'] = $file_name;
         }
+        if(!$input['company_id']){
+            $input['company_id'] = Auth::user() ? Auth::user()->company_id : 1;
+        }
+        
 
         $productCategory = $this->productCategoryRepository->create($input);
 

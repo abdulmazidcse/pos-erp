@@ -249,7 +249,7 @@ class PermissionAPIController extends AppBaseController
 
         $user = auth()->user();
         $user_all_permissions = $user->getAllPermissions();        
-        $userRoles = $user->getRoleNames()->toArray(); 
+        $userRoles = $user->getRoleNames()->toArray();  
         if (in_array('Super Admin', $userRoles) || in_array('IT', $userRoles)) { 
             if (count($user_all_permissions) === 0) { 
                 $this->insertUserPermission();

@@ -21,6 +21,7 @@ class ProductCategory extends Model
 
     public $table = 'product_categories';
     
+    protected $appends = ['img_url'];
 
     protected $dates = ['deleted_at'];
 
@@ -76,5 +77,20 @@ class ProductCategory extends Model
         return $this->belongsTo(Company::class, 'company_id', 'id');
     }
 
+    public function scopeActive($query)
+    {
+        $query->where('status', 1);
+    }
+
+    public function getImgUrlAttribute(){ 
+        
+        $whitelist = array('127.0.0.1', '::1');
+
+        if(!in_array($_SERVER['REMOTE_ADDR'], $whitelist)){
+            return asset('public/uploads/product_categories/');
+        }else {
+            return asset('uploads/product_categories/');
+        } 
+    }    
     
 }

@@ -52,6 +52,8 @@ class ImportJsonData extends Command
         
         self::roleHasPermissions();
 
+        self::modelHasRole();
+
         $this->info('Data imported successfully.');
     }
 
@@ -129,12 +131,9 @@ class ImportJsonData extends Command
         $modelHasRoleJsonFilejsonFile = public_path('needle/model-has-role.json');
         $modelHasRolejsonData = json_decode(file_get_contents($modelHasRoleJsonFilejsonFile), true);
         foreach ($modelHasRolejsonData[0]['data'] as $item) {
-            Role::create([
-                'role_id' => $item['role_id'], 
-                'model_type' => $item['model_type'],
-                'model_id' => $item['model_id']
-            ]);
-        }
+            DB::insert('insert into model_has_roles (role_id, model_type, model_id) values (?, ?, ?)',
+            [$item['role_id'], $item['model_type'], $item['model_id']]); 
+        } 
     }
     protected function user(){ 
         $usersJsonFilejsonFile = public_path('needle/users.json');

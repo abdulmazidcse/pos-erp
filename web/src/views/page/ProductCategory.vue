@@ -22,48 +22,7 @@
         <div class="row">
             <div class="col-md-12 ">
                 <div class="card">
-                    <div class="card-body">
-                        <!-- <table class="table table-bordered table-centered table-nowrap w-100" v-if="!loading"> 
-                            <thead class="table-light">
-                                <tr class="border success item-head">
-
-                                    <th class="text-center" width="5%">SL </th>
-                                    <th class="text-center" width="25%">Parent Category</th>
-                                    <th class="text-center" width="20%">Category Name </th>
-                                    <th class="text-center" width="20%">Image</th>
-                                    
-                                    <th class="text-center" width="25%">Discount</th>
-                                    <th class="text-center" width="25%">Description</th>
-                                    <th class="text-center" width="5%">Action</th>
-
-                                </tr>
-                            </thead>
-                            <tbody v-if="items.length > 0">
-                                <tr class="border" v-for="(item, index) in items" :key="index">
-
-                                    <td class="text-center">{{ index + 1 }} </td>
-                                    <td class="text-center">{{ item.parent_cat_name }} </td> 
-                                    <td class="text-center">{{ item.name}} </td>
-                                    <td class="text-center"> <img :src="item.image" width="100" v-if="item.image"> </td>
-                                    <td class="text-center">{{ item.discount }} </td> 
-                                    <td class="text-center">{{ item.description }} </td> 
-                                    <td class="text-center">
-                                        <div class="dropdown float-end">
-                                            <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
-                                              <i class="mdi mdi-dots-vertical"></i>
-                                            </a>
-                                            <div class="dropdown-menu dropdown-menu-end">
-                                                 item-->
-                                                <!-- <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)"><i class="mdi mdi-circle-edit-outline"></i> Edit</a> -->
-                                                <!-- <a href="javascript:void(0);" class="dropdown-item text-danger" @click.prevent="deleteItem(item)"><i class="mdi mdi-delete-outline"></i> Remove</a> -->
-                                                <!-- item-->
-                                            <!-- </div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table> -->
-
+                    <div class="card-body"> 
                         <Datatable 
                             :columns="columns" 
                             :sortKey="tableData.sortKey"  
@@ -104,7 +63,7 @@
                                         <td class="text-center">{{ i + 1 }} </td>
                                         <td class="text-center">{{ item.name}} </td>
                                         <td class="text-center">{{ item.parents ? item.parents.name : '' }} </td> 
-                                        <td class="text-center"> <img :src="item.image" width="100" v-if="item.image"> </td>
+                                        <td class="text-center"> <img :src="item.img_url+'/'+item.image" width="80" v-if="item.image"> </td>
                                         <td class="text-center">{{ item.discount }} </td> 
                                         <td class="text-center">{{ item.description }} </td> 
                                         <td class="text-center">
@@ -260,10 +219,9 @@
                                 <p>Photo Preview</p>
                                 <img :src="imagePreview" v-if="form.image" width="200" >
                                 <div v-if="editMode & !imagePreview">
-                                    <img :src="form.image" v-if="form.image" width="200">
-                                </div>
-                                
-                            </div>
+                                    <img :src="form.img_url+'/'+form.image" width="100" v-if="form.image">  
+                                </div>                                
+                            </div> 
                         </div>
                     </div>
                     <div class="modal-footer"> 
@@ -332,6 +290,7 @@ export default {
                 is_featured: 0,
                 discount:0,
                 status: 1,
+                img_url: ''
             }),
             multiclasses: { 
               clear: '',
@@ -508,7 +467,7 @@ export default {
             formData.append('discount', this.form.discount);  
             if(this.editMode){
                 formData.append('_method', 'put');
-                if(this.logoPreview){
+                if(this.imagePreview){
                     this.form.image ? formData.append('image', this.form.image, this.form.image.name) : '';
                 } 
                 var postEvent = axios.post(this.apiUrl+'/product_categories/'+this.form.id, formData, this.headers);
@@ -521,8 +480,8 @@ export default {
                 this.isSubmit = false;
                 this.disabled = false;
                 if(res.status == 200){
-                    this.toggleModal();
-                    this.fetchIndexData();
+                    this.toggleModal(); 
+                    this.fetchItems();
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
@@ -590,8 +549,8 @@ export default {
                 if (result.value) { 
                     axios.delete(this.apiUrl+'/product_categories/'+item.id,this.headers) 
                     .then(res => {
-                        if(res.status == 200){  
-                            this.fetchIndexData();
+                        if(res.status == 200){   
+                            this.fetchItems();
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);
