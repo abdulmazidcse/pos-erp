@@ -11,12 +11,9 @@
                             
                         </ol>
                     </div>
-                    <div class="page-title-right float-right"> 
-                        <!-- <button type="button" class="btn btn-primary float-right" @click="createLedgerModal()">
-                            <i class="mdi mdi-plus-outline"></i> Create New Ledger
-                        </button>  -->
-                        <button type="button" class="btn btn-primary float-right" style="margin-right: 5px;" @click="createAccountGroupModal()">
-                            <i class="mdi mdi-plus-outline"></i> Create New Group
+                    <div class="page-title-right float-right">  
+                        <button type="button" class="btn-sm btn btn-outline-success float-right" @click="createAccountGroupModal()"  >
+                            <i class="mdi mdi-camera-timer me-1"></i> Create New Group
                         </button> 
                     </div>
                 </div>
@@ -25,8 +22,9 @@
 
         <!-- Modal -->
         <Modal @close="createAccountGroupModal()" :modalActive="modalAccGroupActive">
-            <div class="modal-content scrollbar-width-thin account_groups">
+            <div class="modal-content scrollbar-width-thin account_groups"> 
                 <div class="modal-header"> 
+                    <h3>{{ btn }} Account Class</h3>
                     <button @click="createAccountGroupModal()" type="button" class="btn btn-default">X</button>
                 </div>
                 <form @submit.prevent="submitAccountGroupForm()" enctype="multipart/form-data" >
@@ -302,7 +300,20 @@ export default {
     mounted() {
         window.scrollTo(0, 0);
     },
-    computed: {}
+    computed: {
+        permission() {
+            let pname = this.$route.meta.parent_module;
+            let module_name = this.$route.meta.module_name;
+            let path_name = this.$route.path; 
+            let data = '';
+            if(this.$route.meta.parent_module){
+                data = this.$store.getters.userAllPermissions[pname][0].children[path_name]
+            }else{
+                data = this.$store.getters.userAllPermissions[module_name][0].other_actions; 
+            } 
+            return data;
+        },
+    }
 }
 </script>
 <style scoped>

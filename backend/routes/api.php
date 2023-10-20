@@ -427,8 +427,7 @@ Route::group(['middleware' => 'auth:api'], function () {
 
 });  
 
-
-
+ 
 Route::get('customer-collection', [App\Http\Controllers\API\SaleAPIController::class, 'dueInvoices']);
 // });
 

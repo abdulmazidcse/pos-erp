@@ -109,20 +109,20 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                         $product_rcv_amount = ($product_amount - $product->disc_amount) + 0;
 
                         $product_ids[]  = $product->id;
-//                        $product_array[$product->id]    = [
-//                            'receive_purchase_price'    => $product->purchase_price,
-//                            'receive_supplier_id'       => $request->get('supplier_id'),
-//                            'receive_mrp_price'         => $product->sale_price,
-//                            'receive_quantity'          => $product->rcv_qty,
-//                            'receive_discount_percent'  => $product->disc_percent,
-//                            'receive_discount_amount'   => $product->disc_amount,
-//                            'receive_free_quantity'     => $product->free_qty,
-//                            'receive_free_amount'       => $free_amount,
-//                            'receive_product_value'     => $product_amount,
-//                            'receive_vat_amount'        => 0,
-//                            'receive_amount'            => $product_rcv_amount,
-//                            'receive_status'            => 2,
-//                        ];
+                            //                        $product_array[$product->id]    = [
+                            //                            'receive_purchase_price'    => $product->purchase_price,
+                            //                            'receive_supplier_id'       => $request->get('supplier_id'),
+                            //                            'receive_mrp_price'         => $product->sale_price,
+                            //                            'receive_quantity'          => $product->rcv_qty,
+                            //                            'receive_discount_percent'  => $product->disc_percent,
+                            //                            'receive_discount_amount'   => $product->disc_amount,
+                            //                            'receive_free_quantity'     => $product->free_qty,
+                            //                            'receive_free_amount'       => $free_amount,
+                            //                            'receive_product_value'     => $product_amount,
+                            //                            'receive_vat_amount'        => 0,
+                            //                            'receive_amount'            => $product_rcv_amount,
+                            //                            'receive_status'            => 2,
+                            //                        ];
                         $product_array[$product->id]    = [
                             'receive_quantity'          => $product->rcv_qty,
                             'receive_weight'            => $product->rcv_weight,

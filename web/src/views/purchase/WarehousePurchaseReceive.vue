@@ -1063,9 +1063,9 @@ export default {
                         this.disabled = false;
                         if(res.status == 200){
                             this.resetForm();
-                            this.order_data.reset();
+                            //this.order_data.reset();
                             this.$toast.success(res.data.message); 
-                            window.location.reload();
+                            //window.location.reload();
                         }else{
                             this.$toast.error(res.data.message);
                         }
@@ -1085,7 +1085,10 @@ export default {
 
                 }
 
-            }) ;
+            }).finally((res) => {
+                this.isSubmit = false;
+                this.disabled = false;
+            })
                       
             
         },

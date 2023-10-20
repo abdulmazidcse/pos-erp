@@ -24,10 +24,14 @@
         <Modal @close="createAccountLedgerModal()" :modalActive="modalAccLedgerActive">
             <div class="modal-content scrollbar-width-thin account_groups">
                 <div class="modal-header"> 
+                    <h3>{{ btn }} Ledger</h3>
                     <button @click="createAccountLedgerModal()" type="button" class="btn btn-default">X</button>
                 </div>
                 <form @submit.prevent="submitAccountLedgerForm()" enctype="multipart/form-data" >
                     <div class="modal-body">
+                        <!-- <div v-if="loadingModalData">
+                            <span class="loader"></span>
+                        </div> -->
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
@@ -171,6 +175,7 @@
                     </div>
                 </form>
             </div>
+            
         </Modal>
 
         <div class="row">
@@ -296,6 +301,7 @@ export default {
     data() {
         return {
             loading: true,
+            loadingModalData: true,
             showModal: false,
             editMode:false,
             disabledTypeSubmit: false,
@@ -437,8 +443,7 @@ export default {
         fetchAccountLedger() { 
             axios.get(this.apiUrl+'/account_ledgers', this.headerjson)
             .then((res) => {
-                this.items = res.data.data;
-                console.log(items);
+                this.items = res.data.data; 
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
@@ -447,8 +452,8 @@ export default {
             });
         },
 
-        fetchGroupData() {
-            axios.get(this.apiUrl+'/account_classes', this.headerjson)
+        async fetchGroupData() {
+          await  axios.get(this.apiUrl+'/account_classes', this.headerjson)
             .then((res) => {
                 this.groups = res.data.data.account_classes.map((item) => {
                     return {label: '['+item.code+'] '+item.name, value: item.id};
@@ -459,36 +464,40 @@ export default {
             }); 
         },
 
-        fetchParentTypes(group_id = '') {
+        async fetchParentTypes(group_id = '', type_id = '') {
             if(group_id != '') {
                 var urlAction = axios.get(this.apiUrl+'/account_types/'+group_id+'/getParentTypes', this.headerjson);
             }else{
                 urlAction = axios.get(this.apiUrl+'/account_types/getParentTypes', this.headerjson);
             }
 
-            urlAction.then((res) => {
+            await urlAction.then((res) => {
                 this.parent_types = res.data.data;
                 this.parent_type_options = res.data.data.map((item) => {
                     return {label: '['+item.type_code+'] '+item.type_name, value: item.id};
                 });
-
+                this.fetchDetailTypes(type_id); 
             })
             .catch((err) => { 
-                this.$toast.error(err.response.data.message);
+                //console.log(err);
+                this.$toast.error(err);
             }); 
         },
 
-        fetchDetailTypes(type_id) {
-            this.forceRerender();
-            var account_type = this.parent_types.find(item => item.id == type_id);
-            var urlAction = axios.post(this.apiUrl+'/account_types/getChartOfAccountsOnlyDetailTypeOptions', {types: JSON.stringify(account_type)}, this.headerjson);
-          
-            urlAction.then((res) => {
-                this.detail_types = res.data.data;
-            })
-            .catch((err) => { 
-                this.$toast.error(err.response.data.message);
-            }); 
+        async fetchDetailTypes(type_id) { 
+            if(type_id){ 
+                this.loadingModalData = true;
+                this.forceRerender(); 
+                let account_type = this.parent_types.find(item => item.id == type_id); 
+                let urlAction = axios.post(this.apiUrl+'/account_types/getChartOfAccountsOnlyDetailTypeOptions', {types: JSON.stringify(account_type)}, this.headerjson);
+            
+                await urlAction.then((res) => {
+                    this.detail_types = res.data.data;
+                })
+                .finally( () =>{
+                    this.loadingModalData = false;
+                })
+            }
         },
 
         fetchLedgerCode(reference_id='', type='') {
@@ -536,14 +545,17 @@ export default {
             this.btn='Update';
             this.editMode = true;
             this.createAccountLedgerModal();
-            this.fetchParentTypes(item.class_id);
-            console.log("sdfjhsilj", item.type_id);
-
-            setTimeout(() => {                  
-                this.fetchDetailTypes(item.type_id);
+            this.form.fill(item);  
+                this.temp_item = item;
+            this.fetchParentTypes(item.class_id, item.type_id); 
+            // if(this.parent_types.length > 0){
+                
                 this.form.fill(item);  
                 this.temp_item = item;
-            }, 3000);
+                // setTimeout(() => {
+                   
+                // }, 3000);
+           //}
         },
 
         submitAccountLedgerForm: function(e) { 

@@ -115,7 +115,7 @@ class ProductCategoryAPIController extends AppBaseController
 
             $input['image'] = $file_name;
         }
-        if(!$input['company_id']){
+        if(!$request->company_id){
             $input['company_id'] = Auth::user() ? Auth::user()->company_id : 1;
         }
         

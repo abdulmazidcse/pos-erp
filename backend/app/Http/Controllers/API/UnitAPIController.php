@@ -39,10 +39,9 @@ class UnitAPIController extends AppBaseController
     {
         $columns = ['unit_code', 'unit_name', 'base_unit', 'operator', 'operation_value','status'];
         $length = $request->input('length');
-        $column = $request->input('column');
-        $dir = $request->input('dir'); 
-        $searchValue = $request->input('search');
-
+        $column = $request->input('column') ? $request->input('column') : 0;
+        $dir = $request->input('dir') ? $request->input('dir') : 'DESC'; 
+        $searchValue = $request->input('search'); 
         $query =  $this->unitRepository->allQuery()->orderBy($columns[$column], $dir);  
 
         if($searchValue) {

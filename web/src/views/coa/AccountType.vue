@@ -24,6 +24,7 @@
         <Modal @close="createAccountTypeModal()" :modalActive="modalAccTypeActive">
             <div class="modal-content scrollbar-width-thin account_groups">
                 <div class="modal-header"> 
+                    <h3>{{ btn }} Account Type</h3>
                     <button @click="createAccountTypeModal()" type="button" class="btn btn-default">X</button>
                 </div>
                 <form @submit.prevent="submitAccountTypeForm()" enctype="multipart/form-data" >
