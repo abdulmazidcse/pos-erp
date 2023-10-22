@@ -484,7 +484,9 @@ class SaleAPIController extends AppBaseController
                 //SaleItem::find($itemsInstanc->id);
                 //$saleDataItem = SaleItem::find($itemsInstanc->id);
                 //$saleDataItem->salesDiscount()->saveMany($salesDiscount[$i]);
-                $itemsInstanc->salesDiscount()->saveMany($salesDiscount[$i]);
+                if($salesDiscount){
+                    $itemsInstanc->salesDiscount()->saveMany($salesDiscount[$i]);
+                } 
                 // for($j=0; $j<count($salesDiscount[$i]); $j++) {
                 //     $salesDiscount[$i][$j]['sale_item_id'] = $itemsInstanc->id;
                 //     $salesDiscount[$i][$j]['created_at'] = date("Y-m-d H:i:s");
@@ -755,7 +757,9 @@ class SaleAPIController extends AppBaseController
                 //SaleItem::find($itemsInstanc->id);
                 //$saleDataItem = SaleItem::find($itemsInstanc->id);
                 //$saleDataItem->salesDiscount()->saveMany($salesDiscount[$i]);
-                $itemsInstanc->salesDiscount()->saveMany($salesDiscount[$i]);
+                if($salesDiscount){
+                    $itemsInstanc->salesDiscount()->saveMany($salesDiscount[$i]);
+                }
                 // for($j=0; $j<count($salesDiscount[$i]); $j++) {
                 //     $salesDiscount[$i][$j]['sale_item_id'] = $itemsInstanc->id;
                 //     $salesDiscount[$i][$j]['created_at'] = date("Y-m-d H:i:s");
