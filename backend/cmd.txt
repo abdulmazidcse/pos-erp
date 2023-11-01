@@ -8,3 +8,6 @@ Fiscal Year
 warehouses data
 outlate data
 Accounts Ledger
+category data
+sub-category data
+product data

@@ -25,6 +25,7 @@ return new class extends Migration
             $table->bigInteger('warehouse_id')->default(0);
             $table->unsignedBigInteger('outlet_id')->default(0);
             $table->string('profile_image')->default('user_profile.png');
+            $table->unsignedTinyInteger('status')->default(1)->comment('0=Inactive|1=Active');
             $table->rememberToken();
             $table->timestamps();
         });
