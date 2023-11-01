@@ -31,6 +31,7 @@
                                 <tr class="border success item-head">
                                     <th width="20%">Department Name </th>
                                     <th width="20%">Company Name</th>
+                                    <th width="10%">Status</th>
                                     <th width="5%">Action</th>
                                 </tr>
                             </thead>
@@ -38,6 +39,9 @@
                                 <tr class="border" v-for="(item, i) in items" :key="i">
                                     <td>{{ item.name}} </td>
                                     <td>{{ item.company_name }} </td>
+                                    <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                        <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                    </td>
                                     <td>
                                         <div class="dropdown float-end">
                                             <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">

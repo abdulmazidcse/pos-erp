@@ -124,6 +124,9 @@
                                     <tr class=" " v-for="(item, i) in districts" :key="i">
                                         <td>{{ item.name}} </td>
                                         <td>{{ item.bn_name }} </td>
+                                        <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                            <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                        </td>
                                         <td>
                                             <div class="dropdown float-end">
                                                 <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -235,6 +238,11 @@ export default {
                     label: 'Bangla Name',
                     name: 'bn_name',
                     width: '20%'
+                },
+                {
+                    label: 'Status',
+                    name: 'status',
+                    width: '10%'
                 },
                 {
                     label: 'Actions',            

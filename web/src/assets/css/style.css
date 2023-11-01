@@ -89,6 +89,9 @@ body {
   padding: 0px;
   background-color: #fff !important; 
 }
+.multiselect.form-control{
+  padding: 0px !important;
+}
 
 @supports(scrollbar-width: thin) {
   .no-support {

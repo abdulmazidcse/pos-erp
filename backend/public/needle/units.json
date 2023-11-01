@@ -1,0 +1,68 @@
+[
+    {
+        "type": "table",
+        "name": "units", 
+        "data": [
+            {
+                "id": "1",
+                "unit_code": "pcs",
+                "unit_name": "Pieces",
+                "base_unit": "1",
+                "operator": "*",
+                "operation_value": "1",
+                "status": "0",
+                "created_at": "2022-02-23 21:34:55",
+                "updated_at": "2023-06-13 10:49:06",
+                "deleted_at": null
+            },
+            {
+                "id": "2",
+                "unit_code": "dzn",
+                "unit_name": "Dozen",
+                "base_unit": "1",
+                "operator": "*",
+                "operation_value": "12",
+                "status": "1",
+                "created_at": "2022-03-14 00:32:41",
+                "updated_at": "2022-03-14 00:32:41",
+                "deleted_at": null
+            },
+            {
+                "id": "3",
+                "unit_code": "lit",
+                "unit_name": "Litre",
+                "base_unit": "1",
+                "operator": "*",
+                "operation_value": "1",
+                "status": "1",
+                "created_at": "2022-05-30 01:41:17",
+                "updated_at": "2022-05-30 01:41:17",
+                "deleted_at": null
+            },
+            {
+                "id": "4",
+                "unit_code": "tst",
+                "unit_name": "Testertert",
+                "base_unit": "0",
+                "operator": "*",
+                "operation_value": "1",
+                "status": "0",
+                "created_at": "2022-05-30 04:30:52",
+                "updated_at": "2022-05-30 04:31:02",
+                "deleted_at": "2022-05-30 04:31:02"
+            },
+            {
+                "id": "5",
+                "unit_code": "kg",
+                "unit_name": "kilograms",
+                "base_unit": "5",
+                "operator": "*",
+                "operation_value": "1",
+                "status": "0",
+                "created_at": "2022-05-31 01:16:26",
+                "updated_at": "2023-06-13 10:48:58",
+                "deleted_at": null
+            }
+        ]
+    }
+]

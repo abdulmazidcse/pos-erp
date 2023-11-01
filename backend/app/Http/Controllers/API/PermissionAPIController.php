@@ -7,6 +7,7 @@ use App\Http\Requests\API\UpdatePermissionAPIRequest;
 use App\Http\Resources\PermissionResource;
 use App\Models\Permission;
 use App\Models\PermissionModule;
+use App\Models\User;
 use App\Repositories\PermissionRepository;
 use App\Repositories\RoleRepository;
 use Illuminate\Http\Request;
@@ -248,6 +249,14 @@ class PermissionAPIController extends AppBaseController
     public function getUserMenuAndRolePermissions(Request $request) {
 
         $user = auth()->user();
+        
+        if (!empty($user)) {
+            $activeUsers = User::active()->find($user->id);
+
+            if (!$activeUsers) {
+                return $this->sendError('Permission Denied or User not activeed');
+            }
+        } 
         $user_all_permissions = $user->getAllPermissions();        
         $userRoles = $user->getRoleNames()->toArray();  
         if (in_array('Super Admin', $userRoles) || in_array('IT', $userRoles)) { 

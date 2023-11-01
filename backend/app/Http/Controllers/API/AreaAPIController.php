@@ -63,11 +63,12 @@ class AreaAPIController extends AppBaseController
 
     public function index(Request $request)
     {
-        $areas = $this->areaRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $areas = $this->areaRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        $areas = $this->areaRepository->allQuery()->active()->get();
 
         return $this->sendResponse($areas->toArray(), 'Areas retrieved successfully');
     }

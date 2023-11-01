@@ -60,11 +60,12 @@ class DistrictAPIController extends AppBaseController
 
     public function index(Request $request)
     {
-        $districts = $this->districtRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $districts = $this->districtRepository->active()->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        $districts = $this->districtRepository->allQuery()->active()->get();
 
         return $this->sendResponse($districts->toArray(), 'Districts retrieved successfully');
     }

@@ -1,0 +1,28 @@
+[
+    {
+        "type": "table",
+        "name": "points_settings",
+        "data": [
+            {
+                "id": "1",
+                "enable_points_rewards": null,
+                "enable_signup_points": null,
+                "signup_points": null,
+                "enable_referral_points": null,
+                "referral_points": null,
+                "enable_social_point": null,
+                "social_share_points": null,
+                "social_share_facebook": null,
+                "social_share_twitter": null,
+                "custom_points_on_cart": null,
+                "cart_points_rate": null,
+                "cart_price_rate": null,
+                "enable_points_order_total": null,
+                "points_within_order_range": null,
+                "created_at": null,
+                "updated_at": null,
+                "deleted_at": null
+            }
+        ]
+    }
+]

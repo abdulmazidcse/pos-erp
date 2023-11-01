@@ -126,6 +126,9 @@
                                         <td>{{ item.name}} </td>
                                         <td>{{ item.bn_name }} </td>
                                         <td>{{ item.districts.name }} </td>
+                                        <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                            <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                        </td> 
                                         <td>
                                             <div class="dropdown float-end">
                                                 <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -240,6 +243,11 @@ export default {
                     label: 'District',
                     name: 'districts.name',
                     width: '20%'
+                },
+                {
+                    label: 'Status',
+                    name: 'status',
+                    width: '10%'
                 },
                 {
                     label: 'Actions',            

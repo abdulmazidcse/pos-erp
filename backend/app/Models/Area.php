@@ -54,5 +54,10 @@ class Area extends Model
         return $this->belongsTo(District::class, 'district_id', 'id');
     }
 
+    public function scopeActive($query)
+    {
+        $query->where('status', 1);
+    }
+
     
 }

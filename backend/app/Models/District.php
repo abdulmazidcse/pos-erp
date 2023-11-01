@@ -94,6 +94,11 @@ class District extends Model
         return $districts;
     }
 
+    public function scopeActive($query)
+    {
+        $query->where('status', 1);
+    }
+
 
     
 }

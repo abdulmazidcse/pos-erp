@@ -36,15 +36,16 @@ class CompanyAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $companies = $this->companyRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $companies = $this->companyRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        $companies = $this->companyRepository->allQuery()->active()->get();
 
         $return_data    = CompanyResource::collection($companies);
 
-        return $this->sendResponse($return_data, 'Companies retrieved dddd successfully');
+        return $this->sendResponse($return_data, 'Companies retrieved successfully');
     }
 
     /**

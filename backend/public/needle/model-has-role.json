@@ -1,8 +1,7 @@
 [
     {
         "type": "table",
-        "name": "role_has_permissions",
-        "database": "erp",
+        "name": "role_has_permissions", 
         "data": [
             {
                 "role_id": 1,

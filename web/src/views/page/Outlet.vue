@@ -26,9 +26,10 @@
                                 <thead> 
                                     <tr class="border success item-head">
                                         <th width="20%">Outlet Name </th> 
-                                        <th width="25%">Contact Person Name</th>
-                                        <th width="25%">Outlet Number</th>
+                                        <th width="20%">Contact Person Name</th>
+                                        <th width="20%">Outlet Number</th>
                                         <th width="25%">Address </th>
+                                        <th width="10%">Status </th>
                                         <th width="5%">Action</th>
                                     </tr>
                                 </thead> 
@@ -38,6 +39,9 @@
                                         <td>{{ item.contact_person_name }} </td>
                                         <td>{{ item.outlet_number }}</td>
                                         <td>{{ item.address }}</td>
+                                        <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                            <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                        </td> 
                                         <td>
                                             <div class="dropdown float-end">
                                                 <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">

@@ -117,4 +117,9 @@ class User extends Authenticatable
     public function oldestOrder(){
         return $this->hasOne(Sale::class,'created_by','id')->oldestOfMany();
     } 
+
+    public function scopeActive($query)
+    {
+        $query->where('status', 1);
+    }
 }

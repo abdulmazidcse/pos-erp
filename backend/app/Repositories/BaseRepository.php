@@ -210,4 +210,11 @@ abstract class BaseRepository
 
         return $query->with($columns); 
     }
+    
+    public function active()
+    {
+        $query = $this->model->newQuery();
+
+        return $query->active(); 
+    }
 }

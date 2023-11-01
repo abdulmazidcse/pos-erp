@@ -28,9 +28,10 @@
                                     <tr class="border success item-head">
                                         <th width="20%">Company Name </th>
                                         <th width="20%">Logo</th>
-                                        <th width="25%">Contact Person Name</th>
-                                        <th width="25%">Contact Person Number</th>
-                                        <th width="5%">Action</th>
+                                        <th width="20%">Contact Person Name</th>
+                                        <th width="20%">Contact Person Number</th>
+                                        <th width="10%">Status </th>
+                                        <th width="10%">Action</th>
                                     </tr>
                                 </thead>
                                 <tbody v-if="items.length > 0">
@@ -39,8 +40,11 @@
                                         <td> <img width="50" v-if="item.logo" :src="item.logo"> </td>
                                         <td>{{ item.contact_person_name }} </td>
                                         <td>{{ item.contact_person_number }}</td>
+                                        <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                            <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                        </td>
                                         <td>
-                                            <div class="dropdown float-end">
+                                            <div class="dropdown">
                                                 <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
                                                     <i class="mdi mdi-dots-vertical"></i>
                                                 </a>

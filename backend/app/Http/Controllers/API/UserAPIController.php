@@ -75,7 +75,7 @@ class UserAPIController extends AppBaseController
 
         $query = User::with(['roles' => function($q){
                     $q->select('id', 'name');
-                }])->select('users.id','users.name', 'users.email', 'users.user_code', 'users.phone','users.company_id','users.profile_image', 'companies.name as company_name')
+                }])->select('users.id','users.name', 'users.email', 'users.user_code', 'users.phone','users.company_id','users.profile_image', 'companies.name as company_name','users.status')
                 ->leftJoin('companies','companies.id','=','users.company_id')
                 ->orderBy($columns[$column], $dir);
 

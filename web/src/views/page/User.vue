@@ -73,6 +73,9 @@
                                             <td>{{ item.phone }}</td>
                                             <td>{{ item.company_name }}</td>
                                             <td>{{ item.roles[0].name }}</td>
+                                            <td><span v-if="item.status==1" class="badge bg-success">Active</span>
+                                                <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
+                                            </td>
                                             <td class="text-center">
                                                 <div class="dropdown float-end">
                                                     <a href="#" class="dropdown-toggle arrow-none card-drop"
@@ -230,6 +233,16 @@
                                             {{errors.role_id[0]}}
                                         </div>
                                     </div>
+                                    <div class="form-group">
+                                        <label for="dstatus">Status</label>
+                                        <select class="form-control border" v-model="form.status" @change="onkeyPress('status')" id="dstatus">
+                                            <option value="1">Active</option>
+                                            <option value="0">Inactive</option>
+                                        </select>
+                                        <div class="invalid-feedback" v-if="errors.status">
+                                            {{errors.status[0]}}
+                                        </div>
+                                    </div>
                                     <div class="form-row">
 
                                         <div class="form-group mb-2">
@@ -384,6 +397,7 @@ export default {
             profile_image: '',
             company_id: '',
             roles: [],
+            status: 1
          }),
          assignform: new Form({
             user_id: '',
@@ -431,6 +445,11 @@ export default {
             {
                label: 'Role',
                name: 'role.0.name',
+               width: '10%'
+            },
+            {
+               label: 'Status',
+               name: 'status',
                width: '10%'
             },
             {
@@ -515,6 +534,7 @@ export default {
          formData.append('password', this.form.password);
          formData.append('password_confirmation', this.form.password_confirmation);
          formData.append('roles', this.form.roles);
+         formData.append('status', this.form.status);
          if (this.editMode) {
             formData.append('_method', 'put');
             if (this.imagePreview) {
@@ -545,8 +565,7 @@ export default {
          });
       },
 
-      outletAssign: function (item) {
-         console.log(item)
+      outletAssign: function (item) { 
          this.assignform.user_id = item.id;
          this.outlets = this.outlet_data.map(({
             id,

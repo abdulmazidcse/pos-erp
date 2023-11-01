@@ -33,8 +33,11 @@ Route::group([
         Route::get('user/menu-and-permissions', [App\Http\Controllers\API\PermissionAPIController::class, 'getUserMenuAndRolePermissions']);
     });
 });
+Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
 
-Route::group(['middleware' => 'auth:api'], function () {
+
+// });
+// Route::group(['middleware' => 'auth:api'], function () {
     Route::get('users/authUser', [App\Http\Controllers\API\UserAPIController::class, 'authApiUser']);
     Route::resource('warehouses', App\Http\Controllers\API\WarehouseAPIController::class);
     Route::resource('outlets', App\Http\Controllers\API\OutletAPIController::class);

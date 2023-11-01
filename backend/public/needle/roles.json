@@ -1,8 +1,7 @@
 [
     {
         "type": "table",
-        "name": "roles",
-        "database": "erp",
+        "name": "roles", 
         "data": [
             {
                 "id": "1",

@@ -4371,8 +4371,7 @@ ul {
   list-style-type: none !important;
 }
 
-.modal-content.scrollbar-width-thin.customer-add-modal {
-  width: 85%;
+.modal-content.scrollbar-width-thin.customer-add-modal { 
   display: block;
   margin: auto;
 }
