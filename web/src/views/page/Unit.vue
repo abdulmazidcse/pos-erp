@@ -1,6 +1,6 @@
 <template>
     <transition  >
-    <div class="container-fluid card-body   ">
+    <div class="container-fluid  ">
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">

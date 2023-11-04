@@ -12,7 +12,9 @@
                         </ol>
                     </div>
                     <div class="page-title-right float-right "> 
-                        <a href="/store-purchase-requisition"><button type="button" class="btn btn-primary float-right">
+                        <!-- v-if="permission['store-requisition-create']"  -->
+                        <a href="/store-purchase-requisition" >
+                            <button type="button" class="btn btn-primary float-right">
                             New Store Requisition
                         </button></a>
                     </div>

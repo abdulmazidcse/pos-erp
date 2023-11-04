@@ -11,18 +11,18 @@
                     </ol>
                   </div> 
                   <div class="page-title-right float-right"> 
-                      <button type="button" class="btn btn-outline-primary float-right mr5" @click="toggleBarcode">
+                      <button type="button" class="btn btn-outline-primary float-right mr5" v-if="permission['product-barcode']" @click="toggleBarcode">
                         Barcode
                       </button>
-                      <button type="button" class="btn btn-outline-primary float-right mr5" @click="toggleImportModal">
+                      <button  type="button" class="btn btn-outline-primary float-right mr5" v-if="permission['product-bulk-import']" @click="toggleImportModal">
                         Quick Products Upload
                       </button>
-                      <button type="button" class="btn btn-outline-success float-right mr5" @click="masterDataUploadModal">
+                      <button type="button" class="btn btn-outline-success float-right mr5" v-if="permission['product-bulk-import']" @click="masterDataUploadModal">
                         Master Data Upload
                       </button> 
-                      <a href="javascript:void(0);"  @click="toggleModal" class="btn btn-primary mb-2 mr5"><i class="mdi mdi-plus-circle me-2"></i> Add Products</a>
+                      <a href="javascript:void(0);" v-if="permission['product-create']" @click="toggleModal" class="btn btn-primary mb-2 mr5"><i class="mdi mdi-plus-circle me-2"></i> Add Products</a>
                        
-                     <!--  <button type="button" class="btn btn-primary float-right mr5" @click="toggleModal">
+                     <!--  <button type="button"  class="btn btn-primary float-right mr5" @click="toggleModal">
                           Add New
                       </button>  -->
                   </div>
@@ -136,15 +136,15 @@
                                               <i class="mdi mdi-dots-vertical"></i>
                                           </a>
                                           <div class="dropdown-menu dropdown-menu-end">
-                                              <!-- item-->
-                                              <a href="#" @click="singleBarcode(item)" class="dropdown-item text-info"><i class="fa-solid fa-barcode"></i> Print Barcode</a>
+                                              <!-- item--> 
+                                              <a href="#" v-if="permission['product-barcode']" @click="singleBarcode(item)" class="dropdown-item text-info"><i class="fa-solid fa-barcode"></i> Print Barcode</a>
 
-                                              <a href="#" @click="show(item)" class="dropdown-item text-info"><i class="fa-solid fa-eye"></i> View</a> 
+                                              <a href="#" v-if="permission['product-show']" @click="show(item)" class="dropdown-item text-info"><i class="fa-solid fa-eye"></i> View</a> 
 
-                                              <a href="javascript:void(0);" class="dropdown-item text-warning" @click="edit(item)">
+                                              <a href="javascript:void(0);" class="dropdown-item text-warning" v-if="permission['product-edit']" @click="edit(item)">
                                               <i class="mdi mdi-circle-edit-outline me-1"></i>Edit</a>
                                               <!-- item-->
-                                              <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)"><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
+                                              <a href="javascript:void(0);" class="dropdown-item text-danger" v-if="permission['product-delete']" @click="deleteItem(item)"><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
                                           </div>
                                         </div>   
                                       </td>
@@ -1668,7 +1668,20 @@ export default {
     mounted() {
         window.scrollTo(0, 0);
     },
-    computed: {}
+    computed: {
+      permission() {
+            let pname = this.$route.meta.parent_module;
+            let module_name = this.$route.meta.module_name;
+            let path_name = this.$route.path; 
+            let data = '';
+            if(this.$route.meta.parent_module){
+                data = this.$store.getters.userAllPermissions[pname][0].children[path_name]
+            }else{
+                data = this.$store.getters.userAllPermissions[module_name][0].other_actions; 
+            } 
+            return data;
+        },
+    }
 };
 </script>
 <style>

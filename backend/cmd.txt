@@ -4,10 +4,17 @@
 4 => php artisan passport:install
 5 => php artisan serve --port=8000
 
-Fiscal Year
-warehouses data
-outlate data
-Accounts Ledger
-category data
-sub-category data
-product data
+# Master-Settings
+1 -> Fiscal Year
+2 -> Company setup
+3 -> Department setup
+4 -> warehouses data
+5 -> outlate data
+6 -> Accounts Ledger
+7 -> category data
+8 -> sub-category data
+9 -> color data
+10 -> size data
+11 -> product data
+12 -> Districts
+13 -> Areas

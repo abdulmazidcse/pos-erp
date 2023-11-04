@@ -10,7 +10,7 @@
                         </div> 
                         <div class="page-title-right float-right ">
                             <button type="button" class="btn-sm btn btn-outline-success float-right" @click="toggleModal()" v-if="permission['user-create']">
-                                <i class="mdi mdi-plus-outline"></i> Add New
+                                <i class="mdi mdi-camera-timer me-1"></i> Create New
                             </button>
                         </div>
                     </div>
