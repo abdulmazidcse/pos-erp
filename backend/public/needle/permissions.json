@@ -3181,6 +3181,23 @@
                 "guard_name": "api",
                 "created_at": "2023-03-29 11:26:43",
                 "updated_at": "2023-03-29 11:26:43"
+            },
+            {
+                "id": "197",
+                "module_id": "34",
+                "name": "Barcode",
+                "slug": "product-barcode",
+                "url_path": null,
+                "component_path": null,
+                "backend_url": null,
+                "frontend_url": null,
+                "column_status": "0",
+                "is_route_action": "1",
+                "is_nav": "1",
+                "is_index": "0",
+                "guard_name": "api",
+                "created_at": "2023-03-29 11:26:43",
+                "updated_at": "2023-03-29 11:26:43"
             }
         ]
     }

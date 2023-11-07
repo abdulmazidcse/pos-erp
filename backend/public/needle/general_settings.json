@@ -1,0 +1,23 @@
+[ 
+    {
+        "type": "table",
+        "name": "general_settings", 
+        "data": [
+            {
+                "id": "1",
+                "invoice_sms_status": "0",
+                "payment_status": "0",
+                "date_status": "1",
+                "date_format": "Y-m-d",
+                "api_key": null,
+                "sender_id": null,
+                "sms_text": null,
+                "purchase_key": null,
+                "ip_address": null, 
+                "created_at": null,
+                "updated_at": "2023-11-06 07:48:41",
+                "deleted_at": null
+            }
+        ]
+    }
+]

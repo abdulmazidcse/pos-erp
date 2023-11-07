@@ -36,7 +36,9 @@ class GeneralSetting extends Model
         'date_format',
         'sender_id',
         'api_key',
-        'sms_text'
+        'sms_text',
+        'purchase_key',
+        'ip_address'
     ];
 
     /**

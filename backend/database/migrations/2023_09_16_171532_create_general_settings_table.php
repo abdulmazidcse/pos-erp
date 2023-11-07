@@ -22,6 +22,8 @@ return new class extends Migration
             $table->text('api_key')->nullable();
             $table->text('sender_id')->nullable();
             $table->text('sms_text')->nullable();
+            $table->text('purchase_key')->nullable();
+            $table->text('ip_address')->nullable(); 
             $table->timestamps();
             $table->softDeletes();
         });

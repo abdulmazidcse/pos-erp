@@ -1,6 +1,6 @@
 1 => php artisan migrate
 2 => php artisan optimize:clear
-3 => php artisan import:json-data
+3 => php artisan import:json-data  // php artisan import:json-data er23-2023-erps
 4 => php artisan passport:install
 5 => php artisan serve --port=8000
 

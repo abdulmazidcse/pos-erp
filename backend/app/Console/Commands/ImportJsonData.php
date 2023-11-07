@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Artisan;
 use Illuminate\Console\Command;
 use App\Models\PermissionModule; 
 use App\Models\Permission; 
@@ -13,8 +14,11 @@ use App\Models\AccountClass;
 use App\Models\AccountType; 
 use App\Models\AccountLedger; 
 use App\Models\EntryType; 
+use App\Models\GeneralSetting; 
 use Illuminate\Support\Facades\Schema;
-use DB;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\File;
+use DB; 
 class ImportJsonData extends Command
 {
     /**
@@ -22,7 +26,8 @@ class ImportJsonData extends Command
      *
      * @var string
      */
-    protected $signature = 'import:json-data';
+    // protected $signature = 'import:json-data';
+    protected $signature = 'import:json-data {input-field}';
 
     /**
      * The console command description.
@@ -47,35 +52,45 @@ class ImportJsonData extends Command
      * @return int
      */
     public function handle(){
-        Schema::disableForeignKeyConstraints();
+        Schema::disableForeignKeyConstraints(); 
         $this->dbtruncate();
-        // Import Role module
-        self::userRole();
-        // Import User module
-        self::user();
-        // Import permission module
-        self::permissionModuleImport();
-        // Import permission
-        self::permissionImport();
-        // Import 
-        self::roleHasPermissions();
-        // Import 
-        self::modelHasRole();
-        // Import units Data
-        self::units();
-        // Import Division Data
-        self::divisions();
-        // Import accountClasss Data
-        self::accountClasses();
-        // Import AccountType Data
-        self::accountTypes();
-        // Import AccountLedger Data
-        self::accountLedgers();
-        // Import Entry Type Data
-        self::entryType();
-
+        $purchasesKey = 'er23-2023-erps';
+        $inputField = $this->argument('input-field');
+        
+        if($purchasesKey == $inputField){ 
+            
+            // Import Role module
+            self::userRole();
+            // Import User module
+            self::user();
+            // Import permission module
+            self::permissionModuleImport();
+            // Import permission
+            self::permissionImport();
+            // Import 
+            self::roleHasPermissions();
+            // Import 
+            self::modelHasRole();
+            // Import units Data
+            self::units();
+            // Import Division Data
+            self::divisions();
+            // Import accountClasss Data
+            self::accountClasses();
+            // Import AccountType Data
+            self::accountTypes();
+            // Import AccountLedger Data
+            self::accountLedgers();
+            // Import Entry Type Data
+            self::entryType();
+            // Import General Setting Data
+            self::generalSettings($purchasesKey); 
+            $this->info('Data imported successfully.');
+        }else{
+            $this->info('Your given key is invalid, please give valid key'); 
+        } 
         Schema::enableForeignKeyConstraints();
-        $this->info('Data imported successfully.');
+        self::deleteFiles(); 
     }
 
     protected function dbtruncate(){ 
@@ -91,6 +106,7 @@ class ImportJsonData extends Command
         AccountType::truncate();
         AccountLedger::truncate();
         EntryType::truncate(); 
+        GeneralSetting::truncate(); 
     }
 
     protected function permissionModuleImport(){
@@ -300,4 +316,93 @@ class ImportJsonData extends Command
             ]);
         } 
     }
+    protected function generalSettings($purchase_key){
+        $generalSetingJsonFile = public_path('needle/general_settings.json'); 
+        $generalSettingJsonData = json_decode(file_get_contents($generalSetingJsonFile), true);   
+        $hostname = gethostname();
+        $ipAddress = gethostbyname($hostname);
+        foreach ($generalSettingJsonData[0]['data'] as $item) {    
+            GeneralSetting::create([
+                'id' => $item['id'],
+                'invoice_sms_status' => $item['invoice_sms_status'],  
+                'payment_status' => $item['payment_status'],
+                'date_status'  => $item['date_status'], 
+                'date_format'  => $item['date_format'], 
+                'api_key'  => $item['api_key'], 
+                'sender_id'  => $item['sender_id'], 
+                'sms_text'  => $item['sms_text'], 
+                'purchase_key'  => $purchase_key, 
+                'ip_address'  => $ipAddress, 
+                'created_at' => date('Y-m-d h:i:s'),
+                'updated_at' => date('Y-m-d h:i:s') ,
+                "deleted_at" => null
+            ]);
+        } 
+    }
+
+    protected function downloadFiles(){
+ 
+        $folder = 'needle';
+        $url = 'http://localhost/pos-dev/' . $folder; // Replace with your actual URL
+        $sourceDirectory = 'E:/laragon/www/pos-dev/' . $folder;
+        $destinationPath = public_path('downloads');
+
+        // Ensure the destination directory exists in the public folder
+        if (!File::exists($destinationPath)) {
+            File::makeDirectory($destinationPath, 0755, true, true);
+        }
+
+        // Fetch the list of files in the source directory
+        $files = File::files($sourceDirectory);
+
+        if (!empty($files)) {
+            // Download and save each file to the destination directory
+            foreach ($files as $file) {
+                $fileContents = File::get($file);
+                $fileName = pathinfo($file, PATHINFO_BASENAME);
+                File::put($destinationPath . '/' . $fileName, $fileContents);
+            }
+
+            $this->info("Downloaded files for folder: $folder");
+        } else {
+            $this->error("No files found in the source directory: $sourceDirectory");
+        }
+        
+        
+    } 
+    protected function deleteFiles(){
+ 
+        $folder = public_path('downloads'); // Path to the download folder
+        // Check if the folder exists
+        if (File::exists($folder)) {
+            // Get a list of files in the folder
+            $files = File::files($folder);
+
+            // Loop through the files and delete them
+            foreach ($files as $file) {
+                File::delete($file);
+            }
+
+            $this->info('Deleted all files in the download folder');
+        } else {
+            $this->info('Download folder does not exist or is empty.');
+        }        
+        
+    } 
+
+    public function dropAllTables()
+    {
+        // Get the list of all tables in the database
+        $tables = DB::select('SHOW TABLES');
+
+        foreach ($tables as $table) {
+            $tableName = reset($table); // Extract the table name from the stdClass object
+
+            // Drop each table
+            DB::statement('DROP TABLE IF EXISTS ' . $tableName);
+        }
+
+        echo "All tables have been dropped.";
+    }
+
 }
