@@ -130,7 +130,9 @@ class AccountReportAPIController extends AppBaseController
                             return $query->whereHas('account_vouchers', function ($query) use ($to_date){
                                 return $query->where('vdate', '<=', $to_date);
                             });
-                        })->get();
+                        })->get()->sortBy(function($query) {
+                            return $query->account_vouchers->vdate;
+                        })->all();
 
 //    return $report_data;
 
@@ -193,7 +195,9 @@ class AccountReportAPIController extends AppBaseController
                             return $query->whereHas('account_vouchers', function ($query) use ($to_date){
                                 return $query->where('vdate', '<=', $to_date);
                             });
-                        })->get();
+                        })->get()->sortBy(function($query) {
+                            return $query->account_vouchers->vdate;
+                        })->all();
 
 //    return $report_data;
 
@@ -256,7 +260,9 @@ class AccountReportAPIController extends AppBaseController
                             return $query->whereHas('account_vouchers', function ($query) use ($to_date){
                                 return $query->where('vdate', '<=', $to_date);
                             });
-                        })->get();
+                        })->get()->sortBy(function($query) {
+                            return $query->account_vouchers->vdate;
+                        })->all();
 
 //    return $report_data;
 
@@ -319,7 +325,9 @@ class AccountReportAPIController extends AppBaseController
                             return $query->whereHas('account_vouchers', function ($query) use ($to_date){
                                 return $query->where('vdate', '<=', $to_date);
                             });
-                        })->get();
+                        })->get()->sortBy(function($query) {
+                            return $query->account_vouchers->vdate;
+                        })->all();
 
 //    return $report_data;
 
@@ -492,6 +500,7 @@ class AccountReportAPIController extends AppBaseController
         $return_data    = [
             'assets_accounts'    => $asset_accounts,
             'liability_equity_accounts'   => array_merge($liability_accounts, $equity_accounts),
+            // 'liability_equity_accounts'   => '',
             'asset_balance' => number_format($asset_balance, 2, '.', ''),
             'liability_equity_balance' => number_format($liability_balance + $total_equity_balance, 2, '.', ''),
             'expense_balance' => $expense_balance,

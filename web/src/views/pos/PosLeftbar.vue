@@ -3100,8 +3100,8 @@ export default {
       // this.return_replace[index].replace_pro_id = product_item.product_id;
       this.return_replace[index].new_pro_id = product_item.product_id;
       this.return_replace[index].return_qty = "";
-      this.return_replace[index].replace_stock_id =
-        product_item.product_stock_id;
+      // this.return_replace[index].replace_stock_id = product_item.product_stock_id;
+      this.return_replace[index].replace_stock_id = product_item.product_stock_id;
       this.return_replace[index].replace_mrp_price = product_item.mrp_price;
       this.return_replace[index].replace_cost_price = product_item.cost_price;
       this.return_replace[index].replace_discount = product_item.item_discount;
@@ -3116,11 +3116,6 @@ export default {
         returnInfo: this.returnInfo,
         return_replace: this.return_replace,
       };
-      var postEvent = axios.post(
-        this.apiUrl + "/sale_returns_void",
-        rrdata,
-        this.headerjson
-      );
 
       this.$swal({
           title: 'Are you sure?',
@@ -3131,9 +3126,15 @@ export default {
           confirmButtonText: 'Confirm'
       }).then((result) => { 
           if(result.value) {
+
+            var postEvent = axios.post(
+              this.apiUrl + "/sale_returns_void",
+              rrdata,
+              this.headerjson
+            );
+
             postEvent
             .then((res) => {
-              // console.log('res_data', res.data.data);
               this.returnReplacePageModal();
               this.sale_return_info = '';
               this.returnInfo = '';
@@ -3173,7 +3174,6 @@ export default {
             postEvent
               .then((res) => {
                 this.returnReplacePageModal();
-
                 //console.log("res.data.data", res.data.data);
                 this.sale_return_info = '';
                 this.returnInfo = '';
@@ -3182,7 +3182,8 @@ export default {
 
               })
               .catch((err) => {
-                this.$toast.error(err);
+                // this.$toast.error(err);
+                this.$toast.error(err.response.data.message);
               });
           }
 

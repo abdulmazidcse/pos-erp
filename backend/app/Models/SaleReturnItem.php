@@ -56,5 +56,22 @@ class SaleReturnItem extends Model
      */
     public static $rules = [];
 
+
+    public function return_products()
+    {
+        return $this->belongsTo(Product::class, 'item_pro_id', 'id');
+    }
+
+    // Replace Products
+    public function replace_products()
+    {
+        return $this->belongsTo(Product::class, 'replace_pro_id', 'id');
+    }
+
+    public function sale_items()
+    {
+        return $this->belongsTo(SaleItem::class, 'sale_item_id', 'id');
+    }
+
     
 }

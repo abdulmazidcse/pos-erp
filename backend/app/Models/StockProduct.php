@@ -17,6 +17,7 @@ class StockProduct extends Model
 
     protected $fillable = [
         'product_id',
+        'category_id',
         'outlet_id',
         'in_stock_quantity',
         'in_stock_weight',
@@ -32,6 +33,11 @@ class StockProduct extends Model
     public function product()
     {
         return $this->belongsTo(Product::class, 'product_id', 'id')->with(['purchase_unit','category','sub_category']);
+    }
+
+    public function product_categories()
+    {
+        return $this->belongsTo(ProductCategory::class, 'category_id', 'id');
     }
 
     public function outlet()

@@ -1,0 +1,9 @@
+1 =>Add Requisition
+  1.1 => Approve List -> Approve
+  1.2 => List -> Purchase Order
+2 => Purchase
+  2.1 => Order Approval List
+  2.1.1 => Approve
+  2.2 => Order List
+  2.2.1 => Send PO
+  2.3 => Store Receive/ Warehouse Receive

@@ -7,7 +7,7 @@
                     <div class="page-title-right float-left">
                         <ol class="breadcrumb m-0"> 
                             <li class="breadcrumb-item active">Requisition </li>
-                            <li class="breadcrumb-item"><a href="javascript: void(0);">Store Purchase Requisition</a></li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Store ddd Purchase Requisition</a></li>
                             
                         </ol>
                     </div>
@@ -28,7 +28,7 @@
                         <!-- <form @submit.prevent="submitForm()" enctype="multipart/form-data" > -->
 
                             <div class="row">
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="requisition_no">Requisition No *</label>
                                         <input type="text" class="form-control border" id="requisition_no" @change="onkeyPress('requisition_no')" v-model="obj.requisition_no" readonly>
@@ -38,13 +38,21 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-6">
+                                <div class="col-md-4">
                                     <div class="form-group">
                                         <label for="requisition_date">Date *</label>
                                         <input type="date" class="form-control border" id="requisition_date" @change="onkeyPress('requisition_date')" v-model="obj.requisition_date" readonly>
                                         <div class="invalid-feedback" v-if="errors.requisition_date">
                                             {{errors.requisition_date[0]}}
                                         </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="form-group">
+                                        <label for="requisition_date">Outlet List</label>
+                                        <select class="form-control border" v-model="obj.outlet_id" id="outlet_id"> 
+                                            <option v-for="(outlet, index) in outlets" :value="outlet.id" :key="index">{{ outlet.name }}</option>
+                                        </select>  
                                     </div>
                                 </div>
                             </div>
@@ -285,6 +293,7 @@ export default {
     created() { 
         this.$store.dispatch('getRequisitionProductItems', {url: this.apiUrl, header: this.headerjson});
         this.fetchStoreRequisitionNo();
+        this.fetchOutlets();
         this.fetchAllCategory();
     },
     methods: { 
@@ -319,6 +328,15 @@ export default {
             .then((res) => {
                 this.parent_categories = res.data.data.parent_category;
                 this.parent_sub_categories = res.data.data.sub_category;
+            })
+            .catch((err) => {
+                console.log("error==", err.response);
+            })
+        },
+        fetchOutlets(){
+            axios.get(this.apiUrl+'/outlets-list', this.headerjson)
+            .then((res) => {
+                this.outlets = res.data.data; 
             })
             .catch((err) => {
                 console.log("error==", err.response);
@@ -524,7 +542,9 @@ export default {
                 if(res.status == 200){
                     this.resetForm();
                     this.$toast.success(res.data.message);
-                    window.location.reload(); 
+                    this.obj.requisition_date = new Date().toISOString().slice(0,10);
+                    this.fetchStoreRequisitionNo();
+                    // window.location.reload(); 
                 }else{
                     this.$toast.error(res.data.message);
                 }

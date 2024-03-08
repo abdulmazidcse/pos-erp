@@ -350,6 +350,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
                                     $stock_log_inputs[]    = [
                                         'product_id' => $product_expires_data[$purchaseProducts->id][$pe]['product_id'],
+                                        'category_id'    => $purchaseProducts->sub_category_id,
                                         'warehouse_id' => $warehouse_id,
                                         'in_stock_quantity' => $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity'],
                                         'stock_quantity'    => ($stock_qty + $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity']),
@@ -372,6 +373,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                 if(empty($stock_product)) {
                                     $new_stock_input = [
                                         'product_id'    => $purchaseProducts->id,
+                                        'category_id'    => $purchaseProducts->sub_category_id,
                                         'warehouse_id'         => $warehouse_id,
                                         'in_stock_quantity' => $product_array[$purchaseProducts->id]['receive_quantity'],
                                         'in_stock_weight' => $product_array[$purchaseProducts->id]['receive_weight'],
@@ -418,6 +420,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
                                 $stock_log_inputs[]    = [
                                     'product_id' => $purchaseProducts->id,
+                                    'category_id'    => $purchaseProducts->sub_category_id,
                                     'warehouse_id' => $warehouse_id,
                                     'in_stock_quantity' => $product_array[$purchaseProducts->id]['receive_quantity'],
                                     'in_stock_weight' => $product_array[$purchaseProducts->id]['receive_weight'],
@@ -766,6 +769,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                     if(empty($stock_product)) {
                                         $stock_new_inputs = [
                                             'product_id'    => $product_expires_data[$purchaseProduct->id][$pe]['product_id'],
+                                            'category_id'    => $purchaseProduct->sub_category_id,
                                             'warehouse_id'         => $warehouse_id,
                                             'in_stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
                                             'stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
@@ -808,6 +812,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
                                     $stock_log_inputs[]    = [
                                         'product_id' => $product_expires_data[$purchaseProduct->id][$pe]['product_id'],
+                                        'category_id'    => $purchaseProduct->sub_category_id,
                                         'warehouse_id' => $warehouse_id,
                                         'in_stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
                                         'stock_quantity'    => ($stock_qty + $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity']),
@@ -830,6 +835,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                 if(empty($stock_product)) {
                                     $new_stock_input = [
                                         'product_id'    => $purchaseProduct->id,
+                                        'category_id'    => $purchaseProduct->sub_category_id,
                                         'warehouse_id'         => $warehouse_id,
                                         'in_stock_quantity' => $product_array[$purchaseProduct->id]['receive_quantity'],
                                         'in_stock_weight' => $product_array[$purchaseProduct->id]['receive_weight'],
@@ -875,6 +881,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
                                 $stock_log_inputs[]    = [
                                     'product_id' => $purchaseProduct->id,
+                                    'category_id'    => $purchaseProduct->sub_category_id,
                                     'warehouse_id' => $warehouse_id,
                                     'in_stock_quantity' => $product_array[$purchaseProduct->id]['receive_quantity'],
                                     'in_stock_weight' => $product_array[$purchaseProduct->id]['receive_weight'],

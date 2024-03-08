@@ -1,4 +1,4 @@
-<template>
+ <template>
     <transition>
         <div class="container-fluid">
             <div class="row">
@@ -7,7 +7,7 @@
                         <div class="page-title-right float-left">
                             <ol class="breadcrumb m-0"> 
                                 <li class="breadcrumb-item active">Reports </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Stock Report</a></li>
+                                <li class="breadcrumb-item"><a href="javascript: void(0);">Inventory Details Report</a></li>
                                 
                             </ol>
                         </div>
@@ -24,7 +24,7 @@
                 <div class="col-md-12 ">
                     <div class="card">
                         <div class="card-header">
-                            <h3 style="text-align: center;">Stock Report</h3>
+                            <h3 style="text-align: center;">Inventory Details Report</h3>
                         </div>
 
                         <div class="card-body">
@@ -155,21 +155,16 @@
                                     <tbody v-if="items.length > 0">
                                         <tr class="border" v-for="(item, i) in items" :key="i">
                                             <td>{{ i + 1 }} </td>
+                                            <!-- <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') +' (' + item.product.category ? item.product.category.name : 'Default' + ')' }} </td> -->
+                                            <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') }} </td>
                                             <td v-if="item.expires_date">{{ item.product.product_name +' ('+ item.product.product_code +' || '+item.expires_date+')' }} </td>
                                             <td v-else>{{ item.product.product_name +' ('+ item.product.product_code +')' }} </td>
-                                            <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') +' (' + (item.product.category ? item.product.category.name : 'Default') + ')' }} </td>
-                                            <td class="text-right">{{ item.product.mrp_price }} </td>
+                                            <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td>
                                             <td class="text-right">{{ parseFloat(item.product.cost_price).toFixed(2) }} </td>
-                                            <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
-                                            <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
-                                            <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                            <td class="text-center">{{ (item.product.purchase_unit) ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td>
-                                            <!-- <td class="text-right" v-if="checkUnitCode(item.product.purchase_measuring_unit) == 'kg'">{{ item.stock_weight * item.product.mrp_price }} </td> -->
-                                            <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
-                                            <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td>
-                                            <!-- <td class="text-right" v-if="checkUnitCode(item.product.purchase_measuring_unit) == 'kg'">{{ item.stock_weight * item.product.cost_price }} </td> -->
-                                            <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.cost_price).toFixed(2) }} </td>
-                                            <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(6) }} </td>
+                                            <td class="text-right">{{ parseFloat(item.product.mrp_price).toFixed(2) }} </td>
+                                            <td class="text-right">{{ item.stock_quantity }} </td>
+                                            <td class="text-right">{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(2) }} </td>
+                                            <td class="text-right">{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td>
                                             <!-- <td>
                                                 <div class="dropdown float-end">
                                                     <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,16 +180,14 @@
                                         </tr>
 
                                         <tr style="font-weight: bold;">
-                                            <td colspan="5" class="text-center">Total</td>
+                                            <td colspan="4" class="text-center">Total</td>
                                             <td></td>
                                             <td></td>
                                             <td></td>
-                                            <td></td>
+                                            <!-- <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td> -->
+                                            <td class="text-right">{{ parseFloat(totalBalance('purchase')).toFixed(2) }}</td>
                                             <td class="text-right">{{ totalBalance('sold') }}</td>
-                                            <!-- <td class="text-right">{{ parseFloat(totalBalance('purchase')).toFixed(2) }}</td> -->
-
-                                            <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td> 
-                                            </tr>
+                                        </tr>
                                     </tbody>
                                     <tbody v-else>
                                         <tr>
@@ -250,49 +243,40 @@
                                         <thead class="tableFloatingHeaderOriginal">
                                             <tr class="success item-head">
                                                 <th width="3%" style="text-align: center">SL </th>
-                                                <th width="10%" style="text-align: center">Item (Code||Expire Date) </th>
                                                 <th width="7%" style="text-align: center">Category</th>
-                                                <th width="10%" style="text-align: center">S. Price  </th>
-                                                <th width="10%" style="text-align: center">P. Price </th>
-                                                <th width="10%" style="text-align: center">In Qty || WT</th>
-                                                <th width="10%" style="text-align: center">Sold Qty || WT </th>
-                                                <th width="10%" style="text-align: center">Stock Qty || WT </th>
+                                                <th width="10%" style="text-align: center">Item (Code||Expire Date) </th>
                                                 <th width="10%" style="text-align: center">Unit  </th>
-                                                <th width="10%" style="text-align: center">Stock Sale Amount  </th>
+                                                <th width="10%" style="text-align: center">P. Price </th>
+                                                <th width="10%" style="text-align: center">S. Price  </th>
+                                                <th width="10%" style="text-align: center">Stock Qty </th>
                                                 <th width="10%" style="text-align: center">Stock Purchase Amount</th>
+                                                <th width="10%" style="text-align: center">Stock Sale Amount  </th>
                                             </tr>
                                         </thead>
 
                                         <tbody v-if="items.length > 0">
                                             <tr class="border" v-for="(item, i) in items" :key="i">
                                                 <td>{{ i + 1 }} </td>
+                                                <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') }} </td>
                                                 <td v-if="item.expires_date">{{ item.product.product_name +' ('+ item.product.product_code +' || '+item.expires_date+')' }} </td>
                                                 <td v-else>{{ item.product.product_name +' ('+ item.product.product_code +')' }} </td>
-                                                <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') +' (' + item.product.category ? item.product.category.name : 'Default' + ')' }} </td>
-                                                <td class="text-right">{{ item.product.mrp_price }} </td>
-                                                <td class="text-right">{{ parseFloat(item.product.cost_price).toFixed(2) }} </td>
-                                                <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
-                                                <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
-                                                <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                                <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td> 
-                                                <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
-                                                <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td> 
-                                                <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.cost_price).toFixed(2) }} </td>
-                                                <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(6) }} </td>                                            
+                                                <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td>
+                                                <td style="text-align: right">{{ parseFloat(item.product.cost_price).toFixed(2) }} </td>
+                                                <td style="text-align: right">{{ parseFloat(item.product.mrp_price).toFixed(2) }} </td>
+                                                <td style="text-align: right">{{ item.stock_quantity }} </td>
+                                                <td style="text-align: right">{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(2) }} </td>
+                                                <td style="text-align: right">{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td>
                                             </tr> 
                                             <tr style="font-weight: bold;">
-                                                <td colspan="5" class="text-center">Total</td>
+                                                <td colspan="4" class="text-center">Total</td>
                                                 <td></td>
                                                 <td></td>
                                                 <td></td>
-                                                <td></td>
-                                                <td class="text-right">{{ totalBalance('sold') }}</td> 
-                                                <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td>
-
-                                                <td class="text-right">
+                                                <td style="text-align: right">
                                                     <input type="hidden" :value="discount_amount">
                                                     {{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}
                                                 </td>
+                                                <td style="text-align: right">{{ totalBalance('sold') }}</td>
                                             </tr>
                                         </tbody> 
                                     </table> 
@@ -361,41 +345,16 @@ export default {
                     label: 'SL',
                     name: '',           
                     width: '5%'
-                },   
-                {
-                    label: 'Item (Code||Expire Date)',
-                    name: 'product.product_name',
-                    width: '20%'
-                },
+                }, 
                 {
                     label: 'Category',
                     name: 'product_category.name',
                     width: '10%'
-                },
+                },  
                 {
-                    label: 'S. Price',
-                    name: 'mrp_price',
-                    width: '7%'
-                },
-                {
-                    label: 'P. Price',
-                    name: 'cost_price',
-                    width: '7%'
-                },
-                {
-                    label: 'In Qty || WT',
-                    name: 'in_stock_quantity',
-                    width: '7%'
-                },
-                {
-                    label: 'Sold Qty || WT',
-                    name: 'out_stock_quantity',
-                    width: '7%'
-                },
-                {
-                    label: 'Stock Qty || WT',
-                    name: 'stock_quantity',
-                    width: '7%'
+                    label: 'Item (Code||Expire Date)',
+                    name: 'product.product_name',
+                    width: '20%'
                 },
                 {
                     label: 'Unit',
@@ -403,13 +362,28 @@ export default {
                     width: '5%'
                 },
                 {
-                    label: 'Stock Sale Amount',
-                    name: 'stock_sale_amount',
-                    width: '10%'
+                    label: 'P. Price',
+                    name: 'cost_price',
+                    width: '7%'
+                },
+                {
+                    label: 'S. Price',
+                    name: 'mrp_price',
+                    width: '7%'
+                },
+                {
+                    label: 'Stock Qty',
+                    name: 'stock_quantity',
+                    width: '7%'
                 },
                 {
                     label: 'Stock Purchase Amount',
                     name: 'stock_purchase_amount',
+                    width: '10%'
+                },
+                {
+                    label: 'Stock Sale Amount',
+                    name: 'stock_sale_amount',
                     width: '10%'
                 },
                 // {
@@ -484,7 +458,7 @@ export default {
                 });
             }
 
-            return sum.toFixed(6);
+            return sum.toFixed(2);
         },
 
         fetchOutlets() {
@@ -548,13 +522,12 @@ export default {
                     this.items = data.data.data;
                     this.units = data.unit_data;
                     this.discount_amount = data.discount_amount;
-
                     // console.log("data.data.data", data.data.data);
                     this.configPagination(data.data);
                 }
                 this.isSubmit  = false;
-                this.tableData.category_id  = '';
-                this.tableData.product_id   = '';
+                // this.tableData.category_id  = '';
+                // this.tableData.product_id   = '';
                 this.categories.map((item) => {
                     if(item.parent_id !=0) {
                         this.category_options.push({value: item.id, label: item.name})
@@ -662,7 +635,7 @@ export default {
 
             const query = queryString;
             try {
-                const response = await axios.get(`${this.apiUrl}/reports/stock-report-excel-export${query}`, {
+                const response = await axios.get(`${this.apiUrl}/reports/inventory-details-report-excel-export${query}`, {
                 responseType: 'blob', // Important: set the response type to 'blob'
                 headers: {
                     'Authorization' : this.$store.getters.token ? `Bearer ${this.$store.getters.token}` : "",
@@ -673,7 +646,7 @@ export default {
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'stock-report.xlsx');
+                link.setAttribute('download', 'inventory-details-report.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 this.downloading = false;

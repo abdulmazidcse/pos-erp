@@ -174,6 +174,7 @@ class HomeController extends Controller
             'income_balance' => $income_balance,
             'as_on_date'    => $to_date,
         ];
+        dd($return_data);
 
         return view('welcome', $return_data);
     }

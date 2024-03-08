@@ -9,6 +9,8 @@ use App\Models\AccountDefaultSetting;
 use App\Models\AccountLedger;
 use App\Models\AccountVoucher;
 use App\Models\AccountVoucherTransaction;
+use App\Models\Customer;
+use App\Models\CustomerLedger;
 use App\Models\EntryType;
 use App\Models\FiscalYear;
 use App\Models\SaleReturn;
@@ -176,18 +178,12 @@ class SaleReturnAPIController extends AppBaseController
         }
         $input = $request->all();
 
-        echo "specific returns==== ";
-        return $input;
-
-
         $sale_items = $input['returnInfo']['sales_items'];
         $sale_item_array = [];
         foreach ($sale_items as $sale_item) {
             $sale_item  = (object) $sale_item;
             $sale_item_array[$sale_item->id] = $sale_item;
         }
-
-//        return $this->sendResponse([$input, $sale_item_array], 'Sale Return & Replace test');
 
         // Sale Return Item
         $total_item_discount = 0;
@@ -200,30 +196,37 @@ class SaleReturnAPIController extends AppBaseController
         if($input['return_replace']){
             DB::beginTransaction();
             try {
-                foreach ($input['return_replace'] as $key => $value) {
-                    if($value['return_or_replace'] == 1){
 
-                        $sitem  = $sale_item_array[$value['item_id']];
-                        if($value['return_qty'] >= $value['item_qty']){
-                            $return_qty = $value['item_qty'];
-                        } else{
-                            $return_qty = $value['return_qty'];
-                        }
-                        $item_discount = $sitem->discount * $return_qty;
-                        $item_vat   = $sitem->vat * $return_qty;
-                        $item_mrp_amount = $sitem->mrp_price * $return_qty;
-                        $item_cost_amount = $sitem->cost_price * $return_qty;
+                $sale_data = Sale::findOrFail($input['returnInfo']['id']);
+                if((($sale_data->account_post_status == 2 && $sale_data->inventory_post_status == 1) || ($sale_data->account_post_status == 0 && $sale_data->inventory_post_status == 0))) {
 
-                        $total_item_discount    += $item_discount;
-                        $total_item_vat += $item_vat;
-                        $total_item_mrp_amount  += $item_mrp_amount;
-                        $total_item_cost_amount += $item_cost_amount;
+                    $items = [];
+                    foreach ($input['return_replace'] as $key => $value) {
+                        if ($value['return_or_replace'] == 1) {
+
+                            $sitem = $sale_item_array[$value['item_id']];
+                            if ($value['return_qty'] >= $value['item_qty']) {
+                                $return_qty = $value['item_qty'];
+                            } else {
+                                $return_qty = $value['return_qty'];
+                            }
+                            $item_discount = $sitem->discount * $return_qty;
+                            $item_vat = $sitem->vat * $return_qty;
+                            $item_mrp_amount = $sitem->mrp_price * $return_qty;
+                            $item_cost_amount = $sitem->cost_price * $return_qty;
+
+                            $total_item_discount += $item_discount;
+                            $total_item_vat += $item_vat;
+                            $total_item_mrp_amount += $item_mrp_amount;
+                            $total_item_cost_amount += $item_cost_amount;
 
 //                        if($value['return_or_replace'] == 0){
                             $return_or_replace = 1; // return
                             $model = SaleItem::findOrFail($value['item_id']);
                             //0=default 1=return 2=replace 3=void
-                            $saleUpdate = array('return_type'=>1);
+
+                            // Sale Item Update
+                            $saleUpdate = array('return_type' => 1);
                             $model = $model->fill($saleUpdate);
                             $model->save();
 //                        }
@@ -244,67 +247,75 @@ class SaleReturnAPIController extends AppBaseController
 //                        }
 
 
-                        // Stock Update
-                        $stock_data = StockProduct::where('id', $sitem->stock_id)->first();
-                        $old_stock_quantity = $stock_data->stock_quantity;
-                        $new_stock_quantity = $old_stock_quantity + $return_qty;
-                        $stock_data->update(['stock_quantity' => $new_stock_quantity]);
+                            // Stock Update
+                            $stock_data = StockProduct::where('id', $sitem->stock_id)->first();
+                            $old_stock_quantity = $stock_data->stock_quantity;
+                            $new_stock_quantity = $old_stock_quantity + $return_qty;
+                            $stock_data->update(['stock_quantity' => $new_stock_quantity]);
 
-                        //0=default 1=return 2=replace 3=void
-                        $items[] = new SaleReturnItem([
-                            'sale_id'       => $input['returnInfo']['id'],
-                            'sale_item_id'  => $value['item_id'],
-                            'item_pro_id'   => $value['pro_id'],
-                            'replace_pro_id'=> ($return_or_replace == 2) ? $value['replace_pro_id'] : '',
-                            'sale_item_qty' => $value['item_qty'],
-                            'sale_r_qty'    => ($return_or_replace == 2) ? $value['item_qty'] : $return_qty,
-                            'return_type'   => $return_or_replace,
-                        ]);
-                    }else{
-                        $items = [];
+                            //0=default 1=return 2=replace 3=void
+                            $items[] = new SaleReturnItem([
+                                'sale_id' => $input['returnInfo']['id'],
+                                'sale_item_id' => $value['item_id'],
+                                'item_pro_id' => $value['pro_id'],
+                                'replace_pro_id' => ($return_or_replace == 2) ? $value['replace_pro_id'] : '',
+                                'sale_item_qty' => $value['item_qty'],
+                                'sale_r_qty' => ($return_or_replace == 2) ? $value['item_qty'] : $return_qty,
+                                'return_type' => $return_or_replace,
+                            ]);
+                        }
                     }
-                }
 
-                $total_discount_amount  = $total_item_discount;
+                    $total_discount_amount = $total_item_discount;
 
-                $sales_return_transaction_data = [
-                    'fiscal_year_id'    => $fiscal_year->id,
-                    'total_discount_amount'    => $total_discount_amount,
-                    'total_vat_amount'  => $total_item_vat,
-                    'total_item_mrp_amount' => $total_item_mrp_amount,
-                    'total_cogs_amount'    => $total_item_cost_amount,
+                    $sales_return_transaction_data = [
+                        'fiscal_year_id' => $fiscal_year->id,
+                        'total_discount_amount' => $total_discount_amount,
+                        'total_vat_amount' => $total_item_vat,
+                        'total_item_mrp_amount' => $total_item_mrp_amount,
+                        'total_cogs_amount' => $total_item_cost_amount,
 //                    'total_cash_amount' => (($total_item_mrp_amount + $total_item_vat) - $total_discount_amount),
-                    'total_cash_amount' => ($total_item_mrp_amount - $total_discount_amount),
-                ];
+                        'total_cash_amount' => ($total_item_mrp_amount - $total_discount_amount),
+                        'customer_id'   => $sale_data->customer_id,
+                        'payment_status' => $sale_data->status,
+                    ];
 
 
-                // For Sale return
-                $input['sale_return_info']['return_type'] = 1;
-                $input['sale_return_info']['sale_id'] = $input['returnInfo']['id'];
-                $input['sale_return_info']['return_amount'] = $sales_return_transaction_data['total_cash_amount'];
+                    // For Sale return
+                    $input['sale_return_info']['return_type'] = 1;
+                    $input['sale_return_info']['sale_id'] = $input['returnInfo']['id'];
+                    $input['sale_return_info']['return_amount'] = $sales_return_transaction_data['total_cash_amount'];
 
-                if(count($items) > 0) {
-                    $saleReturn = $this->saleReturnRepository->create($input['sale_return_info']);
+                    if (count($items) > 0) {
+                        $saleReturn = $this->saleReturnRepository->create($input['sale_return_info']);
 
-                    // Sale Update
-                    $sale_data = Sale::findOrFail($input['returnInfo']['id']);
-                    $saleUpdate = array('return_type'=>1);
-                    $sale_data = $sale_data->fill($saleUpdate);
-                    $sale_data->save();
+                        // Sale Update
+                        $saleUpdate = [
+                            'return_type' => 1,
+                            'return_amount' => $sales_return_transaction_data['total_cash_amount']
+                        ];
 
-                    // For Sale return items
-                    $saleReturn->saleReturnItems()->saveMany($items);
+                        $sale_data = $sale_data->fill($saleUpdate);
+                        $sale_data->save();
 
-                    // Account Transaction
-                    $account_transaction    = $this->saleReturnAccountTransaction($sales_return_transaction_data, "return");
-                    $saleReturn->update(['voucher_id' => $account_transaction->id]);
+                        // For Sale return items
+                        $saleReturn->saleReturnItems()->saveMany($items);
+
+                        // Account Transaction
+                        if ($sale_data->account_post_status == 2 && $sale_data->inventory_post_status == 1) {
+                            $account_transaction = $this->saleReturnAccountTransaction($sales_return_transaction_data, "return");
+                            $saleReturn->update(['voucher_id' => $account_transaction->id]);
+                        }
 
 
+                    }
 
+                    DB::commit();
+                    return $this->sendResponse($saleReturn, 'Sale return successfully done!');
+
+                }else{
+                    return $this->sendError("Your sales data partially posted. Please confirmed account posting or COGS posting");
                 }
-
-                DB::commit();
-                return $this->sendResponse($saleReturn, 'Sale return successfully done!');
 
             }catch(\Exception $e) {
                 DB::rollBack();
@@ -565,7 +576,7 @@ class SaleReturnAPIController extends AppBaseController
 
 
     // For void sales invoice
-    public function saleReturnsVoid(CreateSaleReturnAPIRequest $request)
+    public function saleReturnsVoidPrevious(CreateSaleReturnAPIRequest $request)
     {
 
 
@@ -659,6 +670,115 @@ class SaleReturnAPIController extends AppBaseController
         }
     }
 
+
+    public function saleReturnsVoid(CreateSaleReturnAPIRequest $request)
+    {
+
+        $fiscal_year = FiscalYear::where('status', 1)->first();
+        $start_date = $fiscal_year->start_date;
+        $end_date   = $fiscal_year->end_date;
+
+        if($start_date >= date("Y-m-d") && date("Y-m-d") <= $end_date) {
+            return $this->sendError("Date must be range of Fiscal Year");
+        }
+
+        $input = $request->all();
+
+        // sales info data
+        $sales_info     = (object) $input['returnInfo'];
+
+        $total_discount_amount = $sales_info->sales_items_sum_discount + $sales_info->customer_discount + $sales_info->customer_group_discount;
+        $total_item_discount    = 0;
+        $total_vat_amount   = 0;
+        $total_item_mrp_amount = 0;
+        $total_cogs_amount = 0;
+        $total_cash_amount = 0;
+
+        DB::beginTransaction();
+        try {
+
+            $saleData = Sale::with(['salesItems'])->findOrFail($input['returnInfo']['id']);
+
+            if((($saleData->account_post_status == 2 && $saleData->inventory_post_status == 1) || ($saleData->account_post_status == 0 && $saleData->inventory_post_status == 0))) {
+
+                $saleItems = SaleItem::where('sale_id', '=', $saleData->id)->get();
+                $items = [];
+                if($saleItems){
+                    foreach ($saleItems as $key => $value) {
+                        // Stock Update
+                        $stock_data = StockProduct::where('id', $value->stock_id)->first();
+                        $old_stock_quantity = $stock_data->stock_quantity;
+                        $new_stock_quantity = $old_stock_quantity + $value->quantity;
+                        $stock_data->update(['stock_quantity' => $new_stock_quantity]);
+
+                        //0=default 1=return 2=replace 3=void
+                        $items[] = new SaleReturnItem([
+                            'sale_id'       => $saleData->id,
+                            'sale_item_id'  => $value->id,
+                            'item_pro_id'   => $value->product_id,
+                            'replace_pro_id'=> '',
+                            'sale_item_qty' => $value['item_qty'],
+                            'sale_r_qty'    => $value->quantity,
+                            'return_type'   => 3,
+                        ]);
+
+                        $total_item_discount += $value->discount * $value->quantity;
+                        $total_vat_amount += ($value->quantity * $value->vat);
+                        $total_item_mrp_amount += ($value->quantity * $value->mrp_price);
+                        $total_cogs_amount += ($value->quantity * $value->cost_price);
+
+                    }
+
+                    $sales_transaction_data = [
+                        'fiscal_year_id'    => $fiscal_year->id,
+                        'total_discount_amount'    => $total_discount_amount,
+                        'total_vat_amount'  => $total_vat_amount,
+                        'total_item_mrp_amount' => $total_item_mrp_amount,
+                        'total_cogs_amount'    => $total_cogs_amount,
+    //                    'total_cash_amount' => (($total_item_mrp_amount + $total_vat_amount) - $total_discount_amount),
+                        'total_cash_amount' => ($total_item_mrp_amount - $total_discount_amount),
+                        'customer_id'   => $saleData->customer_id,
+                        'payment_status' => $saleData->status,
+
+                    ];
+
+                    // Sales Return
+                    $input['sale_return_info']['return_type'] = 3;
+                    $input['sale_return_info']['return_amount'] = $sales_transaction_data['total_cash_amount'];
+                    $input['sale_return_info']['sale_id'] = $saleData->id;
+
+                    $saleReturn = $this->saleReturnRepository->create($input['sale_return_info']);
+                    $saleReturn->saleReturnItems()->saveMany($items);
+
+                    // Sale Data Update
+                    $saleUpdate = [
+                        'return_type' => 3,
+                        'return_amount' => $sales_transaction_data['total_cash_amount'],
+                    ];
+
+                    $sale_items_update = $saleData->salesItems()->update(['return_type' => 3]);
+
+                    $saleData = $saleData->fill($saleUpdate);
+                    $saleData->save();
+
+
+                    if ($saleData->account_post_status == 2 && $saleData->inventory_post_status == 1) {
+                        $account_transaction = $this->saleReturnAccountTransaction($sales_transaction_data);
+                        $saleReturn->update(['voucher_id' => $account_transaction->id]);
+                    }
+                }
+                DB::commit();
+                return $this->sendResponse($saleReturn, 'Invoice Void successfully');
+
+            }else{
+                return $this->sendError("Your sales data partially posted. Please confirmed account posting or COGS posting");
+            }
+        }catch(\Exception $e) {
+            DB::rollBack();
+            return $this->sendError($e->getTrace());
+        }
+    }
+
     /**
      * Display the specified SaleReturn.
      * GET|HEAD /saleReturns/{id}
@@ -675,7 +795,6 @@ class SaleReturnAPIController extends AppBaseController
             $query->select(\DB::raw("SUM(sale_r_qty) as sale_r_qty"));
         }])
         ->withCount('saleReturnItems AS return_item')
-        ->with('saleItems')
         ->with('saleReturnItems') 
         ->with('sale')->find($id);
 
@@ -760,10 +879,48 @@ class SaleReturnAPIController extends AppBaseController
 
         $account_default_setting    = AccountDefaultSetting::first();
 
-        // Cash Sales Return
-        // 1st Transaction
-        $cash_sale_ledger = getLedgerAccountById($account_default_setting->cash_sales_account); // Dr income
-        $cash_ledger = getLedgerAccountById($account_default_setting->cash_in_hand_account); // cr assets
+
+        if(isset($data['payment_status']) && $data['payment_status'] == 'due') {
+
+            $customer = Customer::with(['receivable_accounts'])->where('id', $data['customer_id'])->first();
+
+            // Customer Ledger
+            $customer_ledger = CustomerLedger::where('customer_id', $customer->id)->orderBy('id', 'DESC')->first();
+
+            $opening_balance = $customer_ledger->closing_balance;
+            $sales_amount = 0;
+            $payment_receive_amount = 0;
+            $return_amount = $data['total_cash_amount'];
+            $closing_balance = $opening_balance - $return_amount;
+            $customer_ledger_inputs = [
+                'customer_id'   => $customer->id,
+                'transaction_type'  => 'return',
+                'note'  => 'Sales Return',
+                'opening_balance'   => $opening_balance,
+                'sales_amount'  => $sales_amount,
+                'payment_receive_amount'    => $payment_receive_amount,
+                'return_amount' => $return_amount,
+                'closing_balance'   => $closing_balance,
+                'transaction_date'  => date("Y-m-d")
+            ];
+
+            $save_customer_ledger = CustomerLedger::create($customer_ledger_inputs);
+
+            if($customer->receivable_accounts) {
+                $customer_ledger_id = $customer->receivable_ledger_id;
+            }else{
+                $customer_ledger_id = $account_default_setting->account_receivable_ledger;
+            }
+            // Due Sales Return
+            // 1st Transactions
+            $cash_sale_ledger = getLedgerAccountById($account_default_setting->credit_sales_account); // Dr income
+            $cash_ledger = getLedgerAccountById($customer_ledger_id); // cr assets
+        }else{
+            // Cash Sales Return
+            // 1st Transaction
+            $cash_sale_ledger = getLedgerAccountById($account_default_setting->cash_sales_account); // Dr income
+            $cash_ledger = getLedgerAccountById($account_default_setting->cash_in_hand_account); // cr assets
+        }
 
 
 //        $cash_sale_ledger = $this->getLedgerData('ledger_code', '410101'); // Dr income

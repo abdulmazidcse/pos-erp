@@ -226,7 +226,8 @@
                                         <td>{{ item.outlet_name }} </td>
                                         <td>{{ item.product_name }} </td> 
                                         <td>{{ item.product_code }} </td> 
-                                        <td class="text-center">{{ item.punit.toUpperCase() }} </td> 
+                                        <!-- <td class="text-center">{{ item.punit.toUpperCase() }} </td>  -->
+                                        <td class="text-center">{{ (item.punit) ? item.punit.toUpperCase() : 'PCS' }} </td>
                                         <td>{{ item.expires_date }} </td> 
                                         <td class="text-right">{{ item.in_stock_quantity + ' || '+ item.in_stock_weight }} </td> 
                                         <td class="text-right">{{ item.out_stock_quantity + ' || '+ item.out_stock_weight }} </td> 

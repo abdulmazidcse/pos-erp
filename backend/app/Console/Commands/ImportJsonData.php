@@ -53,12 +53,14 @@ class ImportJsonData extends Command
      */
     public function handle(){
         Schema::disableForeignKeyConstraints(); 
+        $this->info('DB truncate Started. Please wait moment.');
         $this->dbtruncate();
+        $this->info('DB truncate successfully.');
         $purchasesKey = 'er23-2023-erps';
         $inputField = $this->argument('input-field');
         
         if($purchasesKey == $inputField){ 
-            
+            $this->info('Started importing. Please wait moment.');
             // Import Role module
             self::userRole();
             // Import User module
@@ -120,21 +122,6 @@ class ImportJsonData extends Command
                         values (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
                 [$item['id'], $item['name'], $item['slug'], $item['icon_name'], $item['parent_id'], $item['is_action_menu'], $item['is_multiple_action'], 
                 $item['is_children'], $item['menu_order'], $item['total_actions'], $item['columnable_permission'], date('Y-m-d h:i:s'), date('Y-m-d h:i:s')]); 
-            // PermissionModule::create([
-            //     'id' => is_int($item['id']),
-            //     'name' => $item['name'],
-            //     'slug' => $item['slug'],
-            //     'icon_name' => $item['icon_name'],
-            //     'parent_id' => $item['parent_id'],
-            //     'is_action_menu' => $item['is_action_menu'],
-            //     'is_multiple_action' => $item['is_multiple_action'],
-            //     'is_children' => $item['is_children'],
-            //     'menu_order' => $item['menu_order'],
-            //     'total_actions' => $item['total_actions'],
-            //     'columnable_permission' => $item['columnable_permission'],
-            //     'created_at' => date('Y-m-d h:i:s'),
-            //     'updated_at' => date('Y-m-d h:i:s') 
-            // ]);
         } 
     }
     protected function permissionImport(){

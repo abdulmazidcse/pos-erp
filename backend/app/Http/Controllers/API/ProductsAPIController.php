@@ -119,7 +119,7 @@ class ProductsAPIController extends AppBaseController
 
     public function productForPos(Request $request)
     {
-//        return Auth::user()->outlet_id;
+        // return Auth::user()->outlet_id;
 
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
@@ -135,15 +135,15 @@ class ProductsAPIController extends AppBaseController
                     $query->orWhere('stock_products.stock_weight','>',0);
                 });
                 $query->orWhere(function ($query) use ($allow_checkout) {
-                        $query->where('stock_products.stock_quantity','>',0);
-                        $query->where('products.allow_checkout_when_out_of_stock','=',$allow_checkout);
-                    });
+                    $query->where('stock_products.stock_quantity','>',0);
+                    $query->where('products.allow_checkout_when_out_of_stock','=',$allow_checkout);
+                });
             });
         $query->when(((Auth::user()->outlet_id ) && (Auth::user()->outlet_id != '0')), function ($q) {
             return $q->where('stock_products.outlet_id', Auth::user()->outlet_id);
         });
 
-//        return $query->toSql();
+        // return $query->toSql();
         $products = $query->get();
         $return_data = PosProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully'); 

@@ -601,7 +601,7 @@ export default {
                 }
             }, function(err) {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                     return
                 }
                 
@@ -617,7 +617,7 @@ export default {
         },
 
         stopRead() {
-            console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
+            // console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
             for(var i = 0; i<=this.barcoderRrenderCounter; i++) {
                 Quagga.stop(); 
             }
@@ -721,7 +721,7 @@ export default {
         fetchAuthUser() {
             axios.get(this.apiUrl+'/users/authUser', this.headerjson)
             .then((res) => {
-                console.log("auth user", res.data.data);
+                // console.log("auth user", res.data.data);
                 this.auth_user = res.data.data.user; 
                 this.auth_user_roles = res.data.data.user_roles; 
                 if(res.data.data.user_roles[0].slug != "shop-manager" && res.data.data.user_roles[0].slug != "sales-man") {
@@ -892,14 +892,15 @@ export default {
         onChangeProduct(product_id, index) {
             const product = this.products_data.find(({id}) => id == product_id);
 
-            var p_tp = (product) ? product.cost_price : 0;
-            var p_mrp = (product) ? product.mrp_price : 0;
-            var p_code = (product) ? product.product_code : '';
-            var p_name = (product) ? product.product_name : '';
-            var unit_id = (product) ? product.purchase_measuring_unit : '';
-            var expireable = (product) ? product.is_expirable : 0;
+            let p_tp = (product) ? product.cost_price : 0;
+            let p_mrp = (product) ? product.mrp_price : 0;
+            let p_code = (product) ? product.product_code : '';
+            let p_name = (product) ? product.product_name : '';
+            let unit_id = (product) ? product.purchase_measuring_unit : '';
+            let sub_category_id = (product) ? product.sub_category_id : 0;
+            let expireable = (product) ? product.is_expirable : 0;
 
-            var unit_data = this.units.find(({id}) => id == unit_id);
+            let unit_data = this.units.find(({id}) => id == unit_id);
             // let unit_code = 'pcs';
             // if(unit_id !='') {
             //     axios.get(this.apiUrl+'/units/'+unit_id, this.headerjson)
@@ -913,6 +914,7 @@ export default {
 
             this.product_items[index].code = p_code;
             this.product_items[index].name = p_name;
+            this.product_items[index].sub_category_id = sub_category_id;
             this.product_items[index].product_unit_id = unit_id;
             this.product_items[index].unit_code = unit_data.unit_code.toLowerCase();
             this.product_items[index].purchase_price = p_tp;
@@ -1039,8 +1041,7 @@ export default {
         // },
 
         submitForm: function(e) {  
-            this.isSubmit = true;
-            this.disabled = true;
+            
             const formData = new FormData();
             formData.append("supplier_id", this.obj.supplier_id);
             formData.append("purchase_order_id", this.obj.purchase_order_id);
@@ -1067,7 +1068,9 @@ export default {
               confirmButtonText: "Ok!",
             }).then((result) => {
                 if(result.isConfirmed) {
-                    var postEvent = axios.post(this.apiUrl+'/purchase_receives', formData, this.headers);
+                    this.isSubmit = true;
+                    this.disabled = true;
+                    let  postEvent = axios.post(this.apiUrl+'/purchase_receives', formData, this.headers);
 
                     postEvent.then(res => {
                         this.isSubmit = false;
@@ -1075,8 +1078,9 @@ export default {
                         if(res.status == 200){
                             this.resetForm();
                             this.order_data.reset();
+                            this.obj.purchase_date = new Date().toISOString().slice(0,10);
                             this.$toast.success(res.data.message); 
-                            window.location.reload();
+                            // window.location.reload();
                         }else{
                             this.$toast.error(res.data.message);
                         }
@@ -1087,6 +1091,9 @@ export default {
                         if(err.response.status == 422){
                             this.errors = err.response.data.errors 
                         }
+                    }).finally(error =>{
+                        this.isSubmit = false; 
+                        this.disabled = false;
                     });
 
                 }else{
@@ -1174,7 +1181,7 @@ export default {
     },
     destroyed() {},
     mounted() {
-        console.log("before update");
+        // console.log("before update");
         window.scrollTo(0, 0);
         Quagga.onDetected((data) => {
             // console.log(data);
@@ -1286,7 +1293,7 @@ export default {
         
         checkQtyValue: function(){ 
             return this.product_items.reduce(function(total, item){
-                console.log("item", item);
+                // console.log("item", item);
                 if((item.checked)){
                     if((item.qty > 0)){
                         return false;

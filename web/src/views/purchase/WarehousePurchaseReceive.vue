@@ -881,14 +881,15 @@ export default {
         onChangeProduct(product_id, index) {
             const product = this.products_data.find(({id}) => id == product_id);
 
-            var p_tp = (product) ? product.cost_price : 0;
-            var p_mrp = (product) ? product.mrp_price : 0;
-            var p_code = (product) ? product.product_code : '';
-            var p_name = (product) ? product.product_name : '';
-            var unit_id = (product) ? product.purchase_measuring_unit : '';
-            var expireable = (product) ? product.is_expirable : 0;
+            let p_tp = (product) ? product.cost_price : 0;
+            let p_mrp = (product) ? product.mrp_price : 0;
+            let p_code = (product) ? product.product_code : '';
+            let p_name = (product) ? product.product_name : '';
+            let unit_id = (product) ? product.purchase_measuring_unit : '';
+            let sub_category_id = (product) ? product.sub_category_id : 0;
+            let expireable = (product) ? product.is_expirable : 0;
 
-            var unit_data = this.units.find(({id}) => id == unit_id);
+            let unit_data = this.units.find(({id}) => id == unit_id);
             // let unit_code = 'pcs';
             // if(unit_id !='') {
             //     axios.get(this.apiUrl+'/units/'+unit_id, this.headerjson)
@@ -903,6 +904,7 @@ export default {
             this.product_items[index].code = p_code;
             this.product_items[index].name = p_name;
             this.product_items[index].product_unit_id = unit_id;
+            this.product_items[index].sub_category_id = sub_category_id;
             this.product_items[index].unit_code = unit_data.unit_code.toLowerCase();
             this.product_items[index].purchase_price = p_tp;
             this.product_items[index].sale_price = p_mrp;

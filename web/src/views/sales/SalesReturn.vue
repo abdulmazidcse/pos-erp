@@ -77,8 +77,10 @@
                                         </a>
                                         <div class="dropdown-menu dropdown-menu-end">
                                             <!-- item--> 
-                                            <a href="javascript:void(0);" class="dropdown-item text-info" @click="viewInfo(item)">
-                                            <i class="mdi mdi-circle-edit-outline me-1"></i>Add to POS</a>
+                                            <a href="javascript:void(0);" @click="viewReturnInfo(item)" class="dropdown-item text-info"><i class="mdi mdi-eye"></i> View</a> 
+
+                                            <!-- <a href="javascript:void(0);" class="dropdown-item text-info" @click="viewInfo(item)">
+                                            <i class="mdi mdi-circle-edit-outline me-1"></i>Add to POS</a> -->
                                             <!-- item-->
                                             <a href="javascript:void(0);" class="dropdown-item text-danger" @click="deleteItem(item)"><i class="mdi mdi-delete-outline me-1"></i>Remove</a>
                                         </div>
@@ -115,6 +117,115 @@
                 </div> <!-- end card -->
             </div><!-- end col-->
         </div>  
+
+        
+
+        <!-- Modal For Return View -->
+        <Modal @close="returnViewModal()" :modalActive="modalActive">
+            <div class="modal-content scrollbar-width-thin">
+                <div class="modal-header"> 
+                    <button @click="returnViewModal()" type="button" class="btn btn-default">X</button>
+                    <h2 style="width: 100%; padding-left: 30vw;">Sales Return View</h2>
+                </div>
+
+                <div class="modal-body">
+
+                    <div class="row">
+                        <div class="col-md-12">
+                            <!-- Product Details -->
+                            <div class="card">
+                                <div class="card-body">
+                                    <div style="padding: 0 15px;">
+                                        <div class="sales_return_details">
+                                            <div class="row">
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Invoice Number: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.sale ? sales_return.sale.invoice_number : '' }} </div>
+                                                    </div>
+                                                    
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Date: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.created_at }} </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Customer: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.sale ? sales_return.sale.customer_name : '' }} </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Return Reason: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.return_reason }} </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Return Quantity: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.return_item_qty }} </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-md-6">
+                                                    <div class="row">
+                                                        <label class="col-md-4 text-left text-bold">Return Amount: </label>
+                                                        <div class="col-md-7 text-left"> {{ sales_return.return_amount }} </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <hr>
+                                        <h4> Product Details</h4>
+                                    </div>
+                                    <div class="table-responsive product_table">
+                                        <table class="table table-bordered table-centered table-nowrap">
+                                            <thead class="table-light">
+                                                <tr class="success item-head">
+                                                    <th class="text-center">SL </th> 
+                                                    <th class="text-center">Name </th> 
+                                                    <th class="text-center">Barcode</th> 
+                                                    <th class="text-center">MRP Amount</th>
+                                                    <th class="text-center">Sales Qty </th>
+                                                    <th class="text-center">Re. Qty </th>
+                                                    <th class="text-center">Amount</th>
+                                                </tr>
+                                            </thead>
+
+                                            <tbody v-if="sales_return.sale_return_items ? sales_return.sale_return_items.length > 0 : false">
+                                                <tr v-for="(item, i) in sales_return.sale_return_items" :key="i">
+                                                    <td class="text-center">{{ i + 1 }}</td>
+                                                    <td>{{ item.return_products.product_name }}</td>
+                                                    <td class="text-center">{{ item.return_products.product_code }}</td>
+                                                    <td class="text-center">{{ item.sale_items.mrp_price }}</td>
+                                                    <td class="text-center">{{ (item.sale_item_qty) ? item.sale_item_qty : item.sale_r_qty }}</td>
+                                                    <td class="text-center">{{ item.sale_r_qty }}</td>
+                                                    <td class="text-center">{{ (item.sale_r_qty * item.sale_items.mrp_price) - item.sale_items.discount }}</td>
+                                                </tr>
+                                            </tbody>
+                                            
+                                        </table>
+                                    </div>
+
+                                    <div class="summation_details">
+                                        
+                                        <!-- <span class="float-right text-danger">Total Amount: <strong>{{ totalAmount }}</strong></span> -->
+                                        <!-- <span class="float-right text-danger" style="margin-right: 10px;">Approve Total Amount: <strong>{{ approveTotalAmount }}</strong></span> -->
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                    <!-- <div class="modal-footer"> 
+                        
+                    </div> -->
+            </div>
+        </Modal>
+
       </div> 
     </transition>
 </template>
@@ -151,10 +262,12 @@ export default {
     },
     data() {  
         return {   
+            modalActive: false,
             items: [],
             loading:true, 
             sortKey: 'name',  
             holdItems:[],
+            sales_return: {},
             form: new Form({
                 id: '', 
                 start_date:'',
@@ -245,9 +358,26 @@ export default {
         };
     },  
     methods: { 
-        viewInfo(item){
-
+        returnViewModal()
+        {
+            this.modalActive = !this.modalActive;
+            if(!this.modalActive){
+                this.sales_return = {};
+            } 
         },
+        // For Sales Return View 
+        viewReturnInfo: function(item) {
+            axios.get(this.apiUrl+'/sale_returns/'+item.id, this.headerjson)
+            .then((res) => {
+                console.log("return info", res.data.data);
+                this.sales_return = res.data.data;
+                this.returnViewModal();
+            })
+            .catch((err) => {
+                this.$toast.error(err.response.data.message);
+            })
+        },
+
         forceRerender() {
           this.componentKey += 1;  
           console.log("Force Update Done");
@@ -357,7 +487,9 @@ export default {
   position: relative;
   vertical-align: middle;
 }
-
+.modal-content.scrollbar-width-thin {
+    border: none !important; 
+} 
 label {
     display: inline-block;
     margin: 0px 0px 4px 2px;

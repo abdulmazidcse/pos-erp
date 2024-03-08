@@ -1806,22 +1806,23 @@ label {
     z-index: 1;
   }
 
-  .modal-content.scrollbar-width-thin.product-show-modal {
+  /* .modal-content.scrollbar-width-thin.product-show-modal {
     width:  700px;
     margin: auto;
-  }
-  .modal-content.scrollbar-width-thin.product-upload-modal {
+  } */
+  /* .modal-content.scrollbar-width-thin.product-upload-modal {
     width: 400px;
-  }
+  } */
   .modal-content.scrollbar-width-thin.product-add-modal {
     width: 95% !important;
     margin: 0px auto;
   }
-  .modal-content.scrollbar-width-thin.product-barcode-modal {
+  /* .modal-content.scrollbar-width-thin.product-barcode-modal {
      
     max-width:900px;
     min-width:800px;
     margin: 0px auto;
-  }
+  } */
+  
 </style>
 <style src="@vueform/multiselect/themes/default.css"></style>

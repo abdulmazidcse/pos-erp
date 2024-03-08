@@ -2,65 +2,66 @@
     <transition  >
 
     <section class="ftco-section">
-        <div class="container">  
-            <div class="row justify-content-center">
-                <div class="col-md-7 col-lg-5">
-                    <div class="wrap">
-                        <!-- <div class="img" style="background-image: url(images/bg-1.jpg);"></div> -->
-                        <div class="login-wrap p-4 p-md-5">
-                            <div class="d-flex">
-                                <div class="w-100"> 
-                                    <div class="d-flex">
-                                         <img style="display:block; margin:0 auto;" src="../../assets/image/login-logo-pos.png" title="Sign In" width="250">
-                                    </div>  
-                                </div> 
-                            </div>
-                            <form @submit.prevent="submitForm()" enctype="multipart/form-data" class="signin-form">
-                                <div class="form-group mt-3">
-                                    <input type="text" class="form-control" required @keypress="onkeyPress('email')" v-model="form.email">
-                                    <label class="form-control-placeholder" for="username">Username</label> 
-                                    <div class="invalid-feedback" v-if="errors.email">
-                                        {{errors.email[0]}}
-                                    </div>
-                                </div>
-                                <div class="form-group">
-                                  <input id="password-field" :type="paswwordFieldType" class="form-control" required  @keypress="onkeyPress('password')" v-model="form.password">
-                                  <label class="form-control-placeholder" for="password">Password</label>
-                                  <span @click="passwordView()" v-if="!checkPasswordView">
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye-slash field-icon toggle-password"></span>
-                                  </span>
-                                  <span @click="passwordHidden()" v-else>
-                                    <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
-                                  </span>
-                                  <div class="invalid-feedback" v-if="errors.password">
-                                    {{errors.password[0]}}
-                                </div>
-                                </div>
-                                <div class="form-group">
-                                    <button type="submit" class="form-control btn btn-primary rounded submit px-3" :disabled="disabled">
-                                    <span v-show="isSubmit">
-                                        <i class="fas fa-spinner fa-spin" ></i>
-                                    </span>
-                                    Sign In</button>
-                                </div>
-                                <!-- <div class="form-group d-md-flex">
-                                    <div class="w-50 text-left">
-                                        <label class="checkbox-wrap checkbox-primary mb-0">Remember Me
-                                        <input type="checkbox" checked>
-                                        <span class="checkmark"></span>
-                                        </label>
-                                    </div>
-                                    <div class="w-50 text-md-right">
-                                        <a href="#">Forgot Password</a>
-                                    </div>
-                                </div> -->
-                            </form>
-                            <!-- <p class="text-center">Not a member? <a data-toggle="tab" href="#signup">Sign Up</a></p> -->
-                        </div>
+      <div class="container">
+        <div class="row justify-content-center ">
+          <div class="col-md-5 col-sm-12 col-lg-5">
+            <div class="wrap">
+              <div class="main-wrap">
+                <div class="login-wrap p-4 p-md-5">
+                  <div class="d-flex">
+                    <div class="w-100">
+                      <div class="d-flex">
+                        <h3>Welcome To IMS Software </h3>
+                      </div>
                     </div>
+                  </div>
+                  <form @submit.prevent="submitForm()" enctype="multipart/form-data" class="signin-form">
+                    <div class="form-group mt-3">
+                      <input type="text" class="form-control" required @keypress="onkeyPress('email')"
+                        v-model="form.email">
+                      <label class="form-control-placeholder" for="username">Username</label>
+                      <div class="invalid-feedback" v-if="errors.email">
+                        {{ errors.email[0] }}
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <input id="password-field" :type="paswwordFieldType" class="form-control" required
+                        @keypress="onkeyPress('password')" v-model="form.password">
+                      <label class="form-control-placeholder" for="password">Password </label>
+                      <span @click="passwordView()" v-if="!checkPasswordView">
+                          <span toggle="#password-field" class="fa fa-fw fa-eye-slash field-icon toggle-password"></span>
+                        </span>
+                        <span @click="passwordHidden()" v-else>
+                          <span toggle="#password-field" class="fa fa-fw fa-eye field-icon toggle-password"></span>
+                        </span>
+                        <div class="invalid-feedback" v-if="errors.password">
+                          {{errors.password[0]}}
+                      </div>
+                      <span class=" field-icon" @click="toggleClass()">
+                        <span v-html="eyeIcon" style="font-size: x-large;"></span>
+                      </span>
+                      <div class="invalid-feedback" v-if="errors.password">
+                        {{ errors.password[0] }}
+                      </div>
+                    </div>
+                    <div class="form-group">
+                      <button type="submit" class="form-control btn btn-primary rounded submit px-3" :disabled="disabled">
+                        <span v-show="isSubmit" class="spinner-border spinner-border-sm" role="status"
+                          aria-hidden="true"></span>
+                        <span v-show="isSubmit"> Loading...</span>
+                        <span v-show="!isSubmit">Sign In</span>
+                      </button>
+                    </div>
+                  </form>
+                  <p class="text-center">Not a member? 
+                    <a @click="toggleShowModal()" style="color: #d5d5a7;"
+                      href="javascript:;">Sign Up</a></p>
                 </div>
+              </div>
             </div>
+          </div>
         </div>
+      </div>
     </section>
     </transition>
 </template>
@@ -271,64 +272,125 @@ export default {
 </script>
 
 <style scoped>
-.content-page {
-  margin-left: 0px !important; 
-  padding: 70px 12px 65px;  
+
+
+img[src="/img/Secure login.6851cd7d.gif"] {
+  background-color: transparent;
 }
- .img {
+
+.ftco-section { 
+  /* background: linear-gradient(to right top, #d16ba5, #c777b9, #ba83ca, #aa8fd8, #9a9ae1, #8aa7ec, #79b3f4, #69bff8, #52cffe, #41dfff, #46eefa, #5ffbf1); */
+  /* background: radial-gradient(circle, #645119, #00546c, #008280, #00ad66, #b4c889); */
+  background-image: url('../../assets/images/imageedit.png');  
+  /* background-repeat: no-repeat; */
   background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center center; }
+  
+  /* background-attachment: fixed; */
+}
 
 .wrap {
-  width: 100%;
-  overflow: hidden;
-  background: #fff;
-  border-radius: 5px;
-  -webkit-box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
-  -moz-box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24);
-  box-shadow: 0px 10px 34px -15px rgba(0, 0, 0, 0.24); }
-  .wrap .img {
-    height: 200px; }
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+}
+
+.main-wrap {
+  background-color: rgba(255, 255, 255, 0.3);
+  display: flex;
+  border-radius: 10px;
+  flex: 1;
+}
 
 .login-wrap {
-  position: relative; }
-  .login-wrap h3 {
-    font-weight: 300; }
+  padding: 4rem 5rem;
+  width: 100%;
+  /* Each login-wrap takes up 50% of the width */
+  box-sizing: border-box;
+  /* Include padding and border in the width calculation */
+}
+
+
+/* Add additional styling for the text if needed */
+.login-wrap h3 {
+  color: #000;
+  /* Set the desired color for the text */
+}
+
+/* Optional: You can style the text within the div separately if needed */
+.transparent p {
+  color: #fff;
+  /* Set the text color */
+}
+
+/* .content-page {
+  margin-left: 0px !importand; 
+  padding: 70px 12px 65px;  
+} */
+.img {
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+
+
 
 .form-group {
   position: relative;
   z-index: 0;
-  margin-bottom: 20px !important; }
-  .form-group a {
-    color: gray; }
+  margin-bottom: 20px !important;
+}
+
+.form-group a {
+  color: gray;
+}
 
 .form-control {
   height: 48px;
-  background: #fff;
+  background: rgba(255, 255, 255, 0.32);
   color: #000;
   font-size: 16px;
   border-radius: 5px;
   -webkit-box-shadow: none;
   box-shadow: none;
-  border: 1px solid rgba(0, 0, 0, 0.1); }
-  .form-control::-webkit-input-placeholder {
-    /* Chrome/Opera/Safari */
-    color: rgba(0, 0, 0, 0.2) !important; }
-  .form-control::-moz-placeholder {
-    /* Firefox 19+ */
-    color: rgba(0, 0, 0, 0.2) !important; }
-  .form-control:-ms-input-placeholder {
-    /* IE 10+ */
-    color: rgba(0, 0, 0, 0.2) !important; }
-  .form-control:-moz-placeholder {
-    /* Firefox 18- */
-    color: rgba(0, 0, 0, 0.2) !important; }
-  .form-control:focus, .form-control:active {
-    outline: none !important;
-    -webkit-box-shadow: none;
-    box-shadow: none;
-    border: 1px solid #01d28e; }
+}
+
+.form-control::-webkit-input-placeholder {
+  /* Chrome/Opera/Safari */
+  color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-control::-moz-placeholder {
+  /* Firefox 19+ */
+  color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-control:-ms-input-placeholder {
+  /* IE 10+ */
+  color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-control:-moz-placeholder {
+  /* Firefox 18- */
+  color: rgba(0, 0, 0, 0.2) !important;
+}
+
+.form-control:focus,
+.form-control:active {
+  outline: none !important;
+  -webkit-box-shadow: none;
+  box-shadow: none;
+  border: 1px solid #01d28e;
+}
+
+input:focus,
+input:not(:placeholder-shown) {
+  background: rgba(255, 255, 255, 0.32);
+  /* Set the desired background color */
+  color: #000000;
+  /* Set the desired text color */
+  /* Add any additional styles as needed */
+}
 
 .field-icon {
   position: absolute;
@@ -337,7 +399,8 @@ export default {
   -webkit-transform: translateY(-50%);
   -ms-transform: translateY(-50%);
   transform: translateY(-50%);
-  color: rgba(0, 0, 0, 0.3); }
+  color: rgba(0, 0, 0, 0.3);
+}
 
 .form-control-placeholder {
   position: absolute;
@@ -346,11 +409,12 @@ export default {
   -webkit-transition: all 400ms;
   -o-transition: all 400ms;
   transition: all 400ms;
-  opacity: .6; 
-  left: 7px;}
+  opacity: .6;
+  left: 7px;
+}
 
-.form-control:focus + .form-control-placeholder,
-.form-control:valid + .form-control-placeholder {
+.form-control:focus+.form-control-placeholder,
+.form-control:valid+.form-control-placeholder {
   -webkit-transform: translate3d(0, -120%, 0);
   transform: translate3d(0, -120%, 0);
   padding: 7px 0 0 0;
@@ -359,26 +423,38 @@ export default {
   font-size: 12px;
   letter-spacing: 1px;
   color: #01d28e;
-  font-weight: 700; }
+  font-weight: 700;
+}
 
 .social-media {
   position: relative;
-  width: 100%; }
-  .social-media .social-icon {
-    display: block;
-    width: 40px;
-    height: 40px;
-    background: transparent;
-    border: 1px solid rgba(0, 0, 0, 0.05);
-    font-size: 16px;
-    margin-right: 5px;
-    border-radius: 50%; }
-    .social-media .social-icon span {
-      color: #999999; }
-    .social-media .social-icon:hover, .social-media .social-icon:focus {
-      background: #01d28e; }
-      .social-media .social-icon:hover span, .social-media .social-icon:focus span {
-        color: #fff; }
+  width: 100%;
+}
+
+.social-media .social-icon {
+  display: block;
+  width: 40px;
+  height: 40px;
+  background: transparent;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  font-size: 16px;
+  margin-right: 5px;
+  border-radius: 50%;
+}
+
+.social-media .social-icon span {
+  color: #999999;
+}
+
+.social-media .social-icon:hover,
+.social-media .social-icon:focus {
+  background: #01d28e;
+}
+
+.social-media .social-icon:hover span,
+.social-media .social-icon:focus span {
+  color: #fff;
+}
 
 .checkbox-wrap {
   display: block;
@@ -391,19 +467,23 @@ export default {
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
-  user-select: none; } 
+  user-select: none;
+}
+
 .checkbox-wrap input {
   position: absolute;
   opacity: 0;
   cursor: pointer;
   height: 0;
-  width: 0; }
- 
+  width: 0;
+}
+
 .checkmark {
   position: absolute;
   top: 0;
-  left: 0; }
- 
+  left: 0;
+}
+
 .checkmark:after {
   content: "\f0c8";
   font-family: "FontAwesome";
@@ -413,61 +493,90 @@ export default {
   margin-top: -4px;
   -webkit-transition: 0.3s;
   -o-transition: 0.3s;
-  transition: 0.3s; }
-  @media (prefers-reduced-motion: reduce) {
-    .checkmark:after {
-      -webkit-transition: none;
-      -o-transition: none;
-      transition: none; } }
- 
-.checkbox-wrap input:checked ~ .checkmark:after {
+  transition: 0.3s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .checkmark:after {
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none;
+  }
+}
+
+.checkbox-wrap input:checked~.checkmark:after {
   display: block;
   content: "\f14a";
   font-family: "FontAwesome";
-  color: rgba(0, 0, 0, 0.2); }
- 
-.checkbox-primary {
-  color: #01d28e; }
-  .checkbox-primary input:checked ~ .checkmark:after {
-    color: #01d28e; }
-.invalid-feedback {
-    display: block;
-    width: 100%;
-    margin-top: 0.25rem;
-    font-size: 80%;
-    color: #dc3545;
-    text-align: left;
+  color: rgba(0, 0, 0, 0.2);
 }
+
+.checkbox-primary {
+  color: #01d28e;
+}
+
+.checkbox-primary input:checked~.checkmark:after {
+  color: #01d28e;
+}
+
+.invalid-feedback {
+  display: block;
+  width: 100%;
+  margin-top: 0.25rem;
+  font-size: 80%;
+  color: #dc3545;
+  text-align: left;
+}
+
 .btn {
   cursor: pointer;
   -webkit-box-shadow: none !important;
   box-shadow: none !important;
   font-size: 15px;
-  padding: 10px 20px; }
-  .btn:hover, .btn:active, .btn:focus {
-    outline: none; }
-  .btn.btn-primary {
-    background: #01d28e !important;
-    border: 1px solid #01d28e !important;
-    color: #fff !important; 
-  }
+  padding: 10px 20px;
+}
+
+.btn:hover,
+.btn:active,
+.btn:focus {
+  outline: none;
+}
+
+.btn.btn-primary {
+  background: #01d28e !important;
+  border: 1px solid #01d28e !important;
+  color: #fff !important;
+}
+
 .btn.btn-primary:hover {
   border: 1px solid #01d28e;
   background: transparent;
-  color: #01d28e; 
+  color: #01d28e;
 }
+
 .btn.btn-primary.btn-outline-primary {
   border: 1px solid #01d28e;
   background: transparent;
-  color: #01d28e; 
+  color: #01d28e;
 }
+
 .btn.btn-primary.btn-outline-primary:hover {
   border: 1px solid transparent;
   background: #01d28e;
-  color: #fff; 
+  color: #fff;
 }
 
-.toggle-password {
-  cursor: pointer;
+
+@media only screen and (min-width: 1201px) {
+  .modal-inner.scrollbar-width-thin {
+    width: 500px !important;
+    height: auto;
+  }
+  .modal-content.modal-md{
+    width: 500px !important;
+    height: auto;
+  }
 }
+
+ 
 </style>

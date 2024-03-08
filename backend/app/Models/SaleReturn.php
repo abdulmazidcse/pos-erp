@@ -62,7 +62,8 @@ class SaleReturn extends Model
 
     public function saleReturnItems()
     {
-        return $this->hasMany(SaleReturnItem::class, 'sale_return_id', 'id');
+        return $this->hasMany(SaleReturnItem::class, 'sale_return_id', 'id')
+        ->with(['return_products', 'replace_products', 'sale_items']);
     }
 
     public function saleItems()

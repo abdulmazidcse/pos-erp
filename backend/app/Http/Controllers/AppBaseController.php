@@ -448,7 +448,7 @@ class AppBaseController extends Controller
             $prefix = $entry_data->prefix . '-' . date("Ymd") . "-";
 
         $length = strlen($prefix) + 5;
-        $voucher_code = uniqueGeneratedCodeWithPrefix($length, $prefix, 'account_vouchers', 'vcode');
+        $voucher_code = uniqueGeneratedCodeWithPrefix($length, $prefix, 'account_vouchers', 'id');
         }else{
             //$prefix = 'OV-' . date("Ymd") . "-";
             $voucher_code = "";
@@ -463,7 +463,7 @@ class AppBaseController extends Controller
             $prefix = 'AV-' .date("Ymd") . '-';
         }
         $length = strlen($prefix) + 5;
-        $voucher_code = uniqueGeneratedCodeWithPrefix($length, $prefix, 'account_vouchers', 'vcode');
+        $voucher_code = uniqueGeneratedCodeWithPrefix($length, $prefix, 'account_vouchers', 'id');
 
         return $voucher_code;
 

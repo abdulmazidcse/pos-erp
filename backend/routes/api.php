@@ -41,6 +41,7 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
     Route::get('users/authUser', [App\Http\Controllers\API\UserAPIController::class, 'authApiUser']);
     Route::resource('warehouses', App\Http\Controllers\API\WarehouseAPIController::class);
     Route::resource('outlets', App\Http\Controllers\API\OutletAPIController::class);
+    Route::get('outlets-list', [App\Http\Controllers\API\OutletAPIController::class,'outlets']);
     Route::resource('sales', App\Http\Controllers\API\SaleAPIController::class);
 
     Route::resource('companies', App\Http\Controllers\API\CompanyAPIController::class);
@@ -408,8 +409,11 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
 
     Route::get('reports/stock-report', [App\Http\Controllers\API\ReportAPIController::class, 'getStockReport']);
     Route::get('reports/stock-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'stockReportExcelExport']);
+    Route::get('reports/inventory-details-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'inventoryDetailsReportExcelExport']);
     Route::get('reports/low-stock-report', [App\Http\Controllers\API\ReportAPIController::class, 'getLowStockReport']);
     Route::get('reports/low-stock-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'lowStockReportExcelExport']);
+    Route::get('reports/inventory-summary-report', [App\Http\Controllers\API\InventoryReportController::class, 'inventorySummaryReport'])->name('inventorySummaryReport');
+    Route::get('reports/inventory-summary-report-excel-export', [App\Http\Controllers\API\InventoryReportController::class, 'inventorySummaryReportExcelExport'])->name('inventorySummaryReportExcelExport');
 
     Route::get('reports/daily-summary-report', [App\Http\Controllers\API\ReportAPIController::class, 'getDailySummaryReport']);
 
@@ -432,6 +436,8 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
 
  
 Route::get('customer-collection', [App\Http\Controllers\API\SaleAPIController::class, 'dueInvoices']);
+Route::get('/annual-report', [App\Http\Controllers\API\DashboardAPIController::class, 'salesVsPurchases']); 
+
 // });
 
 // Route::get('reports/stock-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'stockReportExcelExport']);

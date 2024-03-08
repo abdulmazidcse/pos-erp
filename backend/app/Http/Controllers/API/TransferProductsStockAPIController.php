@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\AppBaseController;
+use App\Models\Product;
 use App\Models\StockProduct;
 use App\Models\StockProductsLog;
 use App\Models\StockTransfer;
@@ -196,6 +197,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 $expires_date = $transfer_product->expires_date;
                 $new_quantity = $transfer_product->transfer_quantity;
                 $new_weight = $transfer_product->transfer_weight;
+                $productData = Product::find($product_id);
                 // Product Stock Insert and Update with expires date
                 if($expires_date != "") {
                     $stock_product = StockProduct::where('product_id', $product_id)->where('outlet_id', $outlet_id)->whereDate('expires_date', $expires_date)->first();
@@ -212,6 +214,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'outlet_id'     => $outlet_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -239,6 +242,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'outlet_id'     => $outlet_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -253,6 +257,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // Stock Product Log
                 $stock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'outlet_id' => $outlet_id,
                     'in_stock_quantity' => $new_quantity,
                     'stock_quantity'    => $stock_product->stock_quantity + $new_quantity,
@@ -282,6 +287,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // Warehouse Stock Log
                 $whstock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'warehouse_id' => $warehouse_id,
                     'in_stock_quantity' => 0,
                     'stock_quantity'    => $stock_product->stock_quantity - $new_quantity,
@@ -430,6 +436,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 $expires_date = $transfer_product->expires_date;
                 $new_quantity = $transfer_product->transfer_quantity;
                 $new_weight = $transfer_product->transfer_weight;
+                $productData    = Product::find($product_id);
 
                 // Product Stock Insert and Update with expires date
                 if($expires_date != "") {
@@ -447,6 +454,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'outlet_id'     => $to_outlet_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -474,6 +482,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'outlet_id'     => $to_outlet_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -488,6 +497,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // In Stock Product Log
                 $in_stock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'outlet_id' => $to_outlet_id,
                     'in_stock_quantity' => $new_quantity,
                     'stock_quantity'    => $stock_product->stock_quantity + $new_quantity,
@@ -518,6 +528,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // Out Stock Product Log
                 $out_stock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'outlet_id' => $from_outlet_id,
                     'in_stock_quantity' => 0,
                     'stock_quantity'    => $stock_product->stock_quantity - $new_quantity,
@@ -630,6 +641,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 $expires_date = $transfer_product->expires_date;
                 $new_quantity = $transfer_product->transfer_quantity;
                 $new_weight = $transfer_product->transfer_weight;
+                $productData    = Product::find($product_id);
 
                 // Product Stock Insert and Update with expires date
                 if($expires_date != "") {
@@ -647,6 +659,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'warehouse_id'     => $otw_warehouse_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -674,6 +687,7 @@ class TransferProductsStockAPIController extends AppBaseController
                     }else{
                         $new_inputs = [
                             'product_id'    => $product_id,
+                            'category_id'    => $productData->sub_category_id,
                             'warehouse_id'     => $otw_warehouse_id,
                             'in_stock_quantity' => $new_quantity,
                             'stock_quantity'    => $new_quantity,
@@ -688,6 +702,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // Stock Product Log
                 $in_stock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'warehouse' => $otw_warehouse_id,
                     'in_stock_quantity' => $new_quantity,
                     'stock_quantity'    => $stock_product->stock_quantity + $new_quantity,
@@ -717,6 +732,7 @@ class TransferProductsStockAPIController extends AppBaseController
                 // Stock Product Log
                 $out_stock_log_inputs  = [
                     'product_id' => $product_id,
+                    'category_id'    => $productData->sub_category_id,
                     'outlet_id' => $otw_outlet_id,
                     'in_stock_quantity' => 0,
                     'stock_quantity'    => $stock_product->stock_quantity - $new_quantity,

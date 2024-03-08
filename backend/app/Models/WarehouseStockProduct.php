@@ -17,6 +17,7 @@ class WarehouseStockProduct extends Model
 
     protected $fillable = [
         'product_id',
+        'category_id',
         'warehouse_id',
         'in_stock_quantity',
         'in_stock_weight',

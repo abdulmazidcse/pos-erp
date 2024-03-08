@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('warehouse_stock_products', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('product_id');
+            $table->unsignedBigInteger('category_id');
             $table->unsignedBigInteger('warehouse_id');
             $table->double('in_stock_quantity')->default(0);
             $table->double('in_stock_weight')->default(0);

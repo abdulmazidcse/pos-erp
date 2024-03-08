@@ -7,7 +7,7 @@
                         <div class="page-title-right float-left">
                             <ol class="breadcrumb m-0"> 
                                 <li class="breadcrumb-item active">Reports </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Stock Report</a></li>
+                                <li class="breadcrumb-item"><a href="javascript: void(0);">Inventory Summary Report</a></li>
                                 
                             </ol>
                         </div>
@@ -24,7 +24,7 @@
                 <div class="col-md-12 ">
                     <div class="card">
                         <div class="card-header">
-                            <h3 style="text-align: center;">Stock Report</h3>
+                            <h3 style="text-align: center;">Inventory Summary Report</h3>
                         </div>
 
                         <div class="card-body">
@@ -72,36 +72,12 @@
 
                                 <div class="col-md-3">
                                     <div class="">
-                                        <Multiselect 
-                                            class="form-control border" 
-                                            mode="single"
-                                            v-model="tableData.product_id"
-                                            placeholder="Select Product"
-                                            :searchable="true" 
-                                            :filter-results="true"
-                                            :options="product_options"
-                                            :classes="multiclasses"
-                                            :close-on-select="true" 
-                                            :min-chars="1"
-                                            :resolve-on-load="false" 
-                                            @change="changeProduct($event), onkeyPress('product_id')"
-                                        /> 
-                                        <!-- <input type="date" class="form-control" id="to_date" v-model="search_terms.to_date" @change="onkeyPress('to_date')"> -->
-                                        <div class="invalid-feedback" v-if="errors.to_date">
-                                            {{errors.to_date[0]}}
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div class="col-md-3">
-                                    <div class="">
                                         <button type="submit" class="btn btn-sm btn-primary" :disabled="disabled" @click="filterStockReport()">
                                             <span v-show="isSubmit">
                                                 <i class="fas fa-spinner fa-spin" ></i>
                                             </span>Submit 
                                         </button>
-                                        <a href="javascript:void(0);" style="margin-left: 5px;" class="btn-sm btn btn-primary" @click.prevent="printItem()" ><i class="mdi mdi-printer-outline me-1"></i> </a>
-                                              
+                                        <a href="javascript:void(0);" style="margin-left: 5px;" class="btn-sm btn btn-primary" @click.prevent="printItem()" ><i class="mdi mdi-printer-outline me-1"></i> </a>                                             
 
                                         <a href="javascript:void(0);" style="margin-left: 5px;" class="btn-sm btn btn-primary"
                                         @click.prevent="downloading ? null : exportToExcel()">
@@ -129,7 +105,7 @@
                                                 <div class="control" style="float: left;">
                                                     <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                     <div class="select" style="float: left;">
-                                                        <select class="form-select" v-model="tableData.length" @change="getStockReport()">  
+                                                        <select class="form-select" v-model="tableData.length" @change="getInventorySummaryReport()">  
                                                             <option value="5" selected="selected">5</option>
                                                             <option value="10" selected="selected">10</option>
                                                             <option value="25">25</option>
@@ -146,7 +122,7 @@
                                                 
                                             </div>
                                             <div class="col-md-4">
-                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="getStockReport()">
+                                                <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="getInventorySummaryReport()">
                                             </div>
                                         </div>
                                     </div>   
@@ -155,21 +131,11 @@
                                     <tbody v-if="items.length > 0">
                                         <tr class="border" v-for="(item, i) in items" :key="i">
                                             <td>{{ i + 1 }} </td>
-                                            <td v-if="item.expires_date">{{ item.product.product_name +' ('+ item.product.product_code +' || '+item.expires_date+')' }} </td>
-                                            <td v-else>{{ item.product.product_name +' ('+ item.product.product_code +')' }} </td>
-                                            <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') +' (' + (item.product.category ? item.product.category.name : 'Default') + ')' }} </td>
-                                            <td class="text-right">{{ item.product.mrp_price }} </td>
-                                            <td class="text-right">{{ parseFloat(item.product.cost_price).toFixed(2) }} </td>
-                                            <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
-                                            <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
-                                            <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                            <td class="text-center">{{ (item.product.purchase_unit) ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td>
-                                            <!-- <td class="text-right" v-if="checkUnitCode(item.product.purchase_measuring_unit) == 'kg'">{{ item.stock_weight * item.product.mrp_price }} </td> -->
-                                            <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
-                                            <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td>
-                                            <!-- <td class="text-right" v-if="checkUnitCode(item.product.purchase_measuring_unit) == 'kg'">{{ item.stock_weight * item.product.cost_price }} </td> -->
-                                            <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.cost_price).toFixed(2) }} </td>
-                                            <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(6) }} </td>
+                                            <td>{{ item.name }} </td>
+                                            <td class="text-right">{{ item.item_count ?? 0 }} </td>
+                                            <td class="text-right">{{ item.stock_quantity }}</td>
+                                            <td class="text-right">{{ item.stock_purchase_amount.toFixed(2) ?? 0 }} </td>
+                                            <td class="text-right">{{ item.stock_sale_amount.toFixed(2) ?? 0 }} </td>
                                             <!-- <td>
                                                 <div class="dropdown float-end">
                                                     <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -185,16 +151,12 @@
                                         </tr>
 
                                         <tr style="font-weight: bold;">
-                                            <td colspan="5" class="text-center">Total</td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
-                                            <td></td>
+                                            <td colspan="2" class="text-center">Total</td>
+                                            <td class="text-right">{{ totalBalance('item', 0) }}</td>
+                                            <td class="text-right">{{ totalBalance('stock', 0) }}</td>
+                                            <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td>
                                             <td class="text-right">{{ totalBalance('sold') }}</td>
-                                            <!-- <td class="text-right">{{ parseFloat(totalBalance('purchase')).toFixed(2) }}</td> -->
-
-                                            <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td> 
-                                            </tr>
+                                        </tr>
                                     </tbody>
                                     <tbody v-else>
                                         <tr>
@@ -230,7 +192,7 @@
                         <div class="modal-content scrollbar-width-thin orderPreview" >
                             <div class="modal-header"> 
                                 <button @click="toggleModal()" type="button" class="btn btn-default">X</button>
-                                <h3 style="width: 100%">Product Sales Report</h3>
+                                <h3 style="width: 100%">Inventory Summary Report</h3>
                             </div>
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
@@ -240,9 +202,7 @@
                                                 <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
                                                 <p>{{ this.retailShopAddress }} </p>
                                                 <p>Dhaka, Bangladesh</p> 
-                                                <h4 style="text-align: center;">Stock Report</h4>
-                                                <h4 style="text-align: center;">{{ customer_name }}</h4>
-                                                <h4 style="text-align: center;" v-if="from_date && to_date">From {{ from_date }} TO {{ to_date }}</h4>  
+                                                <h4 style="text-align: center;">Inventory Summary Report</h4>
                                             </td>
                                         </tr>
                                     </table>
@@ -250,49 +210,29 @@
                                         <thead class="tableFloatingHeaderOriginal">
                                             <tr class="success item-head">
                                                 <th width="3%" style="text-align: center">SL </th>
-                                                <th width="10%" style="text-align: center">Item (Code||Expire Date) </th>
-                                                <th width="7%" style="text-align: center">Category</th>
-                                                <th width="10%" style="text-align: center">S. Price  </th>
-                                                <th width="10%" style="text-align: center">P. Price </th>
-                                                <th width="10%" style="text-align: center">In Qty || WT</th>
-                                                <th width="10%" style="text-align: center">Sold Qty || WT </th>
-                                                <th width="10%" style="text-align: center">Stock Qty || WT </th>
-                                                <th width="10%" style="text-align: center">Unit  </th>
-                                                <th width="10%" style="text-align: center">Stock Sale Amount  </th>
+                                                <th width="10%" style="text-align: center">Name </th>
+                                                <th width="7%" style="text-align: center">Item</th>
+                                                <th width="10%" style="text-align: center">Stock Qty </th>
                                                 <th width="10%" style="text-align: center">Stock Purchase Amount</th>
+                                                <th width="10%" style="text-align: center">Stock Sale Amount  </th>
                                             </tr>
                                         </thead>
 
                                         <tbody v-if="items.length > 0">
                                             <tr class="border" v-for="(item, i) in items" :key="i">
                                                 <td>{{ i + 1 }} </td>
-                                                <td v-if="item.expires_date">{{ item.product.product_name +' ('+ item.product.product_code +' || '+item.expires_date+')' }} </td>
-                                                <td v-else>{{ item.product.product_name +' ('+ item.product.product_code +')' }} </td>
-                                                <td class="text-center">{{ (item.product.sub_category ? item.product.sub_category.name : 'Default') +' (' + item.product.category ? item.product.category.name : 'Default' + ')' }} </td>
-                                                <td class="text-right">{{ item.product.mrp_price }} </td>
-                                                <td class="text-right">{{ parseFloat(item.product.cost_price).toFixed(2) }} </td>
-                                                <td class="text-right">{{ item.in_stock_quantity }} || {{ item.in_stock_weight }} </td>
-                                                <td class="text-right">{{ item.out_stock_quantity }} || {{ item.out_stock_weight }} </td>
-                                                <td class="text-right">{{ item.stock_quantity }} || {{ item.stock_weight }} </td>
-                                                <td class="text-center">{{ item.product.purchase_unit ? item.product.purchase_unit.unit_code.toUpperCase() : '' }} </td> 
-                                                <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.mrp_price).toFixed(2) }} </td>
-                                                <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.mrp_price).toFixed(2) }} </td> 
-                                                <td class="text-right" v-if="item.stock_weight > 0 ">{{ parseFloat(item.stock_weight * item.product.cost_price).toFixed(2) }} </td>
-                                                <td class="text-right" v-else>{{ parseFloat(item.stock_quantity * item.product.cost_price).toFixed(6) }} </td>                                            
+                                                <td>{{ item.name }} </td>
+                                                <td style="text-align: right">{{ item.item_count }} </td>
+                                                <td style="text-align: right">{{ item.stock_quantity }}</td>
+                                                <td style="text-align: right">{{ item.stock_purchase_amount.toFixed(2) ?? 0 }} </td>
+                                                <td style="text-align: right">{{ item.stock_sale_amount.toFixed(2) ?? 0 }} </td>
                                             </tr> 
                                             <tr style="font-weight: bold;">
-                                                <td colspan="5" class="text-center">Total</td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td></td>
-                                                <td class="text-right">{{ totalBalance('sold') }}</td> 
-                                                <td class="text-right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td>
-
-                                                <td class="text-right">
-                                                    <input type="hidden" :value="discount_amount">
-                                                    {{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}
-                                                </td>
+                                                <td colspan="2" class="text-center">Total</td>
+                                                <td style="text-align: right">{{ totalBalance('item', 0) }}</td>
+                                                <td style="text-align: right">{{ totalBalance('stock', 0) }}</td>
+                                                <td style="text-align: right">{{ parseFloat(totalBalance('purchase') - discount_amount).toFixed(2) }}</td>
+                                                <td style="text-align: right">{{ totalBalance('sold') }}</td>
                                             </tr>
                                         </tbody> 
                                     </table> 
@@ -300,6 +240,7 @@
                             </div>
                         </div>
                     </Modal>
+
                 </div>
             </div>        
         </div>
@@ -363,53 +304,28 @@ export default {
                     width: '5%'
                 },   
                 {
-                    label: 'Item (Code||Expire Date)',
-                    name: 'product.product_name',
+                    label: 'Category',
+                    name: 'name',
                     width: '20%'
                 },
                 {
-                    label: 'Category',
-                    name: 'product_category.name',
-                    width: '10%'
-                },
-                {
-                    label: 'S. Price',
-                    name: 'mrp_price',
+                    label: 'Item',
+                    name: 'item_count',
                     width: '7%'
                 },
                 {
-                    label: 'P. Price',
-                    name: 'cost_price',
-                    width: '7%'
-                },
-                {
-                    label: 'In Qty || WT',
-                    name: 'in_stock_quantity',
-                    width: '7%'
-                },
-                {
-                    label: 'Sold Qty || WT',
-                    name: 'out_stock_quantity',
-                    width: '7%'
-                },
-                {
-                    label: 'Stock Qty || WT',
+                    label: 'Stock Qty',
                     name: 'stock_quantity',
                     width: '7%'
                 },
                 {
-                    label: 'Unit',
-                    name: 'punit',
-                    width: '5%'
+                    label: 'Stock Purchase Amount',
+                    name: 'stock_purchase_amount',
+                    width: '10%'
                 },
                 {
                     label: 'Stock Sale Amount',
                     name: 'stock_sale_amount',
-                    width: '10%'
-                },
-                {
-                    label: 'Stock Purchase Amount',
-                    name: 'stock_purchase_amount',
                     width: '10%'
                 },
                 // {
@@ -427,7 +343,7 @@ export default {
                 search: '',
                 column: 0,
                 dir: 'asc',
-                sortKey: 'product_name', 
+                sortKey: 'name', 
                 outlet_id: '',
                 category_id: '',
                 product_id: '',
@@ -454,8 +370,7 @@ export default {
     created() {
         this.fetchOutlets();
         this.fetchProductCategories();
-        this.fetchProducts();
-        this.getStockReport();
+        this.getInventorySummaryReport();
     },
 
     methods: { 
@@ -472,19 +387,30 @@ export default {
             return unit_item.unit_code.toLowerCase();
         },
 
-        totalBalance(type) {
+        totalBalance(type, decpoint=2) {
             var sum = 0;
             if(type == 'sold') {
                 this.items.filter((item) => {
-                    sum += parseFloat(item.stock_quantity * item.product.mrp_price);
+                    sum += parseFloat(item.stock_sale_amount);
                 });
-            }else{
+            }
+            if(type == 'purchase') {
                 this.items.filter((item) => {
-                    sum += parseFloat(item.stock_quantity * item.product.cost_price);
+                    sum += parseFloat(item.stock_purchase_amount);
+                });
+            }
+            if(type == 'item') {
+                this.items.filter((item) => {
+                    sum += parseFloat(item.item_count);
+                });
+            }
+            if(type == 'stock') {
+                this.items.filter((item) => {
+                    sum += parseFloat(item.stock_quantity);
                 });
             }
 
-            return sum.toFixed(6);
+            return sum.toFixed(decpoint);
         },
 
         fetchOutlets() {
@@ -517,39 +443,27 @@ export default {
             })
         },
 
-        fetchProducts() {
-            this.product_options = [];
-            axios.get(this.apiUrl+"/products", this.headerjson)
-            .then((resp) => {
-                this.products = resp.data.data;
-                resp.data.data.map((item) => {
-                    this.product_options.push({value: item.id, label: item.product_name})
-                })
-            })
-            .catch((err) => {
-                this.$toast.error(err.response.data.message);
-            })
-        },
-
         filterStockReport()
         {
             this.isSubmit = true;
             this.disabled = true;
-            this.getStockReport();
+            this.getInventorySummaryReport();
         },
 
         // For Pagination 
-        getStockReport(url = this.apiUrl+'/reports/stock-report') {
+        getInventorySummaryReport(url = this.apiUrl+'/reports/inventory-summary-report') {
             this.tableData.draw++;
             axios.get(url, {params:this.tableData, headers: this.headerparams})
             .then((response) => {
-                let data = response.data.data; 
+                let data = response.data.data;
                 if(this.tableData.draw = data.draw) {
-                    this.items = data.data.data;
-                    this.units = data.unit_data;
-                    this.discount_amount = data.discount_amount;
-
-                    // console.log("data.data.data", data.data.data);
+                    if(Array.isArray(data.data.data)) {
+                        this.items = data.data.data;
+                    }else {
+                        this.items = Object.keys(data.data.data).map(key => {
+                                        return data.data.data[key];
+                                    });
+                    }
                     this.configPagination(data.data);
                 }
                 this.isSubmit  = false;
@@ -560,12 +474,10 @@ export default {
                         this.category_options.push({value: item.id, label: item.name})
                     }
                 })
-                this.products.map((item) => {
-                    this.product_options.push({value: item.id, label: item.product_name})
-                })
             })
             .catch((err) => {
-                this.$toast.error(err.response.data.message);
+                console.log(err);
+                this.$toast.error(err.response);
             })
             .finally((fres) => {
                 this.loading = false;
@@ -589,10 +501,10 @@ export default {
             //this.sortOrders[key] = this.sortOrders[key] * -1;
             this.tableData.column = this.getIndex(this.columns, 'name', key);
             this.tableData.dir = sortable; ///this.sortOrders[key] === 1 ? 'asc' : 'desc'; 
-            this.getStockReport();
+            this.getInventorySummaryReport();
         },
         setPage(data){  
-            this.getStockReport(data.url); 
+            this.getInventorySummaryReport(data.url); 
         },
         getIndex(array, key, value) {
             return array.findIndex(i => i[key] == value)
@@ -604,12 +516,6 @@ export default {
 
         changeCategory(category_id) {
             this.tableData.category_id = category_id;
-            this.product_options = [];
-            this.products.map((item) => {
-                if(item.sub_category_id == category_id) {
-                    this.product_options.push({value: item.id, label: item.product_name});
-                }
-            })
         },
 
         changeProduct(product_id) {
@@ -662,7 +568,7 @@ export default {
 
             const query = queryString;
             try {
-                const response = await axios.get(`${this.apiUrl}/reports/stock-report-excel-export${query}`, {
+                const response = await axios.get(`${this.apiUrl}/reports/inventory-summary-report-excel-export${query}`, {
                 responseType: 'blob', // Important: set the response type to 'blob'
                 headers: {
                     'Authorization' : this.$store.getters.token ? `Bearer ${this.$store.getters.token}` : "",
@@ -673,7 +579,7 @@ export default {
                 const url = window.URL.createObjectURL(new Blob([response.data]));
                 const link = document.createElement('a');
                 link.href = url;
-                link.setAttribute('download', 'stock-report.xlsx');
+                link.setAttribute('download', 'inventory-summary-report.xlsx');
                 document.body.appendChild(link);
                 link.click();
                 this.downloading = false;

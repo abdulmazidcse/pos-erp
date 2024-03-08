@@ -176,4 +176,15 @@ class OutletAPIController extends AppBaseController
 
         return $this->sendSuccess('Outlet deleted successfully');
     }
+
+    public function outlets(Request $request){
+        $user = auth()->user();
+        $outlet_id = $user->outlet_id ? $user->outlet_id : ''; 
+        $outlets = $this->outletRepository->allQuery()->when($outlet_id, function($q, $outlet_id){
+            return $q->where('id', $outlet_id);
+        })->get();
+
+        $return_data = OutletResource::collection($outlets);
+        return $this->sendResponse($return_data, 'Outlets retrieved successfully');
+    }
 }

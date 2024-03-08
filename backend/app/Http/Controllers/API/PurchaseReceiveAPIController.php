@@ -99,9 +99,11 @@ class PurchaseReceiveAPIController extends AppBaseController
         ]);
 
 //        return $request->all();
+//        $products = json_decode($request->get('products'));
+//        return $products;
         // For Without purchase order to receive product
         if($request->purchase_order_id == "direct") {
-//            $outlet_id = auth()->user()->outlet_id ?? 1;
+            // $outlet_id = auth()->user()->outlet_id ?? 1;
             $outlet_id = $request->get('outlet_id');
 
             $products = json_decode($request->get('products'));
@@ -345,6 +347,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                                     if(empty($stock_product)) {
                                         $stock_new_inputs = [
                                             'product_id'    => $product_expires_data[$purchaseProducts->id][$pe]['product_id'],
+                                            'category_id'    => $purchaseProducts->sub_category_id,
                                             'outlet_id'         => $outlet_id,
                                             'in_stock_quantity' => $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity'],
                                             'stock_quantity' => $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity'],
@@ -387,6 +390,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                                     $stock_log_inputs[]    = [
                                         'product_id' => $product_expires_data[$purchaseProducts->id][$pe]['product_id'],
+                                        'category_id' => $purchaseProducts->sub_category_id,
                                         'outlet_id' => $outlet_id,
                                         'in_stock_quantity' => $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity'],
                                         'stock_quantity'    => ($stock_qty + $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity']),
@@ -409,6 +413,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                                 if(empty($stock_product)) {
                                     $new_stock_input = [
                                         'product_id'    => $purchaseProducts->id,
+                                        'category_id'    => $purchaseProducts->sub_category_id,
                                         'outlet_id'         => $outlet_id,
                                         'in_stock_quantity' => $product_array[$purchaseProducts->id]['receive_quantity'],
                                         'in_stock_weight' => $product_array[$purchaseProducts->id]['receive_weight'],
@@ -453,6 +458,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                                 $stock_log_inputs[]    = [
                                     'product_id' => $purchaseProducts->id,
+                                    'category_id' => $purchaseProducts->sub_category_id,
                                     'outlet_id' => $outlet_id,
                                     'in_stock_quantity' => $product_array[$purchaseProducts->id]['receive_quantity'],
                                     'in_stock_weight' => $product_array[$purchaseProducts->id]['receive_weight'],
@@ -575,7 +581,12 @@ class PurchaseReceiveAPIController extends AppBaseController
         else{
             $purchase_order = PurchaseOrder::find($request->get('purchase_order_id'));
             $store_requisition = StoreRequisition::find($purchase_order->store_requisition_id);
-            $outlet_id = auth()->user()->outlet_id ?? $store_requisition->outlet_id;
+            if(auth()->user()->outlet_id){
+                $outlet_id = $request->get('outlet_id') ?? auth()->user()->outlet_id;
+            }else{
+                $outlet_id = $store_requisition->outlet_id ?? $request->get('outlet_id');
+            } 
+            // dd(auth()->user()->outlet_id, $store_requisition->outlet_id,  $outlet_id , $purchase_order ,$store_requisition);
 
             $products = json_decode($request->get('products'));
 
@@ -825,6 +836,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                                     if(empty($stock_product)) {
                                         $stock_new_inputs = [
                                             'product_id'    => $product_expires_data[$purchaseProduct->id][$pe]['product_id'],
+                                            'category_id'    => $purchaseProduct->sub_category_id,
                                             'outlet_id'         => $outlet_id,
                                             'in_stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
                                             'stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
@@ -869,6 +881,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                                     $stock_log_inputs[]    = [
                                         'product_id' => $product_expires_data[$purchaseProduct->id][$pe]['product_id'],
+                                        'category_id'    => $purchaseProduct->sub_category_id,
                                         'outlet_id' => $outlet_id,
                                         'in_stock_quantity' => $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity'],
                                         'stock_quantity'    => ($stock_qty + $product_expires_data[$purchaseProduct->id][$pe]['expire_quantity']),
@@ -891,6 +904,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                                 if(empty($stock_product)) {
                                     $new_stock_input = [
                                         'product_id'    => $purchaseProduct->id,
+                                        'category_id'    => $purchaseProduct->sub_category_id,
                                         'outlet_id'         => $outlet_id,
                                         'in_stock_quantity' => $product_array[$purchaseProduct->id]['receive_quantity'],
                                         'in_stock_weight' => $product_array[$purchaseProduct->id]['receive_weight'],
@@ -938,6 +952,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                                 $stock_log_inputs[]    = [
                                     'product_id' => $purchaseProduct->id,
+                                    'category_id'    => $purchaseProduct->sub_category_id,
                                     'outlet_id' => $outlet_id,
                                     'in_stock_quantity' => $product_array[$purchaseProduct->id]['receive_quantity'],
                                     'in_stock_weight' => $product_array[$purchaseProduct->id]['receive_weight'],
@@ -1403,6 +1418,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                             'code' => $purchase_product->product->product_code,
                             'unit_code' => $purchase_product->product->purchase_unit->unit_code,
                             'product_unit_id'   => $purchase_product->product_unit_id,
+                            'sub_category_id'   => $purchase_product->product->sub_category_id,
                             'cpu' => ($purchase_product->order_purchase_price != 0) ? $purchase_product->order_purchase_price : $purchase_product->product->cost_price,
                             'purchase_price' => ($purchase_product->order_purchase_price != 0) ? $purchase_product->order_purchase_price : $purchase_product->product->cost_price,
                             'sale_price' => $purchase_product->product->mrp_price,

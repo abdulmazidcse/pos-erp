@@ -55,6 +55,8 @@ import moment from 'moment'
 //import JlDatatable from 'jl-datatable'
 
 import  VueHtmlToPaper from './plugins/VueHtmlToPaper'
+
+import 'material-icons/iconfont/material-icons.css';
  
 window.Fire = createApp(App); 
 const app = createApp(App); 
@@ -98,15 +100,15 @@ else {
 
 app.config.globalProperties.$createElement = '';
 app.config.globalProperties.reRenderRoute = 0;
-app.config.globalProperties.address =  "3rd floor, UCEP Cheyne Tower, 25 Segun Bagicha Rd, Dhaka 1000";  
-app.config.globalProperties.invHeadAddress =  "UCEP cheyne tower, Segunbagicha, Dhaka,  Dhaka-1000";  
+app.config.globalProperties.address =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
+app.config.globalProperties.invHeadAddress =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
 app.config.globalProperties.invHeadPhone =  "";// 01739897087  
 app.config.globalProperties.prepareBy =  "Khandakar Kudrat E Khuda";  
 app.config.globalProperties.checkedBy =  "Khandakar Kudrat E Khuda";  
 app.config.globalProperties.approvedBy =  "Khandakar Kudrat E Khuda";  
   
-app.config.globalProperties.retailShopName =  "24 Seven Inc.";  
-app.config.globalProperties.retailShopAddress =  "Plot -394, Road -29, Mohakhali DOHS";  
+app.config.globalProperties.retailShopName =  "Retail Shop 1.";  
+app.config.globalProperties.retailShopAddress =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
 
 // for turn off warning
 app.config.warnHandler = function (msg, vm, trace) {

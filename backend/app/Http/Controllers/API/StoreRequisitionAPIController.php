@@ -13,7 +13,7 @@ use App\Repositories\StoreRequisitionRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\DB;
-use Response;
+use Response; 
 
 /**
  * Class StoreRequisitionController
@@ -76,6 +76,9 @@ class StoreRequisitionAPIController extends AppBaseController
             'requisition_date'  => 'required',
             'requisition_no'    => 'required|unique:store_requisitions,requisition_no'
         ]);
+        $user = auth()->user();
+        
+        // return response()->json($user, 200);
 
         // For Purchase Products
         $products = json_decode($request->products);
@@ -111,7 +114,7 @@ class StoreRequisitionAPIController extends AppBaseController
         }
 
         $inputs  = [
-            'outlet_id' => 1,
+            'outlet_id' => $user->outlet_id ? $user->outlet_id : 1,
             'requisition_date'  => $request->get('requisition_date'),
             'requisition_no'    => $request->get('requisition_no'),
             'total_quantity'    => $total_quantity,

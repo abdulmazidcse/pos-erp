@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\API;
 
 use App\Http\Controllers\AppBaseController;
+use App\Http\Resources\InventoryDetailsResource;
 use App\Http\Resources\LowStockReportResource;
 use App\Http\Resources\StockReportResource;
+use App\Http\Resources\StockReportExportResource;
 use App\Models\PaymentCollection;
 use App\Models\PurchaseReceive;
 use App\Models\PurchaseReceiveDetail;
@@ -32,7 +34,10 @@ class ReportAPIController extends AppBaseController
         $outlet_id = request('outlet_id');
         $category_id = request('category_id');
         $product_id = request('product_id');
-        $query = StockProduct::with(['product'])->orderBy($columns[$column], $dir);
+        // $query = StockProduct::with(['product'])->orderBy($columns[$column], $dir);
+        $query = StockProduct::with(['product'])->when($column, function($query) use ( $columns, $column, $dir){
+            return $query->orderBy($columns[$column], $dir);
+        });
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {
@@ -63,6 +68,11 @@ class ReportAPIController extends AppBaseController
                 $query->where('product_id', $product_id);
             });
         }
+        $query->where(function($query) {
+            $query->whereHas('product', function ($q) {
+//                $q->
+            });
+        });
 
         $stock_products = $query->paginate($length);
         $units = Unit::all();
@@ -188,16 +198,23 @@ class ReportAPIController extends AppBaseController
         $data = $response->getData();
 
         // Now $data contains the array of data 
-        $return_suppliers = StockReportResource::collection($data->data->data->data); 
+        // $return_suppliers = StockReportResource::collection($data->data->data->data); 
+        if($request->get('export')){
+            $return_suppliers = StockReportExportResource::collection($data->data->data->data);
+        } else {
+            $return_suppliers = StockReportResource::collection($data->data->data->data);
+        }
 
         return $this->sendResponse($return_suppliers, 'Suppliers retrieved successfully');
     }
     public function stockReportExcelExport(Request $request){ 
+        $request['export'] = 1;
         $response = $this->stockReportResourceCollection($request);
         // Get the data array from the JSON response
         $data = $response->getData();
 
         $returnData = $data->data;
+        
         // dd($returnData);
 
         $customHeadings = [ ['Stock Report'],[]];
@@ -211,6 +228,39 @@ class ReportAPIController extends AppBaseController
         // Generate and download the Excel file
         return Excel::download($export, 'stock-report.xlsx');
     } 
+    
+    public function inventoryDetailsReportResourceCollection($request){
+
+        // Call the index method to retrieve the JSON response
+        $response = $this->getStockReport($request);
+
+        // Get the data array from the JSON response
+        $data = $response->getData();
+
+        // Now $data contains the array of data
+        $return_suppliers = InventoryDetailsResource::collection($data->data->data->data);
+
+        return $this->sendResponse($return_suppliers, 'Inventory details retrieved successfully');
+    }
+
+    public function inventoryDetailsReportExcelExport(Request $request){
+        $response = $this->inventoryDetailsReportResourceCollection($request);
+        // Get the data array from the JSON response
+        $data = $response->getData();
+
+        $returnData = $data->data;
+
+        $customHeadings = [ ['Inventory Details Report'],[]];
+        $columns = ['SL', 'category','item','unit_code', 'cost_price', 'mrp_price','stock_quantity','stock_purchase_amount','stock_sale_amount'];
+
+        // Create an instance of the export class with the data
+        $margeRangeOne = 'A1:I1';
+        $margeRangeTwo = 'A2:I2';
+        $export = new Export($returnData, $columns, $customHeadings,  $margeRangeOne, $margeRangeTwo);
+
+        // Generate and download the Excel file
+        return Excel::download($export, 'inventory-details-report.xlsx');
+    }
     
     public function lowStockReportExcelExportCollection($request){ 
 
