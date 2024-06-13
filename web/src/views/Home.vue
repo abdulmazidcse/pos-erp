@@ -31,6 +31,7 @@
       </div>
     </div>
     <!-- end page title -->
+    <AnalogWatch/>
     <Topblock v-if="topBlockLoad" :salesData="salesInfoData"></Topblock>
     <TopblockEmpty v-else /> 
     <ApexchartBlock  v-if="apexchartBlockLoad" 
@@ -230,6 +231,7 @@ import Pagination from "@/components/Pagination.vue";
 import Topblock from "@/views/dashboard/Topblock.vue";
 import TopblockEmpty from "@/views/dashboard/TopblockEmpty.vue";
 import ApexchartBlock from "@/views/dashboard/ApexchartBlock.vue";
+import AnalogWatch from '@/views/page/AnalogWatch.vue';
 export default {
   name: "Dashboard",
   components: {
@@ -237,7 +239,8 @@ export default {
     Pagination,
     Topblock,
     TopblockEmpty,
-    ApexchartBlock
+    ApexchartBlock,
+    AnalogWatch
   },
   props: {
     language: {

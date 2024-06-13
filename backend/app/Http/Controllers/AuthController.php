@@ -224,8 +224,7 @@ class AuthController extends AppBaseController
        // return response()->json(['message' => 'Faild to verified verification code.'], 400);
     }
     
-     public function resetPassword(Request $request)
-    {
+    public function resetPassword(Request $request){
         $data = $request->validate([
             'email'    => 'required ',
             'password' => 'required',
@@ -246,5 +245,60 @@ class AuthController extends AppBaseController
     }
 
 
+    public function change_password(Request $request) {
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required', // Validate against current hashed password
+            'new_password' => 'required|string|min:8|confirmed', // Minimum length of 8 and confirmed
+        ]);
     
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+    
+        $user = Auth::user(); // Retrieve authenticated user
+    
+        if (!Hash::check($request->current_password, $user->password)) { 
+            return response()->json(['current_password' => [
+                "The old password does not match."
+            ]], 422); 
+        }
+    
+        // Save the new password
+        $user->password = Hash::make($request->new_password);
+        $user->save();
+    
+        return response()->json(['message' => 'Password changed successfully'], 200);
+    }
+    
+
+    public function change_password222(Request $request){
+        $validator = Validator::make($request->all(), [
+            'current_password' => 'required|current_password', // Validate against current hashed password
+            'new_password' => 'required|string|min:8|confirmed', // Minimum length of 8 and confirmed
+            'confirm_password' => 'required|string|min:8',
+        ]);
+
+        $currentPassword = $request->current_password;
+        $newPassword = $request->new_password;
+        $confirmPassword = $request->confirm_password;
+
+        if ($newPassword !== $confirmPassword) {
+            // Password mismatch
+        }
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        }
+
+        $user = Auth::user(); // Retrieve authenticated user
+
+        if (!Hash::check($request->currentPassword, $user->password)) {
+            return response()->json(['message' => 'Current password does not match'], 401);
+        }
+
+        $user->password = Hash::make($request->newPassword);
+        $user->save();
+
+        return response()->json(['message' => 'Password changed successfully'], 200);
+    }    
 }

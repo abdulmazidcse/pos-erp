@@ -60,11 +60,19 @@ class ProductsAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $products = $this->productsRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        $user = auth()->user();  
+        $query = $this->productsRepository->allQuery()->active();
+        if ($user->hasRole('Super Admin')) {
+            $products = $query->get();
+        } else { 
+            $products = $query->where('outlet_id',  $user->outlet_id)->get();
+        }   
+        // $products = $this->productsRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+
         $return_data = ProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully');
         //return $this->sendResponse($products->toArray(), 'Products retrieved successfully'); 
@@ -118,9 +126,8 @@ class ProductsAPIController extends AppBaseController
     }
 
     public function productForPos(Request $request)
-    {
-        // return Auth::user()->outlet_id;
-
+    { 
+        $searchValue = $request->input('search');
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
             'stock_products.stock_quantity','stock_products.out_stock_quantity',
@@ -135,15 +142,24 @@ class ProductsAPIController extends AppBaseController
                     $query->orWhere('stock_products.stock_weight','>',0);
                 });
                 $query->orWhere(function ($query) use ($allow_checkout) {
-                    $query->where('stock_products.stock_quantity','>',0);
+                    // $query->where('stock_products.stock_quantity','>',0);
                     $query->where('products.allow_checkout_when_out_of_stock','=',$allow_checkout);
                 });
             });
-        $query->when(((Auth::user()->outlet_id ) && (Auth::user()->outlet_id != '0')), function ($q) {
-            return $q->where('stock_products.outlet_id', Auth::user()->outlet_id);
-        });
+
+            if($searchValue) {
+                $query->where(function ($query) use ($searchValue) {
+                    $query->where('product_name', 'like', '%' .$searchValue. '%');
+                    $query->orWhere('product_code', 'like', '%' .$searchValue. '%'); 
+                });
+            }
+            
+        // $query->when(((Auth::user()->outlet_id ) && (Auth::user()->outlet_id != '0')), function ($q) {
+        //     return $q->where('products.outlet_id', Auth::user()->outlet_id);
+        // }); 
 
         // return $query->toSql();
+        
         $products = $query->get();
         $return_data = PosProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully'); 

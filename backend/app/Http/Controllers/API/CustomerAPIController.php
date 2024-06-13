@@ -55,7 +55,7 @@ class CustomerAPIController extends AppBaseController
 
     public function customerList(Request $request)
     {
-        $columns = ['sl','customer_code', 'name', 'phone', 'email', 'address', 'customer_group_name'];
+        $columns = ['sl','customer_code', 'name', 'phone', 'email', 'address', 'customer_group_name','customer_group_id','customer_receivable_account'];
 
         $length = $request->input('length');
         $column = $request->input('column');
@@ -100,7 +100,6 @@ class CustomerAPIController extends AppBaseController
             'phone' => 'required|min:10|unique:customers,phone',
             'address'   => 'required',
             'discount_percent' => 'required',
-
             'customer_receivable_account'   => 'required',
         ]);
 

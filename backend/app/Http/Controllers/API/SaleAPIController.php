@@ -137,6 +137,61 @@ class SaleAPIController extends AppBaseController
         ];
         return $this->sendResponse($return_data, 'Sales retrieved successfully');
     }
+    public function listForApp(Request $request)
+    {
+
+        $columns = ['id','created_at', 'invoice_number', 'total_amount', 'customer_name', 'collection_amount'];
+
+        $length = $request->input('length');
+        $column = $request->input('column');
+        $dir = $request->input('dir');
+        $searchValue = $request->input('search');
+
+        $from_date  = $request->input('from_date') ?? null; //Carbon::now()->subMonths(1)->format("Y-m-d");
+        $to_date    = $request->input('to_date') ?? Carbon::now()->format("Y-m-d");
+        $outlet_id  = $request->input('outlet_id'); 
+        
+        $query = Sale::with(['salesItems' => function ($query) {
+            $query->select('id', 'sale_id', 'product_id','quantity','discount','mrp_price','cost_price') // specify fields for saleItems
+                  ->with(['products' => function ($query) {
+                      $query->select('id', 'product_name', 'product_code', 'mrp_price', 'cost_price'); // specify fields for products
+                  }]);
+        }, 'customer','outlets','createdBy'])
+        ->select('id','created_at', 'invoice_number', 'grand_total', 'total_amount', 'order_discount_value', 'customer_discount', 'customer_group_discount', 'outlet_id', 'customer_name', 'collection_amount','customer_id','created_by')
+        ->where('return_type', '!=', 3)->orderBy($columns[$column], $dir);
+
+        if($searchValue) {
+            $query->where(function ($query) use ($searchValue) {
+                $query->where('invoice_number', 'like', '%' .$searchValue. '%');
+                $query->orWhere('collection_amount', 'like', '%' .$searchValue. '%');
+                $query->orWhere('customer_name', 'like', '%' .$searchValue. '%');
+            });
+        }
+
+        if(isset($outlet_id)) {
+            $query->where('outlet_id', $outlet_id);
+        }
+
+        // if(isset($from_date)) {
+        //     $query->whereDate('created_at', '>=', $from_date);
+        // }
+
+        if(isset($to_date)) {
+            $query->whereDate('created_at', '<=', $to_date);
+        }
+
+
+        $sales_data = $query->withCount('salesItems')
+            ->addSelect(['sales_items_sum_discount' => SaleItem::whereColumn('sale_id', 'sales.id')
+            ->selectRaw('sum(quantity * discount) as sales_items_sum_discount')])
+            ->withSum('salesItems', 'mrp_price')
+            ->paginate($length);
+        $return_data    = [
+            'data' => $sales_data,
+            'draw' => $request->input('draw')
+        ];
+        return $this->sendResponse($return_data, 'Sales retrieved successfully');
+    }
 
     public function duelist(Request $request)
     { 
@@ -319,7 +374,7 @@ class SaleAPIController extends AppBaseController
                     'discount'  => $value['discount'], 
                     'vat'       => $value['tax'],
                     'vat_id'    => $product->product_tax, 
-                    'mrp_price' => $product->mrp_price,
+                    'mrp_price' => $value['mrp_price'] ? $value['mrp_price'] : $product->mrp_price,
                     'cost_price'=> $product->cost_price,
                     'uom'       => $value['uom'],
                     'weight'    => $value['weight']
@@ -599,7 +654,7 @@ class SaleAPIController extends AppBaseController
         $total_item_discount = 0;
         $total_item_vat = 0;
         $total_item_mrp_amount = 0;
-        $total_item_cost_amount = 0;
+        $total_item_cost_amount = 0; 
 
         if ($request->items) {
             $getItems = $request->items;
@@ -615,7 +670,7 @@ class SaleAPIController extends AppBaseController
                     'stock_weight'    => $stockPro->stock_weight ? ($stockPro->stock_weight - $value['weight']) : $stockPro->stock_weight, 
                 ];
                 $update_stock[] = $update_stock_arr;
-
+                // (json["mrp_price"] - json["discount"]) * json["quantity"],
                 $items[] = new SaleItem([
                     'stock_id'=> $value['product_stock_id'],
                     'product_id'=> $value['product_id'],
@@ -623,26 +678,26 @@ class SaleAPIController extends AppBaseController
                     'discount'  => $value['discount'],
                     'vat'       => $value['tax'],
                     'vat_id'    => $product->product_tax,
-                    'mrp_price' => $product->mrp_price,
                     'cost_price'=> $product->cost_price,
+                    'mrp_price' => $product->mrp_price, 
                     'uom'       => $value['uom'],
                     'weight'    => $value['weight']
                 ]);
 
                 /** For SMS  */
-//                if($value['weight']){
-//                    $smsItemInfo[] = array(
-//                        'pro_name' => strtoupper($product->product_native_name),
-//                        'wt' => $value['weight'].'KG',
-//                        'price'=> $product->mrp_price.'tk',
-//                    );
-//                }else{
-//                    $smsItemInfo[] = array(
-//                        'pro_name' => strtoupper($product->product_native_name),
-//                        'wt' => $value['quantity'],
-//                        'price'=> $product->mrp_price.'tk',
-//                    );
-//                }
+                //                if($value['weight']){
+                //                    $smsItemInfo[] = array(
+                //                        'pro_name' => strtoupper($product->product_native_name),
+                //                        'wt' => $value['weight'].'KG',
+                //                        'price'=> $product->mrp_price.'tk',
+                //                    );
+                //                }else{
+                //                    $smsItemInfo[] = array(
+                //                        'pro_name' => strtoupper($product->product_native_name),
+                //                        'wt' => $value['quantity'],
+                //                        'price'=> $product->mrp_price.'tk',
+                //                    );
+                //                }
 
                 if(sizeof($value['dis_array']) > 0 ){
                     foreach ($value['dis_array'] as $key2 => $dis_array) {
@@ -658,8 +713,7 @@ class SaleAPIController extends AppBaseController
                 $total_item_discount += ($value['quantity'] * $value['discount']);
                 $total_item_vat += $value['tax'];
                 $total_item_mrp_amount += ($value['quantity'] * $product->mrp_price);
-                $total_item_cost_amount += ($value['quantity'] * $product->cost_price);
-
+                $total_item_cost_amount += ($value['quantity'] * $product->cost_price); 
             }
         }
 
@@ -668,8 +722,9 @@ class SaleAPIController extends AppBaseController
         $customer_group_id  = $request->get('customer_group_id');
         $customer_group_name    = strtolower($request->get('customer_group_name'));
 
-        $id=\DB::select("show table status where name='sales'; ");
+        $id=DB::select("show table status where name='sales'; ");
         $next_sale_id=$id[0]->Auto_increment;
+        // dd($id); 
         $outlet_id = auth('api')->user() ? (auth('api')->user()->outlet_id ? auth('api')->user()->outlet_id : 1 ) : 1;
         if ($request->items) {
             $salesData = array(
@@ -677,7 +732,7 @@ class SaleAPIController extends AppBaseController
                 'customer_id' => $request->customer_id,
                 'customer_name' => $customer->name,
                 'total_amount' => $request->total_amount,
-                'grand_total' => round($request->grand_total),
+                'grand_total' => round($request->grand_total), 
                 'collection_amount' => $request->total_collect_amount,
                 'paid_amount' => $request->paid_amount,
                 'return_amount' => $request->return_amount,
@@ -736,6 +791,8 @@ class SaleAPIController extends AppBaseController
             if($pointsSettings->enable_points_rewards && $insertPoint != ''){
                 $sale->point()->save($insertPoint);
             }
+            $sale->update(['invoice_number' => 'INV'.sprintf('%03d',$outlet_id).date('y').sprintf('%06d',$sale->id)]);
+            
 
             foreach ($update_stock as $key => $value) {
                 StockProduct::where('id',$value['id'])->update([
@@ -779,7 +836,7 @@ class SaleAPIController extends AppBaseController
 //            $sale->update(['voucher_id' => $account_transaction->id]);
 
             // sale data query
-            $query = Sale::with(['payments','salesItems','customer','createdBy','salesDiscount']);
+            $query = Sale::with(['payments','outlets','salesItems','customer','createdBy','salesDiscount']);
             $query->where('invoice_number',$sale->invoice_number);
             $saleInfo = $query->get()->toArray();
 

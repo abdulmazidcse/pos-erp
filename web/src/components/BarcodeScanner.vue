@@ -2,8 +2,7 @@
     <div id="barcodeScannerUI" ref="root"></div>
 </template>
   
-  <script>
-  import "../dbr";
+  <script> 
   import { BarcodeScanner } from 'dynamsoft-javascript-barcode';
   import { onBeforeUnmount, onMounted, ref } from "vue";
   

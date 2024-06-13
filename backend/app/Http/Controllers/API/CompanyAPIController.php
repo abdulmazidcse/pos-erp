@@ -41,7 +41,7 @@ class CompanyAPIController extends AppBaseController
         //     $request->get('skip'),
         //     $request->get('limit')
         // );
-        $companies = $this->companyRepository->allQuery()->active()->get();
+        $companies = $this->companyRepository->allQuery()->get();
 
         $return_data    = CompanyResource::collection($companies);
 

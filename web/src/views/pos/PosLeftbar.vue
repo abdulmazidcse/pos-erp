@@ -291,12 +291,7 @@
               </option>
             </select>
           </div>
-        </div>
-        <!-- <div class="col-sm-2">
-          <div class="form-group">
-            <button>dd</button>
-          </div>
-        </div> -->
+        </div> 
       </div>
       <div class="row">
         <div class="row pt-2"></div>
@@ -2407,10 +2402,7 @@ import Modal from "./../helper/Modal";
 import BarcodeGenerator from "@/components/BarcodeGenerator.vue";
 import { StreamBarcodeReader } from "vue-barcode-reader";
 import { ImageBarcodeReader } from "vue-barcode-reader";
-import "../../dbr";
-// import { BarcodeScanner } from 'dynamsoft-javascript-barcode';
-// import BarcodeScannerLoad from "@/components/BarcodeScanner";
-// import QuaggaScannerTest from "@/components/QuaggaScannerTest";
+ 
 import Quagga from 'quagga'; 
 
 export default {
@@ -2511,24 +2503,7 @@ export default {
     });
     let orderedTax = computed(() => {
       //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].order_tax : 0;
-    });
-
-    // const searchProducts = computed(() => {
-    //   if (searchIteam.value === '') {
-    //     return []
-    //   }
-    //   let matches = 0
-    //   return store.getters.productItems.filter(item => {
-    //     if (item.product_name.toLowerCase().includes(searchIteam.value.toLowerCase()) && matches < 10) {
-    //       matches++
-    //       return item
-    //     }else if (item.product_code.toLowerCase().includes(searchIteam.value.toLowerCase()) && matches < 10) {
-    //       matches++
-    //       return item
-    //     }
-    //   })
-    // });
-
+    }); 
     const totalCartValue = computed(() => {
       return store.getters.cartItems.reduce(function (total, item) { 
         if (item.uom == 5) {
@@ -2558,7 +2533,7 @@ export default {
         state.points_setting.cart_points_rate
       );
 
-      console.log('points_setting',state.points_setting)
+      // console.log('points_setting',state.points_setting)
       //return 100
     });
     const all_discount = computed(() => {
@@ -2598,9 +2573,7 @@ export default {
     };
 
     const fetchCustomers = () => {
-      axios.get(app2.apiUrl + "/customers", app2.headers).then((res) => {
-
-        console.log("res.customers", res.data.data);
+      axios.get(app2.apiUrl + "/customers", app2.headers).then((res) => { 
         state.customers = res.data.data.map(
           ({
             id,
@@ -2906,7 +2879,7 @@ export default {
             }
           }, function(err) {
               if (err) {
-                  console.log(err);
+                  // console.log(err);
                   return
               }
               
@@ -2923,10 +2896,10 @@ export default {
     },
 
     stopRead() {
-        console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
+        // console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
         for(var i = 0; i<=this.barcoderRrenderCounter; i++) {
           Quagga.stop(); 
-          console.log("close data");
+          // console.log("close data");
         }
         this.barcoderRrenderCounter = 0;
         this.renderBarcodeReader = false;
@@ -2986,7 +2959,6 @@ export default {
         .then((res) => {
           this.invDisabled = false;
           if (res.status == 200) {
-            console.log("ewkhfkwehisf jkeshdefjkhsek", res.data.data);
             if (res.data.data.length > 0) {
               if (this.returnReplaceModalActive) {
                 this.popupError = "";
@@ -3053,11 +3025,9 @@ export default {
             this.popupError = res.data.message;
             // this.$toast.error(res.data.message);
           }
-
-          console.log("kjdfsl skjdjfsl", this.return_replace);
         })
         .catch((err) => {
-          console.log("err", err);
+          // console.log("err", err);
           this.invDisabled = false;
           this.popupError = err.response.data.message;
 
@@ -3251,7 +3221,7 @@ export default {
       }
     },
     checkAboveAmount: function (event, i) {
-      console.log("jhdshf", i);
+      // console.log("jhdshf", i);
       // Check Cash Customer due 
       if(this.form.customer_id ==1){
         if(this.totalCollections > Number(this.netAmountCalculate)){
@@ -3361,8 +3331,8 @@ export default {
         this.pform.paid_amount = this.pform.grand_total; 
         this.pform.status = "paid";
         if(!this.checkItem('cash')){
-          console.log(this.totalCollections)
-          console.log(Math.round(this.pform.grand_total))
+          // console.log(this.totalCollections)
+          // console.log(Math.round(this.pform.grand_total))
            if(this.totalCollections <= Math.round(this.pform.grand_total)){
             // Continue
            }else{
@@ -3378,8 +3348,8 @@ export default {
                checkCollectionAmount += parseFloat(this.pform.payments[i].amount);
             }
           }
-          console.log(checkCollectionAmount)
-          console.log(this.pform.grand_total)
+          // console.log(checkCollectionAmount)
+          // console.log(this.pform.grand_total)
           if(checkCollectionAmount >= this.pform.grand_total){
             this.$toast.warning('Collection amount violate');
             this.isSubmit = false;
@@ -3648,7 +3618,7 @@ export default {
 
     payingByAnother(event, e) {
       
-      console.log("this.event value",event.target.value);
+      // console.log("this.event value",event.target.value);
       //console.log("this.pform.payments[e].paid_by", this.pform.payments[e].paid_by);
 
       if (this.pform.payments[e].paid_by != "cash") {
@@ -3736,8 +3706,7 @@ export default {
       this.pform.customer_group_name  = this.customer.customer_group_name;
       if(this.pform.customer_id ==1){
         this.totalCollections = this.pform.payments[0].amount;
-      } 
-      console.log("this.customer", this.customer);
+      }  
     },
 
     handleCustomer: function () {
@@ -4020,7 +3989,7 @@ export default {
     }, 
     totalItemWeight:  function(){ 
       return this.$store.getters.cartItems.reduce(function (total, item) {
-        console.log('totalItemWeight', item)
+        // console.log('totalItemWeight', item)
         return total + item.weight;
       }, 0);
     },
@@ -4122,7 +4091,7 @@ export default {
       }
     },
     customer_group_discount: function () {
-      console.log("this.customers", this.customer);
+      // console.log("this.customers", this.customer);
       if(this.customer){
       let customer_group_discount = (this.totalCartValue * parseFloat(this.customer.group_discount)) / 100;
       this.pform.customer_group_discount = customer_group_discount;

@@ -2,17 +2,92 @@
 
 namespace App\Http\Controllers\API;
 
+use App\Http\Requests\API\CreateUserAPIRequest;
+use App\Http\Requests\API\UpdateUserAPIRequest;
 use App\Http\Controllers\AppBaseController;
 use App\Http\Resources\UserResource;
+use App\Repositories\UserRepository;
 use App\Models\User;
+use App\Models\Role;
+use App\Models\Company;
+use App\Models\Outlet;
+use App\Models\UsersOutlet;
+use App\Models\PasswordReset;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
-
+use Illuminate\Http\JsonResponse;
+use DB;
+use Str;
 class AuthAPIController extends AppBaseController
-{
+{ 
+    public function store(Request $request)
+    {  
+        $validator = Validator::make($request->all(), [
+            'name' => 'required|string|max:255',
+            'user_code' => 'required|string|unique:users', // Ensure unique user code
+            'email' => 'required|string|email|unique:users', // Ensure unique email
+            'phone' => 'required|string|unique:users', // Ensure unique phone number (optional)
+            'password' => 'required|string|min:8|confirmed',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json($validator->errors(), 422);
+        } 
+        $comp = new Company();
+        $comp->name = $request->name;
+        $comp->address = 'Address'; 
+        $comp->contact_person_name = $request->name;
+        $comp->contact_person_number = $request->phone;
+        $comp->save();  
+        $request->company_id = $comp->id;
+        $outlet = self::outlet($request);
+        DB::beginTransaction();
+        try{
+            $user = new User();
+            $user->name = $request->name;
+            $user->user_code = $request->user_code;
+            $user->email = $request->email;
+            $user->phone = $request->phone;
+            $user->company_id = $request->company_id;
+            $user->outlet_id = $outlet->id;
+            $user->password = bcrypt($request->password);
+            $user->save();  
+            
+            $role = Role::find(11); 
+            $user->assignRole($role);
+            UsersOutlet::create([
+                'user_id' => $user->id,
+                'outlet_id' => $user->outlet_id
+            ]);            
+            DB::commit();
+            return $this->sendResponse($user->toArray(), 'User saved successfully');
+        }catch(\Exception $e){
+            DB::rollBack();
+            return $this->sendError($e->getMessage());
+        }
+    }
+
+    public function outlet(Request $request){
+        return Outlet::create([
+        'company_id'    => $request->company_id,
+        'name'          => $request->name .'-'.$request->company_id, 
+        'contact_person_name' => $request->name,
+        'outlet_number' => $request->phone,
+        'district_id' => '47',
+        'area_id' => '109',
+        'police_station' => 'Dhaka',
+        'road_no' => '100',
+        'plot_no' => '310',
+        'latitude' => '23.777628',
+        'longitude' => '90.405449',
+        'status'    => 1
+        ]);
+    }
+
+
     // User Login
     public function login(Request $request){  
         $request->validate([
@@ -23,6 +98,7 @@ class AuthAPIController extends AppBaseController
         $email = $request->input('email');
         $query  = User::query(); 
         $query->where(function ($query) use ($email) {
+            $query->where('status', 1 );
             $query->where('email', $email );
             $query->orWhere('user_code', $email ); 
         });
@@ -41,9 +117,10 @@ class AuthAPIController extends AppBaseController
             ], 401);
         }
 
-        $userToken    = $user->createToken('authToken');
+        $userToken      = $user->createToken('authToken');
         $accessToken    = $userToken->accessToken;
         $token          = $userToken->token; 
+        // $plainTextToken  = $userToken->plainTextToken(); 
         $user_all_permissions = $user->getAllPermissions();
 
         $user_role_status = $user->roles->map(function ($item) {
@@ -110,17 +187,107 @@ class AuthAPIController extends AppBaseController
         ]; 
         return $this->sendResponse($return_data, 'You are successfully logged in'); 
     }
-
-    /**
-     * Logout user (Revoke the token)
-     *
-     * @return [string] message
-     */
+ 
     public function logout(Request $request)
     {
         $request->user()->token()->revoke();
         return response()->json([
             'message' => 'Successfully logged out'
         ]);
+    }
+
+    public function sendOTP(Request $request){
+        // Validate the incoming request
+        $request->validate([
+            'email' => 'required',
+        ]);
+    
+        // Find the user with the provided email address
+        $user = User::where('email', $request->email)
+            ->orWhere('user_code', $request->email)
+            ->orWhere('phone', $request->email)
+            ->first(); 
+                
+        // Check if the user exists
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+    
+        // Generate unique token (OTP)
+        $otp = Str::random(6); // 6-character token
+    
+        // Set OTP expiry time (e.g., 10 minutes from now)
+        $expiryTime = Carbon::now()->addMinutes(10);
+    
+        // Store OTP and expiry time in the database
+        $passwordReset = PasswordReset::updateOrCreate(
+            ['email' => $request->email],
+            ['otp' => $otp, 'token' => $otp, 'created_at' => now(), 'expires_at' => $expiryTime]
+        );
+    
+        // Return success response with OTP
+        return response()->json(['message' => 'OTP sent successfully', 'otp' => $otp]);
+    }
+
+    public function forgotPassword(Request $request) {
+
+        $request->validate([
+            'email' => 'required|email',
+        ]);
+
+        $user = User::where('email', $request->email)
+            ->orWhere('user_code', $request->email)
+            ->orWhere('phone', $request->email)
+            ->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $token = Str::random(60);
+        
+        DB::table('password_resets')->insert([
+            'email' => $user->email,
+            'token' => $token,
+            'otp' => $token,
+            'created_at' => now()
+        ]);
+
+        // Send email with password reset link containing $token
+
+        return response()->json(['message' => 'Password reset link sent to your email']);
+    }
+
+    public function resetPassword(Request $request) {
+        $request->validate([
+            'otp' => 'required',
+            'password' => 'required|confirmed|min:6',
+        ]); 
+
+        $passwordReset = PasswordReset::where('otp', $request->otp)
+            ->where('email', $request->email)
+            ->where('created_at', '>=', now()->subHour())
+            ->first();
+
+        if (!$passwordReset) {
+            return response()->json(['message' => 'Invalid or expired OTP'], 400);
+        }
+
+        $user = User::where('email', $passwordReset->email)
+            ->orWhere('user_code', $passwordReset->email)
+            ->orWhere('phone', $passwordReset->email)
+            ->first();
+
+        if (!$user) {
+            return response()->json(['message' => 'User not found'], 404);
+        }
+
+        $user->password = Hash::make($request->password);
+        $user->save();
+
+        // Delete password reset record
+        $passwordReset->delete();
+
+        return response()->json(['message' => 'Password reset successfully'], 200);
     }
 }

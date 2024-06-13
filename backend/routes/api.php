@@ -17,8 +17,16 @@ use Illuminate\Support\Facades\Route;
 Route::group([
     'prefix' => 'auth'
 ], function () {
+    Route::post('register', [App\Http\Controllers\API\AuthAPIController::class, 'store']);
     Route::post('login', [App\Http\Controllers\API\AuthAPIController::class, 'login']);
     Route::post('unlockDiscount', [App\Http\Controllers\API\AuthAPIController::class, 'unlockDiscount']);
+
+    Route::post('send-otp', [App\Http\Controllers\API\AuthAPIController::class,'sendOTP']);
+    Route::get('set-newpassword', [App\Http\Controllers\API\AuthAPIController::class,'newPassword']);
+    Route::get('forgot-password', [App\Http\Controllers\API\AuthAPIController::class,'forgotPassword']);
+    Route::get('reset-password/{token}', [App\Http\Controllers\API\AuthAPIController::class,'showResetForm'])->name('password.reset');
+    Route::post('reset-password', [App\Http\Controllers\API\AuthAPIController::class,'resetPassword'])->name('password.update');
+
     //    Route::post('login', [App\Http\Controllers\AuthController::class, 'login']);
     Route::group(['middleware' => 'auth:api'], function () {
 
@@ -41,10 +49,12 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
     Route::get('users/authUser', [App\Http\Controllers\API\UserAPIController::class, 'authApiUser']);
     Route::resource('warehouses', App\Http\Controllers\API\WarehouseAPIController::class);
     Route::resource('outlets', App\Http\Controllers\API\OutletAPIController::class);
+    Route::get('outlet', [App\Http\Controllers\API\OutletAPIController::class,'outlet']);
     Route::get('outlets-list', [App\Http\Controllers\API\OutletAPIController::class,'outlets']);
     Route::resource('sales', App\Http\Controllers\API\SaleAPIController::class);
 
     Route::resource('companies', App\Http\Controllers\API\CompanyAPIController::class);
+    Route::get('company/{id}', [App\Http\Controllers\API\CompanyAPIController::class,'show']);
     Route::get('posproducts', [App\Http\Controllers\API\ProductsAPIController::class, 'productForPos']);
     Route::get('purchase-return-products', [App\Http\Controllers\API\ProductsAPIController::class, 'productForPurchaseReturn']);
     // Company Resource Routes
@@ -55,6 +65,7 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
     //Route::get('posproducts', [App\Http\Controllers\API\ProductsAPIController::class, 'productForPosWithoutLogin']);
     Route::get('hold-sales-products', [App\Http\Controllers\API\ProductsAPIController::class, 'productForHoldSales']);
     Route::get('sale/list', [App\Http\Controllers\API\SaleAPIController::class, 'list']);
+    Route::get('orderlist-app', [App\Http\Controllers\API\SaleAPIController::class, 'listForApp']);
     Route::get('sale/duelist', [App\Http\Controllers\API\SaleAPIController::class, 'duelist']);
     Route::get('due-invoices', [App\Http\Controllers\API\SaleAPIController::class, 'dueInvoices']);
     Route::get('due-collection', [App\Http\Controllers\API\SaleAPIController::class, 'dueCollection']);
@@ -439,6 +450,11 @@ Route::get('customer-collection', [App\Http\Controllers\API\SaleAPIController::c
 Route::get('/annual-report', [App\Http\Controllers\API\DashboardAPIController::class, 'salesVsPurchases']); 
 
 // });
+
+
+
+Route::get('customersss/list', [App\Http\Controllers\API\CustomerAPIController::class, 'customerList']);
+Route::resource('customersss', App\Http\Controllers\API\CustomerAPIController::class);
 
 // Route::get('reports/stock-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'stockReportExcelExport']);
 

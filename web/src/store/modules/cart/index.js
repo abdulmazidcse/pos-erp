@@ -100,8 +100,7 @@ const mutations = {
     //     }
     //   } 
     // }   
-    //for(var i in index) {
-       
+    //for(var i in index) {       
       // console.log('index',i)
       // console.log('cartItemProduct',cartItemProduct.i)
       // console.log('itemProduct',itemProduct.i)

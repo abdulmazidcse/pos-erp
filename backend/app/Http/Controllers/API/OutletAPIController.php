@@ -187,4 +187,16 @@ class OutletAPIController extends AppBaseController
         $return_data = OutletResource::collection($outlets);
         return $this->sendResponse($return_data, 'Outlets retrieved successfully');
     }
+
+    public function outlet(Request $request){
+        $user = auth()->user();
+        $outlet_id = $user->outlet_id ? $user->outlet_id : ''; 
+        $outlets = $this->outletRepository->allQuery()->when($outlet_id, function($q, $outlet_id){
+            return $q->where('id', $outlet_id);
+        })->first();
+
+        // $return_data = OutletResource::collection($outlets);
+        $return_data = new OutletResource($outlets);
+        return $this->sendResponse($return_data, 'Outlets retrieved successfully');
+    }
 }

@@ -601,7 +601,7 @@ export default {
                 }
             }, function(err) {
                 if (err) {
-                    console.log(err);
+                    // console.log(err);
                     return
                 }
                 
@@ -617,7 +617,7 @@ export default {
         },
 
         stopRead() {
-            console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
+            // console.log("this.barcoderRrenderCounter", this.barcoderRrenderCounter);
             for(var i = 0; i<=this.barcoderRrenderCounter; i++) {
                 Quagga.stop(); 
             }
@@ -721,7 +721,7 @@ export default {
         fetchAuthUser() {
             axios.get(this.apiUrl+'/users/authUser', this.headerjson)
             .then((res) => {
-                console.log("auth user", res.data.data);
+                // console.log("auth user", res.data.data);
                 this.auth_user = res.data.data.user; 
                 this.auth_user_roles = res.data.data.user_roles; 
                 if(res.data.data.user_roles[0].slug != "shop-manager" && res.data.data.user_roles[0].slug != "sales-man") {
@@ -885,8 +885,7 @@ export default {
         },
 
         deleteRow(index) {
-            // this.product_items.splice(index, 1);
-            console.log('product_items',this.product_items[index]);
+            this.product_items.splice(index, 1);
             this.inputChange();
         },
 
@@ -931,15 +930,15 @@ export default {
             this.product_items[index].rcv_qty = 0;
 
             if(unit_id != '') {
-                let unit_data = this.units.find(({id}) => id == unit_id);
+                var unit_data = this.units.find(({id}) => id == unit_id);
 
                 this.product_items[index].unit_code = unit_data.unit_code.toLowerCase();
 
             }else{
-                let product_id = this.product_items[index].id;
+                var product_id = this.product_items[index].id;
                 const product = this.products_data.find(({id}) => id == product_id);
-                let punit_id = (product) ? product.purchase_measuring_unit : '';
-                let unit_data = this.units.find(({id}) => id == punit_id);
+                var punit_id = (product) ? product.purchase_measuring_unit : '';
+                var unit_data = this.units.find(({id}) => id == punit_id);
 
                 this.product_items[index].product_unit_id = punit_id;
                 this.product_items[index].unit_code = unit_data.unit_code.toLowerCase();
@@ -977,7 +976,7 @@ export default {
                 product.is_expires = true;
             }
 
-            let expire_item = {expire_date:'', expire_qty: 0};
+            var expire_item = {expire_date:'', expire_qty: 0};
             product.expires_data.push(expire_item);
         },
 
@@ -991,7 +990,7 @@ export default {
             }
         },
         expireQtyValidation: function(product, e) {
-            let counter = 0;
+            var counter = 0;
             product.expires_data.filter(item => {
                 if(item.expire_qty != '') {
                     counter += parseInt(item.expire_qty); 
@@ -1012,7 +1011,7 @@ export default {
             if(!product.is_gifts) {
                 product.is_gifts = true;
             }
-            let gift_item = {gift_name:'', gift_qty: 0};
+            var gift_item = {gift_name:'', gift_qty: 0};
             product.gifts.push(gift_item);
         },
 
@@ -1042,8 +1041,7 @@ export default {
         // },
 
         submitForm: function(e) {  
-            this.isSubmit = true;
-            this.disabled = true;
+            
             const formData = new FormData();
             formData.append("supplier_id", this.obj.supplier_id);
             formData.append("purchase_order_id", this.obj.purchase_order_id);
@@ -1070,7 +1068,9 @@ export default {
               confirmButtonText: "Ok!",
             }).then((result) => {
                 if(result.isConfirmed) {
-                    let postEvent = axios.post(this.apiUrl+'/purchase_receives', formData, this.headers);
+                    this.isSubmit = true;
+                    this.disabled = true;
+                    let  postEvent = axios.post(this.apiUrl+'/purchase_receives', formData, this.headers);
 
                     postEvent.then(res => {
                         this.isSubmit = false;
@@ -1078,6 +1078,7 @@ export default {
                         if(res.status == 200){
                             this.resetForm();
                             this.order_data.reset();
+                            this.obj.purchase_date = new Date().toISOString().slice(0,10);
                             this.$toast.success(res.data.message); 
                             // window.location.reload();
                         }else{
@@ -1090,6 +1091,9 @@ export default {
                         if(err.response.status == 422){
                             this.errors = err.response.data.errors 
                         }
+                    }).finally(error =>{
+                        this.isSubmit = false; 
+                        this.disabled = false;
                     });
 
                 }else{
@@ -1102,6 +1106,15 @@ export default {
             }) ;
                       
             
+        },
+
+        generateNumbers() {
+            // this.generatedNumbers = Array.from(
+            //     { length: this.quantity },
+            //     (_, index) =>
+            //     this.prefix +
+            //     (this.startingNumber + index).toString().padStart(this.length - this.prefix.length, "0")
+            // );
         },
         
         submitImportForm: function(e) {  
@@ -1139,7 +1152,7 @@ export default {
         },
 
         resetForm() {
-            let self = this; //you need this because *this* will refer to Object.keys below`
+            var self = this; //you need this because *this* will refer to Object.keys below`
             //Iterate through each object field, key is name of the object field`
             Object.keys(this.obj).forEach(function(key,index) {
                 self.obj[key] = '';
@@ -1148,10 +1161,10 @@ export default {
         },
 
         validation: function (...fiels){ 
-            let obj = new Object(); 
-            let validate = false;
-            for (let k in fiels){     // Loop through the object  
-                for (let j in this.form){  
+            var obj = new Object(); 
+            var validate = false;
+            for (var k in fiels){     // Loop through the object  
+                for (var j in this.form){  
                     if((j==fiels[k]) && (!this.form[j])) {  
                         obj[fiels[k]] = fiels[k].replace("_", " ")+' field is required';  // Delete obj[key]; 
                         this.errors = {...this.errors, ...obj};
@@ -1167,7 +1180,7 @@ export default {
 
         onkeyPress: function(field) { 
             // this.checkImportRequiredPrimary();
-            for (let k in this.errors) {     // Loop through the object
+            for (var k in this.errors) {     // Loop through the object
                 if(k==field){      // If the current key contains the string we're looking for 
                     delete this.errors[k];  // Delete obj[key];
                 }
@@ -1177,7 +1190,7 @@ export default {
     },
     destroyed() {},
     mounted() {
-        console.log("before update");
+        // console.log("before update");
         window.scrollTo(0, 0);
         Quagga.onDetected((data) => {
             // console.log(data);
@@ -1212,8 +1225,8 @@ export default {
         }, 
 
         // totalRcvQuantity: function(number1, number2){ 
-        //         let rcv_qty = (number2 != "") ? number2 : 0;
-        //         let test = number1 + number2;
+        //         var rcv_qty = (number2 != "") ? number2 : 0;
+        //         var test = number1 + number2;
         //         return test;
         // }, 
         
@@ -1249,7 +1262,7 @@ export default {
         totalAmount: function(){
             return this.product_items.reduce(function(total, item){
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (item.purchase_price * item.rcv_weight);
+                    var item_value = (item.purchase_price * item.rcv_weight);
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (item.purchase_price * item.rcv_qty);
@@ -1264,9 +1277,9 @@ export default {
         },
         
         netAmount: function(){
-            let net_amount = this.product_items.reduce(function(total, item){
+            var net_amount = this.product_items.reduce(function(total, item){
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
+                    var item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));
@@ -1280,16 +1293,16 @@ export default {
             },0); 
 
             
-            let discount_val    = (this.order_data.additional_discount) ? this.order_data.additional_discount : 0;
-            let cost_val    = (this.order_data.additional_cost) ? this.order_data.additional_cost : 0;
-            let total_amount = (parseFloat(net_amount) - parseFloat(discount_val)) + parseFloat(cost_val);
+            var discount_val    = (this.order_data.additional_discount) ? this.order_data.additional_discount : 0;
+            var cost_val    = (this.order_data.additional_cost) ? this.order_data.additional_cost : 0;
+            var total_amount = (parseFloat(net_amount) - parseFloat(discount_val)) + parseFloat(cost_val);
 
             return total_amount;
         },
         
         checkQtyValue: function(){ 
             return this.product_items.reduce(function(total, item){
-                console.log("item", item);
+                // console.log("item", item);
                 if((item.checked)){
                     if((item.qty > 0)){
                         return false;
@@ -1327,10 +1340,10 @@ export default {
         },
 
         'order_data.additional_discount'(newVal, oldVal){
-            let net_amount = this.product_items.reduce(function(total, item){
+            var net_amount = this.product_items.reduce(function(total, item){
                 // let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
+                    var item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));
@@ -1342,16 +1355,16 @@ export default {
                 return total + (parseFloat(item_value).toFixed(2) - parseFloat(item_discount)); 
             },0);
 
-            let discount_val = (newVal > 0) ? newVal : 0;
-            let cost_val    = (this.order_data.additional_cost > 0) ? this.order_data.additional_cost : 0
+            var discount_val = (newVal > 0) ? newVal : 0;
+            var cost_val    = (this.order_data.additional_cost > 0) ? this.order_data.additional_cost : 0
             this.order_data.net_amount = parseFloat((net_amount - parseFloat(discount_val)) + parseFloat(cost_val)) ;
         },
 
         'order_data.additional_cost'(newVal, oldVal){
-            let net_amount = this.product_items.reduce(function(total, item){
+            var net_amount = this.product_items.reduce(function(total, item){
                 // let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
+                    var item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));
@@ -1363,8 +1376,8 @@ export default {
                 return total + (parseFloat(item_value).toFixed(2) - parseFloat(item_discount)); 
             },0);
 
-            let cost_val = (newVal > 0) ? newVal : 0;
-            let discount_val    = (this.order_data.additional_discount > 0) ? this.order_data.additional_discount : 0
+            var cost_val = (newVal > 0) ? newVal : 0;
+            var discount_val    = (this.order_data.additional_discount > 0) ? this.order_data.additional_discount : 0
 
             this.order_data.net_amount = parseFloat((net_amount - parseFloat(discount_val)) + parseFloat(cost_val));
         },
@@ -1373,8 +1386,7 @@ export default {
 }
 </script>
 <style scoped>
-.modal-content.scrollbar-width-thin {
-    border: none !important;
+.modal-content.scrollbar-width-thin { 
     width: 100%;
 }
 

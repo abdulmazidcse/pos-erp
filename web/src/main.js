@@ -75,23 +75,12 @@ app.config.globalProperties.headerparams = {
                       'Content-Type': 'application/json' 
                     };
 if((location.host == 'localhost:8080') || (location.host == '127.0.0.1:8080')){ 
-	app.config.globalProperties.apiUrl =  "http://127.0.0.1:8000/api";
-	app.config.globalProperties.baseUrl =  "http://127.0.0.1:8000"; 
-	app.config.globalProperties.baseUrlPrintCSS =  "http://127.0.0.1:8000"; 
-	app.config.globalProperties.sampleFileUrl =  "http://127.0.0.1:8000"; 
-}
-
-// else if((location.host == 'agrosalesuat.ssgbd.com') || (location.host == 'https://agrosalesuat.ssgbd.com')){ 
-// 	app.config.globalProperties.apiUrl = "https://agrosalesuat.ssgbd.com/backend/api";
-// 	app.config.globalProperties.baseUrl = "https://agrosalesuat.ssgbd.com/backend";
-// 	app.config.globalProperties.sampleFileUrl = "https://agrosalesuat.ssgbd.com/backend/public";
-// }
-// else {
-// 	app.config.globalProperties.apiUrl = "https://24x7posdev.ssgbd.com/backend/api";
-// 	app.config.globalProperties.baseUrl = "https://24x7posdev.ssgbd.com/backend";
-// 	app.config.globalProperties.sampleFileUrl = "https://24x7posdev.ssgbd.com/backend/public";
-// }  
-else {
+  let baseUrl =  "http://127.0.0.1:8000"; ///'https://pos.24sevenbd.com/backend';  //
+	app.config.globalProperties.apiUrl = baseUrl+"/api";
+	app.config.globalProperties.baseUrl = baseUrl; 
+	app.config.globalProperties.baseUrlPrintCSS = baseUrl; 
+	app.config.globalProperties.sampleFileUrl = baseUrl; 
+} else {
 	app.config.globalProperties.apiUrl = "https://"+location.host+"/backend/api";
 	app.config.globalProperties.baseUrl = "https://"+location.host+"/backend";
 	app.config.globalProperties.baseUrlPrintCSS = "https://"+location.host+"/backend/public";

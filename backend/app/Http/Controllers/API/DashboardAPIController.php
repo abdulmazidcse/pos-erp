@@ -30,12 +30,33 @@ class DashboardAPIController extends AppBaseController
         $order_query    = Sale::orderBy('id', 'desc');
         $supplier_query = Supplier::where('status', 1);
         $product_query  = Product::where('status', 1);
+
         $annualReport = self::annualReport($request);
         $topSalesProducts = self::topProducts($request);
         $salesVsPurchases = self::salesVsPurchases($request);
+ 
+        $toDay = Carbon::today(); 
+        $yesterday = Carbon::yesterday(); 
+        $startOfWeek = Carbon::now()->startOfWeek(Carbon::SATURDAY); 
+        $endOfWeek = Carbon::now()->endOfWeek(Carbon::FRIDAY); 
+        $startOfLastWeek = Carbon::now()->subWeek()->startOfWeek(Carbon::SATURDAY); 
+        $endOfLastWeek = Carbon::now()->subWeek()->endOfWeek(Carbon::FRIDAY); 
+        $currentMonth = Carbon::now()->month; 
+
+        $startOfMonth = Carbon::now()->startOfMonth()->subMonth()->startOfMonth()->toDateTimeString();
+        $endOfMonth = Carbon::now()->startOfMonth()->subMonth()->endOfMonth()->toDateTimeString();
+
+        $currentYear = Carbon::now()->year;
+        $todaySalesAmount = Sale::whereDate('created_at', $toDay)->sum('grand_total');
+        $yesterdaySalesAmount = Sale::whereDate('created_at', $yesterday)->sum('grand_total');
+        $currentWeekSalesAmount = Sale::whereBetween('created_at', [$startOfWeek, $endOfWeek])->sum('grand_total');
+        $previousWeekSalesAmount = Sale::whereBetween('created_at', [$startOfLastWeek, $endOfLastWeek])->sum('grand_total');
+        $currentMonthSalesAmount = Sale::whereMonth('created_at', $currentMonth)->sum('grand_total');
+        $previousMonthSalesAmount = Sale::whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum('grand_total');
+        $currentYearSalesAmount = Sale::whereYear('created_at', $currentYear)->sum('grand_total');
 
 
-        $return_data = [
+        $return_data    = [
             'customer_count'  => $customer_query->count(),
             'order_count' => $order_query->count(),
             'supplier_count'  => $supplier_query->count(),
@@ -43,10 +64,63 @@ class DashboardAPIController extends AppBaseController
             'annual_sales_report' => $annualReport,
             'top_sales_products' => $topSalesProducts,
             'sales_vs_purchases' => $salesVsPurchases,
+   
+
+            'todaySalesAmount'  => number_format((float)$todaySalesAmount, 2, '.', ','),
+            'yesterdaySalesAmount'  => number_format((float)$yesterdaySalesAmount, 2, '.', ','),
+            'currentWeekSalesAmount'  => number_format((float)$currentWeekSalesAmount, 2, '.', ','), 
+            'previousWeekSalesAmount'  => number_format((float)$previousWeekSalesAmount, 2, '.', ','),             
+            'currentMonthSalesAmount'  => number_format((float)$currentMonthSalesAmount, 2, '.', ','),
+            'previousMonthSalesAmount'  => number_format((float)$previousMonthSalesAmount, 2, '.', ','),
+            'currentYearSalesAmount'   => number_format((float)$currentYearSalesAmount, 2, '.', ','), 
+            'last7DaysSales'   => self::getLast7DaysSales()->original, 
         ];
+
 
         return $this->sendResponse($return_data, 'Data Retrieve Successfully');
     }
+
+    public function getLast7DaysSales()
+    {
+        $endDate = Carbon::now();
+        $startDate = $endDate->copy()->subDays(7);
+
+        // Fetch sales data for the last 7 days including dates with zero sales
+        $salesData = DB::table('sales')
+            ->rightJoin(DB::raw("(SELECT DATE_SUB(CURDATE(), INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY) AS date
+                        FROM (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS a
+                        CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS b
+                        CROSS JOIN (SELECT 0 AS a UNION ALL SELECT 1 UNION ALL SELECT 2 UNION ALL SELECT 3 UNION ALL SELECT 4 UNION ALL SELECT 5 UNION ALL SELECT 6 UNION ALL SELECT 7 UNION ALL SELECT 8 UNION ALL SELECT 9) AS c
+                        ) dates"), function($join) {
+                $join->on(DB::raw("DATE(sales.created_at)"), '=', 'dates.date');
+            })
+            ->select(DB::raw('dates.date'), DB::raw('COALESCE(SUM(sales.grand_total), 0) as total_sales'))
+            ->whereBetween('dates.date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->groupBy('dates.date')
+            ->orderBy('dates.date', 'asc')
+            ->get();
+
+        // Transform the sales data to include zero sales for missing dates
+        $original = [];
+        $currentDate = $startDate->copy();
+        while ($currentDate <= $endDate) {
+            $found = false;
+            foreach ($salesData as $sales) {
+                if ($sales->date == $currentDate->format('Y-m-d')) {
+                    $original[] = ['date' => $sales->date, 'total_sales' => $sales->total_sales];
+                    $found = true;
+                    break;
+                }
+            }
+            if (!$found) {
+                $original[] = ['date' => $currentDate->format('Y-m-d'), 'total_sales' => 0];
+            }
+            $currentDate->addDay();
+        }
+
+        return response()->json($original);
+    }
+
 
     public function dashboardProductStock(Request $request)
     {
