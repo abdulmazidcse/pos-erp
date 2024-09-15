@@ -84,7 +84,7 @@
                             <div class="row">
                                 <div class="mb-3 col-md-6">
                                     <label for="outlet_id">Outlet *</label>
-                                    <select class="form-control border" id="outlet_id" v-model="obj.outlet_id" @change="onkeyPress('outlet_id')">
+                                    <select class="form-control border" id="outlet_id" v-model="obj.outlet_id" @change="onkeyPress('outlet_id'), outletFilterByProduct()">
                                         <option value="">--- Select Outlet ---</option>
                                         <option v-for="(outlet, index) in outlets" :key="index" :value="outlet.id">{{ outlet.name }}</option>
                                     </select>
@@ -161,48 +161,79 @@
                         Product Latest Stock List
                     </div>
                     <div class="card-body">
-                        <!-- <div class="mb-3">
-                            <input type="text" class="form-control border" id="search_product" placeholder="Search Product">
-                        </div> -->
-                        <div class="product_table table-responsive">
-                            <table class="table table-centered table-bordered table-nowrap w-100"  v-if="!loading">
-                                <thead class="table-light">
-                                    <tr class="border success item-head">
-                                        <th>SL</th> 
-                                        <th>Outlet </th> 
-                                        <th>Product Name</th> 
-                                        <th>Product Code</th>
-                                        <th>Expires Date</th>
-                                        <th>In Stock Qty </th>
-                                        <th>In Stock Weight</th>
-                                        <th>Out Stock Qty </th>
-                                        <th>Out Stock Weight</th>
-                                        <th>Stock Qty </th>
-                                        <th>Stock Weight</th>
-                                    </tr>
-                                </thead>
-
-                                <tbody v-if="items.length > 0">
-                                    <tr v-for="(product_item, i) in items" :key="i">
-
-                                        <td>{{ i + 1 }}</td>
-                                        <td>{{ product_item.outlet_name }}</td>
-                                        <td>{{ product_item.product_name }}</td>
-                                        <td>{{ product_item.product_code }}</td>
-                                        <td>{{ product_item.expires_date }}</td>
-                                        <td class="text-right">{{ product_item.in_stock_quantity }}</td>
-
-                                        <td class="text-right">{{ product_item.in_stock_weight }}</td>
-                                        <td class="text-right">{{ product_item.out_stock_quantity}}</td>
-                                        <td class="text-right">{{ product_item.out_stock_weight }}</td>
-                                        <td class="text-right">{{ product_item.stock_quantity }}</td>
-                                        <td class="text-right">{{ product_item.stock_weight }}</td>                                   
-                                        
-                                    </tr>
-                                </tbody>
-                                
-                            </table>
-                        </div>
+                        <Datatable 
+                          :columns="columns" 
+                          :sortKey="tableData.sortKey"  
+                          @sort="sortBy" 
+                          v-if="!loading">
+                          <template #header > 
+                              <div class="tableFilters" style="margin-bottom: 10px;">
+                                  <div class="row">
+                                      <div class="col-md-6">
+                                          <div class="control" style="float: left;">
+                                              <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
+                                              <div class="select" style="float: left;">
+                                                  <select class="form-select" v-model="tableData.length" @change="fetchItems()">  
+                                                      <option value="10" selected="selected">10</option>
+                                                      <option value="25">25</option>
+                                                      <option value="50">50</option>
+                                                      <option value="100">100</option>
+                                                  </select>
+                                              </div>
+                                              <span style="float: left; margin-left: 10px; padding: 7px 0px;"> Entries</span>
+                                          </div>
+                                      </div>
+                                      
+                                      <div class="col-md-2">
+                                           
+                                      </div>
+                                      <div class="col-md-4">
+                                          <input type="text" class="form-control" style="float: right;" v-model="tableData.search" placeholder="Search..." @input="fetchItems()">
+                                      </div>
+                                  </div>
+                              </div>   
+                          </template> 
+                          <template #body >   
+                              <tbody v-if="items.length > 0">     
+                                  <tr class="border" v-for="(item, i) in items" v-if="items.length > 0">
+                                    <td>{{ item.id}} </td> 
+                                    <td>{{ item.outlet ? item.outlet.name : '-' }} </td>
+                                    <td>{{ item.product ? item.product.product_name : '-'}}</td>
+                                    <td>{{ item.product ? item.product.product_code : '-'}} </td>
+                                    <td>{{ item.expires_date }}</td> 
+                                    <td>{{ item.in_stock_quantity }}</td> 
+                                    <td>{{ item.stock_quantity }}</td> 
+                                    <td>{{ item.out_stock_quantity }}</td> 
+                                    <td>{{ item.in_stock_weight }}</td>                                    
+                                    <td>{{ item.out_stock_weight }}</td> 
+                                    <td>{{ item.stock_weight }}</td> 
+                                  </tr> 
+                              </tbody> 
+                              <tbody v-else>
+                                  <tr>
+                                      <td colspan="3"> No Data Available Here!</td>
+                                  </tr>
+                              </tbody>
+                          </template> 
+                          <template #footer>
+                              <Pagination 
+                                  :pagination="pagination"  
+                                  :language="lang"
+                                  @onChangePage="setPage" > 
+                              </Pagination> 
+                          </template> 
+                        </Datatable> 
+                        <div class="tab-pane show active" v-if="loading">
+                          <div class="row"> 
+                            <div class="col-md-5">  
+                            </div>
+                            <div class=" col-md-2"> 
+                                <img src="../../assets/image/loading.gif" alt="Loading..." style="width:130px">
+                            </div>
+                            <div class="col-md-5">  
+                            </div>
+                          </div>
+                        </div> 
 
                     </div>
                 </div>
@@ -221,21 +252,37 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+<script> 
+import Modal from "./../helper/Modal"; 
 import Form from 'vform'
 import axios from 'axios'; 
+import Datatable from '@/components/Datatable.vue';
+import Pagination from '@/components/Pagination.vue';
 
 export default {
     name: 'Stock In/Out',
     components: {
-        Modal
+        Modal,
+        Datatable,
+        Pagination
+    },
+    props:{
+        language: {
+            type: Object,
+            default: () => {
+            return {
+                lengthMenu: null,
+                info: null,
+                zeroRecords: null, 
+                search: null
+            }
+            },
+        },
     },
     data() {
         return {
             pageloading: true,
+            loading: true,
             isSubmit: false,
             showModal: false,
             editMode:false,
@@ -257,14 +304,117 @@ export default {
                 expires_date: '',
                 note: '',
             }),
-
-            
+            columns: [  
+              {
+                  label: 'OrderID',
+                  name: 'id',           
+                  width: '5%',
+                  isSearch: false, 
+                  isAction: true,
+              }, 
+              {
+                  label: 'Outlet',
+                  name: 'outlet.name',
+                  width: '15%',
+                  isSearch: false, 
+                  isAction: true,
+              },  
+              {
+                  label: 'Product Name',
+                  name: 'product.product_name',
+                  width: '15%',
+                  isSearch: false, 
+                  isAction: true,
+              },
+              {
+                  label: 'Product Code',
+                  name: 'product.product_code',
+                  width: '15%',
+                  isSearch: false, 
+                  isAction: true,
+              },  
+              {
+                  label: 'Expires Date',
+                  name: 'expires_date',
+                  width: '5%',
+                  isSearch: false, 
+                  isAction: true,
+              }, 
+              {
+                  label: 'In Stock Qty',
+                  name: 'in_stock_quantity',
+                  width: '7%',
+                  isSearch: false, 
+                  isAction: true,
+              },
+              {
+                  label: 'Stock Qty',
+                  name: 'stock_quantity',
+                  width: '5%',
+                  isSearch: false, 
+                  isAction: true,
+              },
+              {
+                  label: 'Out Stock Qty',
+                  name: 'out_stock_quantity',
+                  width: '7%',
+                  isSearch: false, 
+                  isAction: true,
+              },               
+              {
+                  label: 'In Stock Weight',
+                  name: 'in_stock_weight',
+                  width: '7%',
+                  isSearch: false, 
+                  isAction: true,
+              },  
+              {
+                  label: 'Stock Weight',
+                  name: 'stock_weight',
+                  width: '5%',
+                  isSearch: false, 
+                  isAction: true,
+              },
+              {
+                  label: 'Out Stock Weight',            
+                  name: 'out_stock_weight',
+                  isSearch: false, 
+                  isAction: true,
+                  width: '4%',
+              } 
+          ],  
+          tableData: {
+              draw: 0,
+              length: 10,
+              search: '',
+              column: 0,
+              dir: 'desc',
+              sortKey: 'stock_quantity'
+          }, 
+          lang: {
+              lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
+              info: this.$props.language.info ? this.$props.language.info : 'Showing_FROM_to_TO_of_TOTAL_entries',
+              zeroRecords: this.$props.language.zeroRecords ? this.$props.language.zeroRecords : 'No data available in table.', 
+              search: this.$props.language.search ? this.$props.language.search : 'Search'
+          },
+          pagination: {
+              lastPage: '',
+              currentPage: '',
+              total: '',
+              lastPageUrl: '',
+              nextPageUrl: '',
+              prevPageUrl: '',
+              from: '',
+              to: '',
+              links:[],
+          },            
         };
     },
     created() {
-        this.fetchLatestStockData();
-        this.fetchProducts();
+        // this.fetchLatestStockData();
+        // this.fetchProducts();
         this.fetchOutlets();
+        this.fetchItems(); 
     },
     methods: { 
 
@@ -275,21 +425,71 @@ export default {
             this.disabled_upload = true;
         },
         // Stock Data
-        fetchLatestStockData() {
-            axios.get(this.apiUrl+'/stocks/latestStockData', this.headerjson)
-            .then((res) => {
-                this.items = res.data.data; 
-            })
-            .catch((err) => { 
-                this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
-                this.pageloading = false;
-            });
+        // fetchLatestStockData() {
+        //     axios.get(this.apiUrl+'/stocks/latestStockData', this.headerjson)
+        //     .then((res) => {
+        //         this.items = res.data.data; 
+        //     })
+        //     .catch((err) => { 
+        //         this.$toast.error(err.response.data.message);
+        //     }).finally((ress) => {
+        //         this.pageloading = false;
+        //     });
+        // },
+
+        fetchItems(url = this.apiUrl+'/stocks/latestStockData') {
+          this.tableData.draw++;
+          axios.get(url, {params:this.tableData, headers: this.headerparams})
+          .then((response) => {
+              let data = response.data.data;  
+              if(this.tableData.draw = data.draw) { 
+                  this.items = data.data.data;
+                  this.configPagination(data.data);                    
+              }
+          })
+          .catch(errors => {
+              console.log(errors);
+          })
+          .finally((fres) => {
+              this.loading = false;
+              this.isSubmit = false;
+              this.pageloading = false;
+          });
+        },
+
+        configPagination(data){
+            this.pagination.lastPage = data.last_page;
+            this.pagination.currentPage = data.current_page;
+            this.pagination.total   = data.total ? data.total : 0;
+            this.pagination.lastPageUrl = data.last_page_url;
+            this.pagination.nextPageUrl = data.next_page_url;
+            this.pagination.prevPageUrl = data.prev_page_url;
+            this.pagination.from = data.from ? data.from : 0;
+            this.pagination.to = data.to ? data.to : 0;  
+            this.pagination.links = data.links;
+        },
+
+        sortBy(key,sortable) {
+          this.tableData.sortKey = key; 
+          this.tableData.column = this.getIndex(this.columns, 'name', key);
+          this.tableData.dir = sortable; 
+          this.fetchItems();
+        },
+        setPage(data){  
+            this.fetchItems(data.url); 
+        },
+        getIndex(array, key, value) {
+            return array.findIndex(i => i[key] == value)
         },
 
         // Product Data
+        outletFilterByProduct() {
+            console.log(this.obj.outlet_id);
+            console.log('outletFilterByProduct');
+            this.fetchProducts();
+        },
         fetchProducts() {
-            axios.get(this.apiUrl+'/products', this.headerjson)
+            axios.get(this.apiUrl+'/products?outlet_id='+this.obj.outlet_id, this.headerjson)
             .then((res) => {
                 this.products = res.data.data; 
             })

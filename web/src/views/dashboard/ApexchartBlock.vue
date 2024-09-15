@@ -57,8 +57,7 @@ export default {
       type: Array,
       required: true,
       default: () => [],
-    },
-    
+    },    
   },
   data() {
     return {
@@ -177,17 +176,17 @@ export default {
           categories: this.salesVsPurchase.months, //JSON.parse(this.salesData).months,
         },
         title: {
-          text: 'Month-wise Sales Report',
+          text: 'Month wise Sales Report',
         },
       },
       lineChartSeries: [
         {
           name: 'Sales Data',
-          data: this.salesVsPurchase.sales, // JSON.parse(this.salesData).sales,
+          data:this.salesVsPurchase.sales ? this.salesVsPurchase.sales.map(val => parseFloat(val).toFixed(2)) : 0, // JSON.parse(this.salesData).sales,
         },
         {
           name: 'Purchases Data',
-          data: this.salesVsPurchase.purchase, // JSON.parse(this.salesData).sales,
+          data: this.salesVsPurchase.purchase ? this.salesVsPurchase.purchase.map(val => parseFloat(val)) : 0, // JSON.parse(this.salesData).sales,
         },
       ],
       topProductsStringified: "",
@@ -229,6 +228,20 @@ export default {
     },
     stringifyTopProducts() {
       this.topProductsStringified = JSON.stringify(this.topProducts, null, 2);
+    },
+    formatNumber(number) {
+      // Convert number to string
+      const numStr = number.toString();
+      
+      // Match and format according to Indian numbering system
+      const [integer, decimal] = numStr.split('.');
+      const lastThreeDigits = integer.slice(-3);
+      const otherDigits = integer.slice(0, -3);
+      
+      // Add commas to the remaining digits
+      const formattedInteger = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThreeDigits;
+      
+      return decimal ? `${formattedInteger}.${decimal}` : formattedInteger;
     },
   },
   mounted() {

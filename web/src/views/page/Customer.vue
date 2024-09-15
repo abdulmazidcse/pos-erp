@@ -68,6 +68,7 @@
                                             <td>{{ item.email }}</td>
                                             <td>{{ item.address }}</td>
                                             <td>{{ item.customer_group_name }}</td> 
+                                            <td>{{ item.company_name }}</td> 
                                             <td>
                                                 <div class="dropdown float-end">
                                                     <a href="#" class="dropdown-toggle arrow-none card-drop" data-bs-toggle="dropdown" aria-expanded="false">
@@ -136,16 +137,7 @@
                                                     {{errors.customer_code[0]}}
                                                 </div>
                                             </div>
-                                        </div>
-                                        <!-- <div class="form-group col-md-2">
-                                            <div class="mb-3">
-                                                <label for="emp_code">EMP ID *</label>
-                                                <input type="text" class="form-control border " @keypress="onkeyPress('emp_code')" v-model="form.emp_code" id="emp_code" placeholder="EMP ID" autocomplete="off"> 
-                                                <div class="invalid-feedback" v-if="errors.emp_code">
-                                                    {{errors.emp_code[0]}}
-                                                </div>
-                                            </div>
-                                        </div> -->
+                                        </div> 
                                         <div class="form-group col-md-4">
                                             <div class="mb-3">
                                                 <label for="company_id">Company </label> 
@@ -515,6 +507,15 @@ export default {
                 {
                     label: 'Group Name',
                     name: 'customer_group_name',
+                    isAction: true,
+                    isSearch: false, 
+                    width: '15%'
+                },
+                {
+                    label: 'Company Name',
+                    isAction: true,
+                    isSearch: false, 
+                    name: 'company_name',
                     width: '15%'
                 },
                 {
@@ -556,7 +557,7 @@ export default {
     },
     created() { 
         this.getCustomerList();
-        this.fetchIndexData();
+        // this.fetchIndexData();
         this.fetchCompany()
         this.fetchDistrict()
         this.fetchArea();
@@ -583,7 +584,7 @@ export default {
         fetchIndexData() { 
             axios.get(this.apiUrl+'/customers', this.headerjson)
             .then((res) => {
-                this.items = res.data.data; 
+                // this.items = res.data.data; 
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
@@ -693,7 +694,8 @@ export default {
                 this.disabled = false;
                 if(res.status == 200){
                     this.toggleModal();
-                    this.fetchIndexData();
+                    // this.fetchIndexData();
+                    this.getCustomerList();
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
@@ -723,7 +725,8 @@ export default {
                     this.importFile = '';
                     this.disabled_upload = true;
                     this.toggleImportModal();
-                    this.fetchIndexData();
+                    // this.fetchIndexData();
+                    this.getCustomerList();
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
@@ -778,7 +781,8 @@ export default {
                     axios.delete(this.apiUrl+'/customers/'+item.id,this.headerjson)
                     .then(res => {
                         if(res.status == 200){  
-                            this.fetchIndexData();
+                            // this.fetchIndexData();
+                            this.getCustomerList();
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);

@@ -72,7 +72,7 @@
                                             <td>{{ item.user_code }} </td>
                                             <td>{{ item.phone }}</td>
                                             <td>{{ item.company_name }}</td>
-                                            <td>{{ item.roles[0].name }}</td>
+                                            <td>{{ item.roles ?  (item.roles[0] ?  item.roles[0].name : '') : '' }}</td>
                                             <td><span v-if="item.status==1" class="badge bg-success">Active</span>
                                                 <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
                                             </td>
@@ -518,7 +518,7 @@ export default {
          this.isRequired = false;
          this.toggleModal();
          this.form.fill(item);
-         this.form.roles = item.roles[0].id;
+         this.form.roles = item.roles ? item.roles[0].id : 0;
          this.imagePreview = '';
       },
 

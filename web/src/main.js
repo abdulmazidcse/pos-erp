@@ -43,8 +43,8 @@ import Vue3TreeSelect from "vue3-treeselect";
 // import the styles
 import 'vue3-treeselect/dist/vue3-treeselect.css';
 
-import Autocomplete from "vue3-autocomplete";
-import 'vue3-autocomplete/dist/vue3-autocomplete.css';
+// import Autocomplete from "vue3-autocomplete";
+// import 'vue3-autocomplete/dist/vue3-autocomplete.css';
 
 import VueBarcode from '@chenfengyuan/vue-barcode';
 
@@ -73,18 +73,20 @@ app.config.globalProperties.headerjson = {headers: {
 app.config.globalProperties.headerparams = {
                       'Authorization' : store.getters.token ? `Bearer ${store.getters.token}` : "",
                       'Content-Type': 'application/json' 
-                    };
+                    }; 
+
 if((location.host == 'localhost:8080') || (location.host == '127.0.0.1:8080')){ 
-  let baseUrl =  "http://127.0.0.1:8000"; ///'https://pos.24sevenbd.com/backend';  //
+  // let baseUrl =  "https://backend.quickpossolution.com"; 
+  let baseUrl =  "http://127.0.0.1:8000"; 
 	app.config.globalProperties.apiUrl = baseUrl+"/api";
 	app.config.globalProperties.baseUrl = baseUrl; 
 	app.config.globalProperties.baseUrlPrintCSS = baseUrl; 
 	app.config.globalProperties.sampleFileUrl = baseUrl; 
 } else {
-	app.config.globalProperties.apiUrl = "https://"+location.host+"/backend/api";
-	app.config.globalProperties.baseUrl = "https://"+location.host+"/backend";
-	app.config.globalProperties.baseUrlPrintCSS = "https://"+location.host+"/backend/public";
-	app.config.globalProperties.sampleFileUrl = "https://"+location.host+"/backend/public";
+	app.config.globalProperties.apiUrl = "https://backend.quickpossolution.com/api";
+	app.config.globalProperties.baseUrl = "https://backend.quickpossolution.com";
+	app.config.globalProperties.baseUrlPrintCSS ="https://backend.quickpossolution.com/public";
+	app.config.globalProperties.sampleFileUrl = "https://backend.quickpossolution.com/public";
 }  
 
 app.config.globalProperties.$createElement = '';

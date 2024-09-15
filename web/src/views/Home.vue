@@ -31,7 +31,7 @@
       </div>
     </div>
     <!-- end page title -->
-    <AnalogWatch/>
+    <!-- <AnalogWatch/> -->
     <Topblock v-if="topBlockLoad" :salesData="salesInfoData"></Topblock>
     <TopblockEmpty v-else /> 
     <ApexchartBlock  v-if="apexchartBlockLoad" 
@@ -42,7 +42,7 @@
     <div class="row">
       <div class="col-lg-12">
         <div class="row">
-          <div class="col-sm-3">
+          <div class="col-lg-3 col-md-3 col-6">
             <div class="card widget-flat">
               <div class="card-body">
                 <div class="float-end">
@@ -65,7 +65,7 @@
           </div>
           <!-- end col-->
 
-          <div class="col-sm-3">
+          <div class="col-lg-3 col-md-3 col-6">
             <div class="card widget-flat">
               <div class="card-body">
                 <div class="float-end">
@@ -85,7 +85,7 @@
           </div>
           <!-- end col-->
         
-          <div class="col-sm-3">
+          <div class="col-lg-3 col-md-3 col-6">
             <div class="card widget-flat">
               <div class="card-body">
                 <div class="float-end">
@@ -105,7 +105,7 @@
           </div>
           <!-- end col-->
 
-          <div class="col-sm-3">
+          <div class="col-lg-3 col-md-3 col-6">
             <div class="card widget-flat">
               <div class="card-body">
                 <div class="float-end">

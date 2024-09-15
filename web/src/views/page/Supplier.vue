@@ -32,13 +32,15 @@
                         <div class="row">
                             <div class="col-md-8">
                                 <div class="row">
-                                    <div class="form-group col-md-6">
+                                    <div class="form-group col-md-12">
                                         <label for="name">Name *</label>
                                         <input type="text" class="form-control border " @keyup="ledgerAccountNameSetup($event.target.value)" @keypress="onkeyPress('name')" v-model="form.name" id="name" placeholder="Supplier Name" autocomplete="off"> 
                                         <div class="invalid-feedback" v-if="errors.name">
                                             {{errors.name[0]}}
                                         </div>
                                     </div> 
+                                </div>
+                                <div class="row"> 
                                     <div class="form-group col-md-6">
                                         <label for="type_id">Type </label> 
                                         <select class="form-control border" v-model="form.type_id" @change="onkeyPress('type_id')" id="type_id">
@@ -49,9 +51,22 @@
                                         </select>                                                         
                                         <div class="invalid-feedback" v-if="errors.type_id">
                                             {{errors.type_id[0]}}
+                                        </div>                                        
+                                    </div>
+                                    <div class="form-group col-md-6">
+                                        <div class="mb-3">
+                                            <label for="company_id">Company </label> 
+                                            <select class="form-control border" v-model="form.company_id" @change="onkeyPress('company_id')" id="company_id">
+                                                <option value="0">Select company</option>
+                                                <option v-for="(company, index) in companies" :value="company.id" :key="index">
+                                                    {{company.name}}
+                                                </option>
+                                            </select> 
+                                            <div class="invalid-feedback" v-if="errors.company_id">
+                                                {{errors.company_id[0]}}
+                                            </div>
                                         </div>
-                                        
-                                    </div> 
+                                    </div>  
                                 </div>
 
                                 <div class="row">
@@ -440,6 +455,7 @@
                                         <td>{{ item.phone }} </td>
                                         <td>{{ item.email }} </td>
                                         <td>{{ item.address }} </td>
+                                        <td>{{ item.company_name }} </td>
                                         <td v-if="item.status"><label class="badge bg-success"> Active </label></td>
                                         <td v-else><label class="badge bg-danger"> Active </label></td>
                                         <td>
@@ -542,10 +558,12 @@ export default {
             districts: [],
             areas: [],
             roles: [],
+            companies:[],
             form: new Form({
                 id: '',
                 name: '',
                 type_id: 0,
+                company_id: 0,
                 address: '',
                 district_id: 0,
                 area_id: 0,
@@ -596,6 +614,11 @@ export default {
                     width: '15%'
                 },
                 {
+                    label: 'Company Name',
+                    name: 'company_name',
+                    width: '15%'
+                },
+                {
                     label: 'Status',
                     name: 'status',
                     width: '15%'
@@ -642,6 +665,7 @@ export default {
         this.fetchSupplierType();
         this.fetchDistrict();
         this.fetchArea();
+        this.fetchCompany();
     },
     methods: { 
         toggleModal: function() {
@@ -672,6 +696,15 @@ export default {
             }).finally((ress) => {
                 this.loading = false;
             });
+        }, 
+        fetchCompany() { 
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => {
+                this.companies = res.data.data; 
+            })
+            .catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }); 
         },  
         fetchSupplierType() { 
             axios.get(this.apiUrl+'/supplier_types', this.headers)
@@ -679,9 +712,9 @@ export default {
                 this.supplier_types = res.data.data; 
             })
             .catch((response) => { 
-                //console.log('companies => ',response.data) 
+                console.log('res',response) 
             }).finally((ress) => {
-                //console.log('companies finally',ress);
+                console.log('finally',ress);
             });
         },
         fetchDistrict() { 
@@ -690,9 +723,9 @@ export default {
                 this.districts = res.data.data; 
             })
             .catch((response) => { 
-                //console.log('companies => ',response.data) 
+                console.log('Res',response) 
             }).finally((ress) => {
-                //console.log('companies finally',ress);
+                console.log('finally',ress);
             });
         },
         fetchArea() { 
@@ -701,9 +734,9 @@ export default {
                 this.areas = res.data.data; 
             })
             .catch((response) => { 
-                //console.log('companies => ',response.data) 
+                console.log('',response) 
             }).finally((ress) => {
-                //console.log('companies finally',ress);
+                console.log(' finally',ress);
             });
         },
 
@@ -739,6 +772,7 @@ export default {
             const formData = new FormData();  
             formData.append('name', this.form.name);            
             formData.append('type_id', this.form.type_id);
+            formData.append('company_id', this.form.company_id);
             formData.append('address', this.form.address ?? '');
             formData.append('district_id', this.form.district_id);
             formData.append('area_id', this.form.area_id);

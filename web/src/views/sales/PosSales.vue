@@ -635,10 +635,6 @@ export default {
                   this.items = data.data.data;
                   this.configPagination(data.data);                    
               }
-
-              // this.tableData.from_date = '';
-              // this.tableData.to_date = '';
-              // this.tableData.outlet_id = '';
           })
           .catch(errors => {
               console.log(errors);

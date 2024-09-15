@@ -4,7 +4,7 @@
       <div class="col-lg-3 col-6">
         <div class="small-box bg-info">
           <div class="inner">
-            <h3>{{ salesData?.annual_sale_item?.total_price ? parseFloat(salesData.annual_sale_item.total_price).toFixed(0) : 0 }}</h3>  
+            <h3>{{ salesData?.annual_sale_item?.total_price ? formatNumber(parseFloat(salesData.annual_sale_item.total_price).toFixed(0)) : 0 }}</h3>  
             <p>Annual Total Sales</p>  
           </div>
           <div class="icon">
@@ -18,7 +18,7 @@
       <div class="col-lg-3 col-6">
         <div class="small-box bg-success">
           <div class="inner">
-            <h3>{{ salesData?.annual_sales?.total_grand_total ? parseFloat(salesData.annual_sales.total_grand_total).toFixed(0) : 0 }}</h3>  
+            <h3>{{ salesData?.annual_sales?.total_grand_total ? formatNumber(parseFloat(salesData.annual_sales.total_grand_total).toFixed(0)) : 0 }}</h3>  
             <p>Annual Grand Total sales</p>
           </div>
           <div class="icon">
@@ -32,7 +32,7 @@
       <div class="col-lg-3 col-6">
         <div class="small-box bg-warning">
           <div class="inner">
-            <h3>{{ salesData?.annual_sale_item?.total_cost_price ? parseFloat(salesData.annual_sale_item.total_cost_price).toFixed(0) : 0 }}</h3>  
+            <h3>{{ salesData?.annual_sale_item?.total_cost_price ? formatNumber(parseFloat(salesData.annual_sale_item.total_cost_price).toFixed(0)) : 0 }}</h3>  
             <p>Annual Total cost price</p>
           </div>
           <div class="icon">
@@ -46,7 +46,7 @@
       <div class="col-lg-3 col-6">
         <div class="small-box bg-danger">
           <div class="inner">
-            <h3>{{ salesData?.annual_sale_item?.total_profit && salesData?.annual_sales?.total_order_discount ? (parseFloat(salesData.annual_sale_item.total_profit) - parseFloat(salesData.annual_sales.total_order_discount)).toFixed(0) : 0 }}</h3>
+            <h3>{{ salesData?.annual_sale_item?.total_profit && salesData?.annual_sales?.total_order_discount ? formatNumber( (parseFloat(salesData.annual_sale_item.total_profit) - parseFloat(salesData.annual_sales.total_order_discount)).toFixed(0) ): 0 }}</h3>
 
             <p>Annual Total Profit</p>
           </div>
@@ -99,6 +99,37 @@ export default {
   created() { 
   },
   methods: {  
+    formatNumber(number) {
+      // Convert number to string
+      const numStr = number.toString();
+      
+      // Match and format according to Indian numbering system
+      const [integer, decimal] = numStr.split('.');
+      const lastThreeDigits = integer.slice(-3);
+      const otherDigits = integer.slice(0, -3);
+      
+      // Add commas to the remaining digits
+      const formattedInteger = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThreeDigits;
+      
+      return decimal ? `${formattedInteger}.${decimal}` : formattedInteger;
+    },
+    indianNumbering(number) {
+      // Convert number to string
+      const numStr = number.toFixed(); // Keep two decimal places
+      
+      // Split the integer and decimal parts
+      const [integer, decimal] = numStr.split('.');
+      
+      // Format the integer part according to the Indian numbering system
+      const lastThreeDigits = integer.slice(-3);
+      const otherDigits = integer.slice(0, -3);
+      
+      // Add commas to the remaining digits
+      const formattedInteger = otherDigits.replace(/\B(?=(\d{2})+(?!\d))/g, ',') + ',' + lastThreeDigits;
+      
+      // Return the formatted number with the currency symbol
+      return `₹${formattedInteger}.${decimal}`;
+    }
   },
   computed: {
     permission() {
