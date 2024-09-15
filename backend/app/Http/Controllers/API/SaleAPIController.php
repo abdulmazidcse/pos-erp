@@ -89,6 +89,8 @@ class SaleAPIController extends AppBaseController
 
     public function list(Request $request)
     {
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
 
         $columns = ['id','created_at', 'invoice_number', 'total_amount', 'customer_name', 'collection_amount'];
 
@@ -99,7 +101,11 @@ class SaleAPIController extends AppBaseController
 
         $from_date  = $request->input('from_date') ?? null; //Carbon::now()->subMonths(1)->format("Y-m-d");
         $to_date    = $request->input('to_date') ?? Carbon::now()->format("Y-m-d");
-        $outlet_id  = $request->input('outlet_id');
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        }        
 
         $query = Sale::with(['salesItems', 'outlets'])
         ->select('id','created_at', 'invoice_number', 'grand_total', 'total_amount', 'order_discount_value', 'customer_discount', 'customer_group_discount', 'outlet_id', 'customer_name', 'collection_amount')
@@ -124,13 +130,18 @@ class SaleAPIController extends AppBaseController
         if(isset($to_date)) {
             $query->whereDate('created_at', '<=', $to_date);
         }
-
-
+        
         $sales_data = $query->withCount('salesItems')
-//            ->withSum('salesItems', 'discount')
             ->addSelect(['sales_items_sum_discount' => SaleItem::whereColumn('sale_id', 'sales.id')->selectRaw('sum(quantity * discount) as sales_items_sum_discount')])
             ->withSum('salesItems', 'mrp_price')
             ->paginate($length);
+        
+        // $sales_data = $query->withCount('salesItems')
+        // //  ->withSum('salesItems', 'discount')
+        //     ->addSelect(['sales_items_sum_discount' => SaleItem::whereColumn('sale_id', 'sales.id')->selectRaw('sum(quantity * discount) as sales_items_sum_discount')])
+        //     ->withSum('salesItems', 'mrp_price')
+        //     ->paginate($length);
+
         $return_data    = [
             'data' => $sales_data,
             'draw' => $request->input('draw')
@@ -140,6 +151,8 @@ class SaleAPIController extends AppBaseController
     public function listForApp(Request $request)
     {
 
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
         $columns = ['id','created_at', 'invoice_number', 'total_amount', 'customer_name', 'collection_amount'];
 
         $length = $request->input('length');
@@ -149,7 +162,11 @@ class SaleAPIController extends AppBaseController
 
         $from_date  = $request->input('from_date') ?? null; //Carbon::now()->subMonths(1)->format("Y-m-d");
         $to_date    = $request->input('to_date') ?? Carbon::now()->format("Y-m-d");
-        $outlet_id  = $request->input('outlet_id'); 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        }   
         
         $query = Sale::with(['salesItems' => function ($query) {
             $query->select('id', 'sale_id', 'product_id','quantity','discount','mrp_price','cost_price') // specify fields for saleItems

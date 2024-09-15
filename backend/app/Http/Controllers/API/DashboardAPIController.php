@@ -26,6 +26,15 @@ class DashboardAPIController extends AppBaseController
 
     public function dashboard(Request $request)
     {
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
+
         $customer_query = Customer::where('status', 1);
         $order_query    = Sale::orderBy('id', 'desc');
         $supplier_query = Supplier::where('status', 1);
@@ -47,13 +56,33 @@ class DashboardAPIController extends AppBaseController
         $endOfMonth = Carbon::now()->startOfMonth()->subMonth()->endOfMonth()->toDateTimeString();
 
         $currentYear = Carbon::now()->year;
-        $todaySalesAmount = Sale::whereDate('created_at', $toDay)->sum('grand_total');
-        $yesterdaySalesAmount = Sale::whereDate('created_at', $yesterday)->sum('grand_total');
-        $currentWeekSalesAmount = Sale::whereBetween('created_at', [$startOfWeek, $endOfWeek])->sum('grand_total');
-        $previousWeekSalesAmount = Sale::whereBetween('created_at', [$startOfLastWeek, $endOfLastWeek])->sum('grand_total');
-        $currentMonthSalesAmount = Sale::whereMonth('created_at', $currentMonth)->sum('grand_total');
-        $previousMonthSalesAmount = Sale::whereBetween('created_at', [$startOfMonth, $endOfMonth])->sum('grand_total');
-        $currentYearSalesAmount = Sale::whereYear('created_at', $currentYear)->sum('grand_total');
+        $todaySalesAmount = Sale::whereDate('created_at', $toDay) 
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
+
+        $yesterdaySalesAmount = Sale::whereDate('created_at', $yesterday)
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
+
+        $currentWeekSalesAmount = Sale::whereBetween('created_at', [$startOfWeek, $endOfWeek])
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');   
+
+        $previousWeekSalesAmount = Sale::whereBetween('created_at', [$startOfLastWeek, $endOfLastWeek])
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
+
+        $currentMonthSalesAmount = Sale::whereMonth('created_at', $currentMonth)
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
+
+        $previousMonthSalesAmount = Sale::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
+            
+        $currentYearSalesAmount = Sale::whereYear('created_at', $currentYear)
+            ->where('outlet_id', $outlet_id)
+            ->sum('grand_total');
 
 
         $return_data    = [
@@ -73,17 +102,25 @@ class DashboardAPIController extends AppBaseController
             'currentMonthSalesAmount'  => number_format((float)$currentMonthSalesAmount, 2, '.', ','),
             'previousMonthSalesAmount'  => number_format((float)$previousMonthSalesAmount, 2, '.', ','),
             'currentYearSalesAmount'   => number_format((float)$currentYearSalesAmount, 2, '.', ','), 
-            'last7DaysSales'   => self::getLast7DaysSales()->original, 
+            'last7DaysSales'   => self::getLast7DaysSales($request)->original, 
         ];
-
 
         return $this->sendResponse($return_data, 'Data Retrieve Successfully');
     }
 
-    public function getLast7DaysSales()
+    public function getLast7DaysSales(Request $request)
     {
         $endDate = Carbon::now();
         $startDate = $endDate->copy()->subDays(7);
+
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
 
         // Fetch sales data for the last 7 days including dates with zero sales
         $salesData = DB::table('sales')
@@ -96,6 +133,9 @@ class DashboardAPIController extends AppBaseController
             })
             ->select(DB::raw('dates.date'), DB::raw('COALESCE(SUM(sales.grand_total), 0) as total_sales'))
             ->whereBetween('dates.date', [$startDate->format('Y-m-d'), $endDate->format('Y-m-d')])
+            ->when($outlet_id, function ($q, $outlet_id) {
+                return $q->where('outlet_id', $outlet_id);
+            })
             ->groupBy('dates.date')
             ->orderBy('dates.date', 'asc')
             ->get();
@@ -122,10 +162,7 @@ class DashboardAPIController extends AppBaseController
     }
 
 
-    public function dashboardProductStock(Request $request)
-    {
-
-        // Product Stock Report
+    public function dashboardProductStock(Request $request) { 
         $length = $request->input('length') ?? 10;
         $stock_data = $this->stProductObj->filtered()->paginate($length);
 
@@ -140,14 +177,20 @@ class DashboardAPIController extends AppBaseController
 
     public function dashboardProductSaleReport(Request $request)
     {
-        $columns = ['id', 'created_at', 'product_id', 'item_quantity', 'mrp_price'];
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
+
+        $columns = ['id', 'created_at', 'product_id', 'item_quantity', 'mrp_price'];
         $length = $request->input('length');
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
-
-
         $from_date = request('from_date') ?? Carbon::now()->subMonths(1)->format("Y-m-d");
 //        $from_date = request('from_date') ?? Carbon::now()->format("Y-m-d");
         $to_date = request('to_date') ?? Carbon::now()->format("Y-m-d");
@@ -195,9 +238,15 @@ class DashboardAPIController extends AppBaseController
         ];
         return $this->sendResponse($return_data, 'Sales Data retrieved successfully');
     }
-    public function dashboardSaleReport(Request $request)
-    { 
+    public function dashboardSaleReport(Request $request) { 
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
         $from_date = request('from_date') ?? Carbon::now()->subMonths(1)->format("Y-m-d"); 
         $to_date = request('to_date') ?? Carbon::now()->format("Y-m-d");
 
@@ -233,6 +282,14 @@ class DashboardAPIController extends AppBaseController
     }
 
     public function invoiceWiseProfit(Request $request){
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
         $invoiceWise = SaleItem::select(  
             'sale_id',
             'invoice_number',
@@ -249,7 +306,15 @@ class DashboardAPIController extends AppBaseController
 
     public function annualReport(Request $request)
     { 
-        $year =  $request->get('year') ?? '2023';//date('Y');
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
+        $year =  $request->get('year') ?? '2024';//date('Y');
         $annualSales = SaleItem::select(
             DB::raw('YEAR(created_at) as year'),
             DB::raw('SUM(discount * quantity) AS total_discount'),
@@ -287,7 +352,15 @@ class DashboardAPIController extends AppBaseController
 
     public function topProducts(Request $request)
     {
-        $year =  $request->get('year') ?? '2023';//date('Y'); 
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
+        $year =  $request->get('year') ?? '2024';//date('Y'); 
         $topProducts = Product::active()
             ->select('id', 'product_name')
             ->withCount(['salesItems' => function ($query) use ($year) {
@@ -303,6 +376,14 @@ class DashboardAPIController extends AppBaseController
 
     public function monthWiseSalesReport(Request $request){
         // Retrieve sales data grouped by month
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
         $salesData = Sale::selectRaw('MONTH(created_at) as month, SUM(total_amount) as total_sales')
             ->groupBy('month')
             ->orderBy('month')
@@ -318,6 +399,13 @@ class DashboardAPIController extends AppBaseController
     }
     public function monthWisePurchasesReport(Request $request){
         // Retrieve sales data grouped by month
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        } 
         $salesData = PurchaseReceive::selectRaw('MONTH(created_at) as month, SUM(net_amount) as total_purchase')
             ->groupBy('month')
             ->orderBy('month')
@@ -343,7 +431,7 @@ class DashboardAPIController extends AppBaseController
         foreach ($months as $key => $value) {  
             foreach ($salesDataCombine as $key2 => $value2) {
                 if($value==$key2){
-                    $sales_data[$key] = $value2;
+                    $sales_data[$key] = number_format($value2, 2);
                 }  
             }  
         } 
@@ -352,7 +440,7 @@ class DashboardAPIController extends AppBaseController
                 if($value==$key2){
                     // $formattedValue =  number_format($value2, 2, '.', ','); 
                     // $purchases_data[$key] = str_replace('"', '', $formattedValue);  
-                    $purchases_data[$key] = $value2;  
+                    $purchases_data[$key] = number_format($value2, 2);  
                 }  
             }  
         } 

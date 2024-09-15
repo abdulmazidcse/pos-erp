@@ -36,12 +36,16 @@ class CompanyAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        // $companies = $this->companyRepository->all(
-        //     $request->except(['skip', 'limit']),
-        //     $request->get('skip'),
-        //     $request->get('limit')
-        // );
-        $companies = $this->companyRepository->allQuery()->get();
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        }    
+        $companies = $this->companyRepository->allQuery()->when($company_id, function($q, $company_id){
+            return $q->where('id', $company_id);
+        })->get();
 
         $return_data    = CompanyResource::collection($companies);
 

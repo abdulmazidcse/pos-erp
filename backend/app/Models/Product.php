@@ -127,9 +127,7 @@ class Product extends Model
     }
     public function stock_product()
     {
-        $outlet_id = 1;
-        return $this->hasMany(StockProduct::class, 'product_id', 'id')
-            ->where('outlet_id',$outlet_id);
+        return $this->hasMany(StockProduct::class, 'product_id', 'id');
     }
     public function gift_items()
     {

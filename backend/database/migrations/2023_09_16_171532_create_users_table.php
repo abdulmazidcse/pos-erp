@@ -28,6 +28,7 @@ return new class extends Migration
             $table->unsignedTinyInteger('status')->default(1)->comment('0=Inactive|1=Active');
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

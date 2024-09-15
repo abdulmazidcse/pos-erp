@@ -73,36 +73,76 @@ class StockAPIController extends AppBaseController
     }
 
     // For Stock In/Out
-    public function latestStockData()
-    {
-        $stock_data = StockProduct::orderBy('updated_at', 'DESC')->take(20)->get();
+    public function latestStockData(Request $request)
+    { 
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        }   
 
-        $return_data    = $stock_data->map(function ($item) {
-            return [
-                'id'    => $item->id,
-                'product_id'    => $item->product_id,
-                'outlet_id' => $item->outlet_id,
-                'outlet_name'   => $item->outlet->name ?? 'N/A',
-                'product_name'  => $item->product->product_name,
-                'product_code'  => $item->product->product_code,
-                'expires_date'  => $item->expires_date ?? 'N/A',
-                'in_stock_quantity' => $item->in_stock_quantity,
-                'in_stock_weight' => $item->in_stock_weight,
-                'out_stock_quantity'    => $item->out_stock_quantity,
-                'out_stock_weight'    => $item->out_stock_weight,
-                'stock_quantity'    => $item->stock_quantity,
-                'stock_weight'    => $item->stock_weight,
-            ];
-        });
+        $columns = ['id','created_at', 'invoice_number', 'total_amount', 'customer_name', 'collection_amount'];
 
-        return $this->sendResponse($return_data, "Stock Data Retrieve Successfully!");
+        $length = $request->input('length');
+        $column = $request->input('column');
+        $dir = $request->input('dir');
+        $searchValue = $request->input('search');
+
+        $query = StockProduct::with(['product:id,product_name,product_code','outlet:id,name'])->orderBy('updated_at', 'DESC');
+        if($outlet_id) {
+            $query->where(function ($query) use ($outlet_id) {
+                $query->where('outlet_id', $outlet_id);
+            });
+        }
+        if($searchValue) {
+            $query->where(function ($query) use ($searchValue) {
+                $query->whereHas('product', function ($query) use ($searchValue) {
+                    $query->where('products.product_name', 'like', '%' .$searchValue. '%'); 
+                    $query->orWhere('products.product_code', 'like', '%' .$searchValue. '%'); 
+                });
+                $query->whereHas('outlet', function ($query) use ($searchValue) {
+                    $query->orWhere('outlets.name', 'like', '%' .$searchValue. '%');  
+                });
+                $query->orWhere('in_stock_quantity', 'like', '%' .$searchValue. '%');
+                $query->orWhere('stock_quantity', 'like', '%' .$searchValue. '%');
+            });
+        }
+
+        $sales_data = $query->paginate($length); 
+
+        // $return_data    = $stock_data->map(function ($item) {
+        //     return [
+        //         'id'    => $item->id,
+        //         'product_id'    => $item->product_id,
+        //         'outlet_id'     => $item->outlet_id,
+        //         'outlet_name'   => $item->outlet->name ?? 'N/A',
+        //         'product_name'  => $item->product->product_name,
+        //         'product_code'  => $item->product->product_code,
+        //         'expires_date'  => $item->expires_date ?? 'N/A',
+        //         'in_stock_quantity' => $item->in_stock_quantity,
+        //         'in_stock_weight' => $item->in_stock_weight,
+        //         'out_stock_quantity'    => $item->out_stock_quantity,
+        //         'out_stock_weight'    => $item->out_stock_weight,
+        //         'stock_quantity'    => $item->stock_quantity,
+        //         'stock_weight'    => $item->stock_weight,
+        //     ];
+        // });
+
+        $return_data    = [
+            'data' => $sales_data,
+            'draw' => $request->input('draw')
+        ];
+
+        return $this->sendResponse($return_data, " sdsd Stock Data Retrieve Successfully!");
     }
 
     public function stockInOut(Request  $request)
     {
         $this->validate($request, [
             'outlet_id' => 'required',
-            'product_id'    => 'required',
+            'product_id'=> 'required',
         ]);
 
         $outlet_id  = $request->get('outlet_id');

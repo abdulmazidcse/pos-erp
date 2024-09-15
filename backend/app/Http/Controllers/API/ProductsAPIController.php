@@ -60,19 +60,17 @@ class ProductsAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $user = auth()->user();  
+        $user = auth()->user(); 
+        $outlet_id = $request->get('outlet_id') ?? null; 
         $query = $this->productsRepository->allQuery()->active();
-        if ($user->hasRole('Super Admin')) {
-            $products = $query->get();
+        if ($user->hasRole('Super Admin')) {            
+            $query->when($outlet_id, function ($q, $outlet_id) {  
+                $q->where('outlet_id', $outlet_id);
+            });
         } else { 
-            $products = $query->where('outlet_id',  $user->outlet_id)->get();
-        }   
-        // $products = $this->productsRepository->all(
-        //     $request->except(['skip', 'limit']),
-        //     $request->get('skip'),
-        //     $request->get('limit')
-        // );
-
+            $query->where('outlet_id',  $user->outlet_id);
+        }  
+        $products = $query->get();
         $return_data = ProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully');
         //return $this->sendResponse($products->toArray(), 'Products retrieved successfully'); 
@@ -81,6 +79,9 @@ class ProductsAPIController extends AppBaseController
 
     public function list(Request $request)
     {
+        $user = auth()->user();  
+        $roles = $user->roles()->pluck('name')->toArray(); 
+
         $columns = ['id', 'product_name','product_native_name', 'product_code', 'category_id', 'sub_category_id', 'brand_id', 'company_id', 'barcode_symbology', 'min_order_qty', 'cost_price', 'depo_price', 'mrp_price', 'abp_price','abp_qty','tax_method', 'product_tax', 'alert_quantity', 'thumbnail', 'supplier_id', 'short_description', 'description', 'is_ecommerce', 'is_expirable', 'purchase_measuring_unit', 'sales_measuring_unit', 'convertion_rate', 'carton_size', 'carton_cpu', 'allow_checkout_when_out_of_stock', 'outlet_id', 'quantity', 'status','discount'];
         // name&category_id=3&sub_cat_id=35&brand_id=1
         $length = $request->input('length');
@@ -90,6 +91,12 @@ class ProductsAPIController extends AppBaseController
         $category_id = $request->input('category_id');
         $sub_cat_id = $request->input('sub_cat_id');
         $brand_id = $request->input('brand_id');
+
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        }   
 
         $query = Product::with(['category' => function($query){
             $query->select('id', 'name');
@@ -116,6 +123,9 @@ class ProductsAPIController extends AppBaseController
                 $query->where('brand_id', 'like',$brand_id); 
             });
         }
+        if(isset($outlet_id)) {
+            $query->where('outlet_id', $outlet_id);
+        }
 
         $products = $query->paginate($length);
         $return_data    = [
@@ -128,6 +138,13 @@ class ProductsAPIController extends AppBaseController
     public function productForPos(Request $request)
     { 
         $searchValue = $request->input('search');
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+        }   
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
             'stock_products.stock_quantity','stock_products.out_stock_quantity',
@@ -142,8 +159,8 @@ class ProductsAPIController extends AppBaseController
                     $query->orWhere('stock_products.stock_weight','>',0);
                 });
                 $query->orWhere(function ($query) use ($allow_checkout) {
-                    // $query->where('stock_products.stock_quantity','>',0);
-                    $query->where('products.allow_checkout_when_out_of_stock','=',$allow_checkout);
+                    // $query->where('stock_products.stock_quantity','=',0);
+                    $query->Where('products.allow_checkout_when_out_of_stock','=',$allow_checkout);
                 });
             });
 
@@ -154,11 +171,20 @@ class ProductsAPIController extends AppBaseController
                 });
             }
             
+            $query->where('products.outlet_id', $outlet_id);
+              
+
+            // $query->when($outlet_id, function ($q, $outlet_id) {  
+            //     return $q->where('products.outlet_id', $outlet_id);
+            // });
+            
         // $query->when(((Auth::user()->outlet_id ) && (Auth::user()->outlet_id != '0')), function ($q) {
         //     return $q->where('products.outlet_id', Auth::user()->outlet_id);
         // }); 
+        
+        // dd($queries);
 
-        // return $query->toSql();
+        // return $query->toSql(); 
         
         $products = $query->get();
         $return_data = PosProductResource::collection($products);
@@ -397,7 +423,17 @@ class ProductsAPIController extends AppBaseController
         }
         //return response()->json($request->user_define_barcode);
 
-        \DB::beginTransaction();
+        \DB::beginTransaction(); 
+        $productStock[] = new StockProduct([
+            'category_id' => $input['category_id'], 
+            'outlet_id' => $input['outlet_id'],
+            'in_stock_quantity' => 0, 
+            'in_stock_weight' => 0, 
+            'stock_quantity' => 0, 
+            'stock_weight' => 0, 
+            'out_stock_quantity' => 0, 
+            'out_stock_weight' => 0
+        ]); 
 
         try{ 
             $products = $this->productsRepository->create($input);
@@ -407,6 +443,7 @@ class ProductsAPIController extends AppBaseController
             $products->suppliers()->attach($supplier_ids);
             $products->sizes()->attach($productsizes);
             $products->colors()->attach($productcolors);
+            $products->stock_product()->saveMany($productStock);
             \DB::commit();
             return $this->sendResponse($products->toArray(), 'Products saved successfully');
 

@@ -36,11 +36,19 @@ class OutletAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $outlets = $this->outletRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $outlets = $this->outletRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+
+        // $return_data = OutletResource::collection($outlets);
+
+        $user = auth()->user();
+        $outlet_id = $user->outlet_id ? $user->outlet_id : ''; 
+        $outlets = $this->outletRepository->allQuery()->when($outlet_id, function($q, $outlet_id){
+            return $q->where('id', $outlet_id);
+        })->get();
 
         $return_data = OutletResource::collection($outlets);
         return $this->sendResponse($return_data, 'Outlets retrieved successfully');

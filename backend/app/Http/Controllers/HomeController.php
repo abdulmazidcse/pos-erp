@@ -4,6 +4,9 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\AccountClass;
+use App\Models\User;
+use Auth;
+use Hash;
 
 class HomeController extends Controller
 {
@@ -177,5 +180,34 @@ class HomeController extends Controller
         dd($return_data);
 
         return view('welcome', $return_data);
+    }
+
+    public function deleteUser(Request $request){
+        return view('delete-user');
+    }
+    public function deletedUser(Request $request){ 
+        $request->validate([
+            'email' => 'required',
+            'password' => 'required|confirmed',
+        ]); 
+
+        $email = $request->input('email');
+        $query  = User::query(); 
+        $query->where(function ($query) use ($email) { 
+            $query->where('email', $email ); 
+        });
+        $user = $query->first();
+        $inputs = $request->all();
+        $inputs['email'] = $user ? $user->email : '';
+        $credentials = [
+            'email' => $inputs['email'],
+            'password' => $inputs['password']
+        ]; 
+        if((!$user || !Hash::check($request->password, $user->password)) || !Auth::attempt($credentials)) {  
+            return redirect()->back()->with('error', 'Invalid Credentials');  
+        }else{
+            $user->delete();
+            return redirect()->back()->with('success', 'User and User All Data Delete Successfully'); 
+        }
     }
 }

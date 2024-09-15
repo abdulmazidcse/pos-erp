@@ -41,12 +41,16 @@ class CustomerAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $customers = $this->customerRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
-
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        }     
+        $customers =  $this->customerRepository->allQuery()->when($company_id, function($q, $company_id){
+            return $q->where('company_id', $company_id);
+        })->get();  
         $data   = CustomerResource::collection($customers);
 
         return $this->sendResponse($data, 'Customers retrieved successfully');
@@ -55,13 +59,23 @@ class CustomerAPIController extends AppBaseController
 
     public function customerList(Request $request)
     {
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        
         $columns = ['sl','customer_code', 'name', 'phone', 'email', 'address', 'customer_group_name','customer_group_id','customer_receivable_account'];
 
         $length = $request->input('length');
         $column = $request->input('column');
         $dir = $request->input('dir');
         $sortKey = $request->input('sortKey');
-        $searchValue = $request->input('search');
+        $searchValue = $request->input('search'); 
+           
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $request->input('company_id') ? $request->input('company_id') : $user->company_id;
+        }  
+
 
         $query = Customer::orderBy($columns[$column], $dir);
 
@@ -72,6 +86,9 @@ class CustomerAPIController extends AppBaseController
                 $query->orWhere('phone', 'like', '%' .$searchValue. '%');
                 $query->orWhere('email', 'like', '%' .$searchValue. '%');
             });
+        }
+        if(isset($company_id)) {
+            $query->where('company_id', $company_id);
         }
 
         $data = $query->paginate($length);

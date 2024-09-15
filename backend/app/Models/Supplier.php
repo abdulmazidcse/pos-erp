@@ -56,6 +56,10 @@ class Supplier extends Model
     {
         return $this->belongsTo(District::class, 'district_id', 'id');
     }
+    public function company()
+    {
+        return $this->belongsTo(Company::class, 'company_id', 'id');
+    }
 
     public function areas()
     {

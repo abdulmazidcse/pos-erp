@@ -16,6 +16,7 @@ return new class extends Migration
         Schema::create('outlets', function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedBigInteger('company_id');
+            $table->string('address', 255);
             $table->string('name', 100);
             $table->string('contact_person_name', 100)->nullable();
             $table->string('outlet_number', 20)->nullable();

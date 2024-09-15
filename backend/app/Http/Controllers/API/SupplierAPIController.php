@@ -39,11 +39,22 @@ class SupplierAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $suppliers = $this->supplierRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $suppliers = $this->supplierRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        }     
+        $suppliers =  $this->supplierRepository->allQuery()->when($company_id, function($q, $company_id){
+            return $q->where('company_id', $company_id);
+        })->get();  
 
         $return_suppliers = SupplierResource::collection($suppliers);
 
@@ -53,17 +64,25 @@ class SupplierAPIController extends AppBaseController
 
     public function getSupplierList(Request $request)
     {
-        $columns = ['name', 'phone', 'email', 'address', 'status'];
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        } 
 
+        $columns = ['name', 'phone', 'email', 'address', 'status'];
         $length = $request->input('length');
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
 
-        $query = Supplier::select('suppliers.*', 'pl.ledger_name as supplier_payable_account', 'dl.ledger_name as supplier_discount_account', 'adl.ledger_name as supplier_advance_account')
+        $query = Supplier::select('suppliers.*','cm.name as company_name', 'pl.ledger_name as supplier_payable_account', 'dl.ledger_name as supplier_discount_account', 'adl.ledger_name as supplier_advance_account')
             ->leftJoin('account_ledgers as pl', 'pl.id', 'suppliers.payable_ledger_id')
             ->leftJoin('account_ledgers as dl', 'dl.id', 'suppliers.discount_ledger_id')
             ->leftJoin('account_ledgers as adl', 'adl.id', 'suppliers.advance_ledger_id')
+            ->leftJoin('companies as cm', 'cm.id', 'suppliers.company_id')
             ->orderBy($columns[$column], $dir);
 
         if($searchValue) {
@@ -74,6 +93,7 @@ class SupplierAPIController extends AppBaseController
             });
         }
 
+        $query->where('suppliers.company_id',  $company_id);
         $suppliers = $query->paginate($length);
         $return_data    = [
             'data' => $suppliers,
@@ -97,6 +117,7 @@ class SupplierAPIController extends AppBaseController
 
         $this->validate($request, [
             'name'  => 'required',
+            'company_id'  => 'required',
             'address'   => 'required',
             'payment_terms_conditions'   => 'required',
             'supply_schedule'   => 'required',

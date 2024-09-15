@@ -24,6 +24,7 @@ class SupplierResource extends JsonResource
             'district_name' => $this->districts ? $this->districts->name : "",
             'area_id'   => $this->area_id,
             'area_name' => $this->areas ? $this->areas->name : "",
+            'company_name' => $this->company ? $this->company->name : "-",
             'postal_code'   => $this->postal_code,
             'contact_person_name' => $this->contact_person_name,
             'phone' => $this->phone,
