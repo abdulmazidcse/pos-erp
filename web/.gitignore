@@ -1,5 +1,6 @@
 .DS_Store
 node_modules
+node_modules--its working for 14
 /dist
 package-lock.json
 package.json
