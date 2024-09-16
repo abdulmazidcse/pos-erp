@@ -14,5 +14,14 @@ module.exports = {
           changeOrigin: true, // Change origin to match frontend
         },
       },
+    },
+    pluginOptions: {
+      electronBuilder: {
+        builderOptions: {
+          win: {
+            icon: './icon.ico'
+          }
+        }
+      }
     }
 }
