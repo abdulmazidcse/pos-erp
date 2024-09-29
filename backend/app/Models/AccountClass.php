@@ -28,7 +28,8 @@ class AccountClass extends Model
 
     public $fillable = [
         'name',
-        'code'
+        'code',
+        'company_id'
     ];
 
     /**

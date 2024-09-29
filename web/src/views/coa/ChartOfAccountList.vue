@@ -24,6 +24,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label>
+                                <select class="form-control" @change="fetchGroupData($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
 
         <div class="row">
@@ -100,9 +117,11 @@ export default {
             loading: true,
             errors: {},
             items: [],
+            companies: [],
         };
     },
     created() {
+        this.fetchCompanies();
         this.fetchCOAData();
     },
     methods: { 
@@ -113,6 +132,17 @@ export default {
                 this.items = res.data.data.accounts;
             })
             .catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => {
+                console.log('res', res.data.data)
+                this.companies = res.data.data;
+            }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {
                 this.loading = false;

@@ -31,7 +31,8 @@ class AccountType extends Model
         'type_name',
         'class_id',
         'parent_type_id',
-        'status'
+        'status',
+        'company_id'
     ];
 
     /**

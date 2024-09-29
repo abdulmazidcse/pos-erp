@@ -27,6 +27,7 @@ class AccountVoucher extends Model
 
 
     public $fillable = [
+        'company_id',
         'vcode',
         'invoice_reference',
         'invoice_type',

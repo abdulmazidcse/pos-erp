@@ -16,6 +16,8 @@ use App\Http\Controllers\AppBaseController;
 use Illuminate\Support\Facades\DB;
 use Maatwebsite\Excel\Excel;
 use Response;
+use Illuminate\Validation\Rule;
+
 
 /**
  * Class CustomerController
@@ -46,7 +48,7 @@ class CustomerAPIController extends AppBaseController
         if (in_array('Super Admin', $roles)) { 
             $company_id  = $request->input('company_id');
         }else{
-            $company_id  = $user->company_id;
+            $company_id  = $request->input('company_id') ? $request->input('company_id') : $user->company_id;
         }     
         $customers =  $this->customerRepository->allQuery()->when($company_id, function($q, $company_id){
             return $q->where('company_id', $company_id);
@@ -61,21 +63,19 @@ class CustomerAPIController extends AppBaseController
     {
         $user = auth()->user();  
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
-        
         $columns = ['sl','customer_code', 'name', 'phone', 'email', 'address', 'customer_group_name','customer_group_id','customer_receivable_account'];
 
         $length = $request->input('length');
         $column = $request->input('column');
         $dir = $request->input('dir');
         $sortKey = $request->input('sortKey');
-        $searchValue = $request->input('search'); 
-           
+        $searchValue = $request->input('search');
+        
         if (in_array('Super Admin', $roles)) { 
             $company_id  = $request->input('company_id');
         }else{
             $company_id  = $request->input('company_id') ? $request->input('company_id') : $user->company_id;
-        }  
-
+        }   
 
         $query = Customer::orderBy($columns[$column], $dir);
 
@@ -110,18 +110,23 @@ class CustomerAPIController extends AppBaseController
      */
     public function store(CreateCustomerAPIRequest $request)
     {
+        $company_id = checkCompanyId($request);
         $this->validate($request, [
             'customer_code' => 'required|unique:customers,customer_code',
             'customer_group_id' => 'required',
-            'name'  => 'required',
-            'phone' => 'required|min:10|unique:customers,phone',
-            'address'   => 'required',
+            'name' => 'required',
+            'phone' => [
+                'required',
+                'min:10',
+                Rule::unique('customers')->where(function ($query) use ($company_id) {
+                    return $query->where('company_id', $company_id);
+                }),
+            ],
+            'address' => 'required',
             'discount_percent' => 'required',
-            'customer_receivable_account'   => 'required',
+            'customer_receivable_account' => 'required',
         ]);
-
-        $input = $request->except(['customer_receivable_account']);
-
+        $input = $request->except(['customer_receivable_account','emp_code']);
         $account_default_setting = AccountDefaultSetting::first();
         $customer_receivable_account_type = AccountType::where('id', $account_default_setting->customer_receivable_account_type)->first();
 
@@ -137,9 +142,11 @@ class CustomerAPIController extends AppBaseController
         try{
 
             $receivable_account_save    = AccountLedger::insertGetId($receivable_account_inputs);
+            if($request->get('company_id') ==0){
+                 $input['company_id'] = $company_id;
+            }
 
             $input['receivable_ledger_id']  = $receivable_account_save;
-
 
             $customer = $this->customerRepository->create($input);
 

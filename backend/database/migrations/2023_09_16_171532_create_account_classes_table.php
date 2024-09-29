@@ -19,6 +19,7 @@ return new class extends Migration
             $table->string('code')->unique();
             $table->tinyInteger('is_debit_positive')->default(1);
             $table->tinyInteger('is_credit_positive')->default(0);
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
             $table->softDeletes();
         });

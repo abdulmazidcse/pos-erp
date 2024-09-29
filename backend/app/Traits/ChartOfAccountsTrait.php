@@ -10,36 +10,36 @@ use App\Models\AccountVoucherTransaction;
 
 trait ChartOfAccountsTrait
 {
-//    public function getChartOfAccountsList($accounts, $step = 0){
-//
-//        if($step == 0) {
-//            $accounts = $this->doesntHave('parent')->orderBy('ledger_code')->get();
-//        }
-//
-//        $treeData = array();
-//        foreach ($accounts as $key => $account) {
-//            $treeData[] = [
-//                'id'    => $account->id,
-//                'ledger_code'   => $account->ledger_code,
-//                'ledger_name'   => $account->ledger_name,
-//                'parent_id'     => $account->parent_id,
-//                'type_id'       => $account->type_id,
-//                'type_name'       => $account->account_types->type_name ?? 'N/A',
-//                'is_control_transaction'    => $account->is_control_transaction,
-//                'is_master_head'    => $account->is_master_head,
-//                'children'      => $this->getChartOfAccountsList($account->children_accounts, $step + 1),
-//            ];
-//
-//        }
-//
-//        return $treeData;
-//
-//    }
+    //    public function getChartOfAccountsList($accounts, $step = 0){
+    //
+    //        if($step == 0) {
+    //            $accounts = $this->doesntHave('parent')->orderBy('ledger_code')->get();
+    //        }
+    //
+    //        $treeData = array();
+    //        foreach ($accounts as $key => $account) {
+    //            $treeData[] = [
+    //                'id'    => $account->id,
+    //                'ledger_code'   => $account->ledger_code,
+    //                'ledger_name'   => $account->ledger_name,
+    //                'parent_id'     => $account->parent_id,
+    //                'type_id'       => $account->type_id,
+    //                'type_name'       => $account->account_types->type_name ?? 'N/A',
+    //                'is_control_transaction'    => $account->is_control_transaction,
+    //                'is_master_head'    => $account->is_master_head,
+    //                'children'      => $this->getChartOfAccountsList($account->children_accounts, $step + 1),
+    //            ];
+    //
+    //        }
+    //
+    //        return $treeData;
+    //
+    //    }
 
-    public function getChartOfAccountsList($accounts, $step = 0){
+    public function getChartOfAccountsList($company_id, $accounts, $step = 0){
 
         if($step == 0) {
-            $accounts = AccountClass::orderBy('code')->get();
+            $accounts = AccountClass::where('company_id', $company_id)->orderBy('code')->get();
         }
 
         $treeData = array();
@@ -48,6 +48,7 @@ trait ChartOfAccountsTrait
                 'id'    => $account->id,
                 'code'   => $account->code,
                 'name'   => $account->name,
+                'company_id'   => $account->company_id,
                 'account_type'  => "group",
                 'account_type_name'  => ucwords(strtolower($account->name)),
                 'children'      => $this->getAccountTypes('', $account->id),
@@ -85,6 +86,7 @@ trait ChartOfAccountsTrait
                 'id'    => $type->id,
                 'code'  => $type->type_code,
                 'name'  => $type->type_name,
+                'company_id'  => $type->company_id,
                 'account_type'  => $account_type,
                 'account_type_name'  => $account_type_name,
                 'children' => $this->getAccountTypes($type->type_children, '',($step + 1)),
@@ -100,21 +102,22 @@ trait ChartOfAccountsTrait
                         }else{
                             $children_data = [];
                         }
-//                        $treeData[$sl]['children'][] = [
-//                            'id'    => $account->id,
-//                            'code'  => $account->ledger_code,
-//                            'name'  => $account->ledger_name,
-//                            'account_type'  => "ledger",
-//                            'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
-//                            'detail_type_id'  => $account->detail_type_id,
-////                            'children'  => $children,
-////                            $children_data,
-//                        ];
+                    //                        $treeData[$sl]['children'][] = [
+                    //                            'id'    => $account->id,
+                    //                            'code'  => $account->ledger_code,
+                    //                            'name'  => $account->ledger_name,
+                    //                            'account_type'  => "ledger",
+                    //                            'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
+                    //                            'detail_type_id'  => $account->detail_type_id,
+                    ////                            'children'  => $children,
+                    ////                            $children_data,
+                    //                        ];
 
                         $treeData[$sl]['children'][] = array_merge([
                             'id'    => $account->id,
                             'code'  => $account->ledger_code,
                             'name'  => $account->ledger_name,
+                            'company_id'  => $account->company_id,
                             'account_type'  => "ledger",
                             'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
                             'detail_type_id'  => $account->detail_type_id,
@@ -157,6 +160,7 @@ trait ChartOfAccountsTrait
                 'id'    => $type->id,
                 'code'  => $type->type_code,
                 'name'  => $type->type_name,
+                'company_id'  => $type->company_id,
                 'account_type'  => $account_type,
                 'account_type_name'  => $account_type_name,
                 'children' => $this->getOnlyAccountTypes($type->type_children, '',($step + 1)),
@@ -199,6 +203,7 @@ trait ChartOfAccountsTrait
                 'id'    => $type->id,
                 'code'  => $type->type_code,
                 'name'  => $type->type_name,
+                'company_id'  => $type->company_id,
                 'label'  => $type->type_name,
                 'account_type'  => $account_type,
                 'account_type_name'  => $account_type_name,
@@ -228,20 +233,21 @@ trait ChartOfAccountsTrait
                 }else{
                     $children_data = [];
                 }
-//                $subArray[] = [
-//                    'id'    => $subLedger->id,
-//                    'code'  => $subLedger->ledger_code,
-//                    'name'  => $subLedger->ledger_name,
-//                    'account_type'  => "ledger",
-//                    'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
-//                    'detail_type_id'  => $account->detail_type_id,
-////                    'children'  => $this->getSubLedgers($subLedger),
-//                ];
+                //                $subArray[] = [
+                //                    'id'    => $subLedger->id,
+                //                    'code'  => $subLedger->ledger_code,
+                //                    'name'  => $subLedger->ledger_name,
+                //                    'account_type'  => "ledger",
+                //                    'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
+                //                    'detail_type_id'  => $account->detail_type_id,
+                ////                    'children'  => $this->getSubLedgers($subLedger),
+                //                ];
 
                 $subArray[] = array_merge([
                     'id'    => $subLedger->id,
                     'code'  => $subLedger->ledger_code,
                     'name'  => $subLedger->ledger_name,
+                    'company_id'  => $subLedger->company_id,
                     'account_type'  => "ledger",
                     'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
                     'detail_type_id'  => $account->detail_type_id,
@@ -272,11 +278,11 @@ trait ChartOfAccountsTrait
                 'detail_type_id'  => $account->detail_type_id,
                 'children'  => $this->getChartOfAccountOptions($account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
             ];
-//            $treeData[] = [
-//                'id'    => $account->id,
-//                'label'   => '['.$account->ledger_code.'] '.$account->ledger_name,
-//                'children'      => $this->getChartOfAccountOptions($account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
-//            ];
+            //            $treeData[] = [
+            //                'id'    => $account->id,
+            //                'label'   => '['.$account->ledger_code.'] '.$account->ledger_name,
+            //                'children'      => $this->getChartOfAccountOptions($account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
+            //            ];
 
         }
 

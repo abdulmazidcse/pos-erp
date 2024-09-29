@@ -20,6 +20,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" v-model="form.company_id" @change="fetchAccountDefaultSettings($event.target.value), fetchAccountLedgers($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <div class="row">
             <div class="col-md-12 ">
@@ -58,6 +75,7 @@
                                         <div class="card-body">
                                             
                                             <div class="row">
+                                                
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
                                                         <label for="">Supplier Payable Account Type</label><br>
@@ -1033,10 +1051,8 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+<script> 
+import Modal from "./../helper/Modal"; 
 import Form from 'vform'
 import axios from 'axios'; 
 
@@ -1057,6 +1073,7 @@ export default {
             btn:'Create',
             item: '',
             ledgers: [],
+            companies:[],
             valueConsistsOf: 'BRANCH_PRIORITY',
             normalizer(node) {
                 return {
@@ -1066,6 +1083,7 @@ export default {
                 }
             },
             form: new Form({
+                company_id: "",
                 supplier_payable_account_type: null,
                 supplier_discount_account_type: null,
                 supplier_advance_payment_account_type: null,
@@ -1118,8 +1136,9 @@ export default {
         };
     },
     created() {
-        this.fetchAccountLedgers();
-        this.fetchAccountDefaultSettings();
+        this.fetchCompanies()
+        // this.fetchAccountLedgers();
+        // this.fetchAccountDefaultSettings();
     },
     methods: { 
         
@@ -1133,8 +1152,20 @@ export default {
             });
         },
 
-        fetchAccountLedgers() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption', this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => {
+                console.log('res', res.data.data)
+                this.companies = res.data.data;
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+
+        fetchAccountLedgers(selectedId) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption?company_id='+selectedId, this.headerjson)
             .then((resp) => {
                 this.ledgers = resp.data.data.accounts;  
             })
@@ -1147,12 +1178,10 @@ export default {
         },
 
 
-        fetchAccountDefaultSettings() {
-            axios.get(this.apiUrl+'/account-default-setting', this.headerjson)
+        fetchAccountDefaultSettings(selectedId) {
+            // this.form.reset();
+            axios.get(this.apiUrl+'/account-default-setting?company_id='+selectedId, this.headerjson)
             .then((resp) => {
-                // this.item = resp.data.data;  
-                console.log("dataaaa", resp.data.data);
-
                 this.form.fill(resp.data.data);  
                 this.forceRerender();
 
@@ -1210,6 +1239,7 @@ export default {
             formData.append('rocket_charge_ledger', this.form.rocket_charge_ledger_id);
             formData.append('bank_reference_ledger_nagad', this.form.bank_reference_ledger_nagad);
             formData.append('nagad_charge_ledger', this.form.nagad_charge_ledger_id);
+            formData.append('company_id', this.form.company_id);
                 
             var postEvent = axios.post(this.apiUrl+'/account-default-setting', formData, this.headers);
 

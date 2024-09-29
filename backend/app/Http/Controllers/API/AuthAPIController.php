@@ -149,6 +149,23 @@ class AuthAPIController extends AppBaseController
         return $this->sendResponse($return_data, 'You are successfully logged in'); 
     } 
 
+    public function loginWithToken(Request $request){
+        $token = $request->input('token');
+        dd( $token);
+        
+        // Validate the token and retrieve the user
+        $user = User::where('api_token', $token)->first();
+        
+        if ($user) {
+            // Log in the user (you might need to set session or similar)
+            Auth::login($user);
+            return response()->json(['message' => 'Logged in successfully']);
+        }
+
+        return response()->json(['error' => 'Invalid token'], 401);
+    }
+
+
     public function unlockDiscount(Request $request){ 
         $request->validate([
             'email' => 'required',

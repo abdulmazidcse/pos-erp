@@ -32,6 +32,7 @@ class AccountGroup extends Model
     public $fillable = [
         'group_code',
         'parent_id',
+        'company_id',
         'group_name',
         'order',
         'status'

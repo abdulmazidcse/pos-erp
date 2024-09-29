@@ -20,6 +20,7 @@ return new class extends Migration
             $table->unsignedBigInteger('class_id');
             $table->unsignedBigInteger('parent_type_id')->default(0);
             $table->unsignedTinyInteger('status')->default(1)->comment('0=Inactive|1=Active');
+            $table->unsignedBigInteger('company_id');
             $table->timestamps();
             $table->softDeletes();
         });

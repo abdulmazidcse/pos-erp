@@ -19,6 +19,7 @@ Route::group([
 ], function () {
     Route::post('register', [App\Http\Controllers\API\AuthAPIController::class, 'store']);
     Route::post('login', [App\Http\Controllers\API\AuthAPIController::class, 'login']);
+    Route::get('login-with-token', [App\Http\Controllers\API\AuthAPIController::class, 'loginWithToken']);
     Route::post('unlockDiscount', [App\Http\Controllers\API\AuthAPIController::class, 'unlockDiscount']);
 
     Route::post('send-otp', [App\Http\Controllers\API\AuthAPIController::class,'sendOTP']);

@@ -251,7 +251,7 @@ class ProductsAPIController extends AppBaseController
 
     public function productForPurchaseReturn(Request $request)
     {
-//        return Auth::user()->outlet_id;
+        // return Auth::user()->outlet_id;
 
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
@@ -275,7 +275,7 @@ class ProductsAPIController extends AppBaseController
             return $q->where('stock_products.outlet_id', Auth::user()->outlet_id);
         });
 
-//        return $query->toSql();
+        //  return $query->toSql();
         $products = $query->get();
         $return_data = PosProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully');
@@ -319,7 +319,7 @@ class ProductsAPIController extends AppBaseController
          
         $input = $request->all();
 
-//        return $this->sendResponse($input, 'test');
+        // return $this->sendResponse($input, 'test');
 
         $category = ProductCategory::find($input['category_id']);
         if(!empty($category)){

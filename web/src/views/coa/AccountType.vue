@@ -19,6 +19,24 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label>
+                                <!-- @change="getAccountTypes($event.target.value)"  v-model="tableData.search"-->
+                                <select class="form-control" v-model="tableData.company_id" @change="getAccountTypes()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="createAccountTypeModal()" :modalActive="modalAccTypeActive">
@@ -32,6 +50,16 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <label for="class_id">Company *</label>
+                                        <select class="form-control border " @change="fetchGroupData($event.target.value), onkeyPress('class_id')" v-model="form.company_id" id="class_id"> 
+                                            <option value="">--- Select Company ---</option>
+                                            <option v-for="(company, i) in companies" :key="i" :value="company.id">{{  company.name }}</option>
+                                        </select>
+                                        <div class="invalid-feedback" v-if="errors.company_id">
+                                            {{errors.class_id[0]}}
+                                        </div>
+                                    </div>
                                     <div class="form-group col-md-12">
                                         <label for="class_id">Account Group *</label>
                                         <select class="form-control border " @change="onChangeAccountGroup($event.target.value), onkeyPress('class_id')" v-model="form.class_id" id="class_id"> 
@@ -240,6 +268,7 @@ export default {
             account_types: [],
             groups: [],
             parent_types: [],
+            companies: [],
             renderOptionComponent: true,
             valueConsistsOf: 'BRANCH_PRIORITY',
             normalizer(node) {
@@ -255,7 +284,8 @@ export default {
                 parent_type_id: null,
                 type_code: '',
                 type_name: '',
-                status: 1
+                status: 1,
+                company_id: ''
             }), 
 
             columns: [       
@@ -307,6 +337,7 @@ export default {
                 column: 4,
                 dir: 'asc',
                 sortKey: 'group_name',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -329,8 +360,9 @@ export default {
     },
     created() {
         // this.fetchAccountType();
-        this.getAccountTypes();
-        this.fetchGroupData();
+        // this.getAccountTypes();
+        // this.fetchGroupData();
+        this.fetchCompanies();
     },
     methods: { 
         forceRerender() {
@@ -371,14 +403,26 @@ export default {
             });
         },
 
-        fetchGroupData() {
-            axios.get(this.apiUrl+'/account_classes', this.headerjson)
+        fetchGroupData(selectedId) {
+            this.tableData.company_id = selectedId;
+            axios.get(this.apiUrl+'/account_classes?company_id='+selectedId, this.headerjson)
             .then((res) => {
                 this.groups = res.data.data.account_classes;
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }); 
+        },
+
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
         },
 
         fetchParentTypes(group_id) {
@@ -394,8 +438,10 @@ export default {
 
         fetchTypeCode(reference_id='', type='') {
             var formData = new FormData();
+            console.log('this.tableData.company_id', this.tableData.company_id);
             formData.append("reference_id", reference_id);
             formData.append("reference_type", type);
+            formData.append("company_id", this.tableData.company_id);
             axios.post(this.apiUrl+'/account_types/getTypesCode', formData, this.headers)
             .then((res) => {
                 this.form.type_code = res.data.data;
@@ -440,6 +486,7 @@ export default {
             formData.append('type_code', this.form.type_code);
             formData.append('type_name', this.form.type_name);
             formData.append('status', this.form.status);
+            formData.append('company_id', this.form.company_id);
             if(this.editMode){
                 formData.append('_method', 'put');
                 var postEvent = axios.post(this.apiUrl+'/account_types/'+this.form.id, formData, this.headers);

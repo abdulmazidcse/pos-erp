@@ -19,6 +19,24 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label>
+                                <!--  -->
+                                <select class="form-control" @change="fetchGroupData($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="createAccountGroupModal()" :modalActive="modalAccGroupActive">
@@ -32,6 +50,15 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <div class="">
+                                            <label for="outlet_id"> Company </label>
+                                            <select v-model="form.company_id"  class="form-control">
+                                                <option value="">--- Select Company ---</option>
+                                                <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div> 
                                     
                                     <div class="form-group col-md-12">
                                         <label for="code">Code *</label>
@@ -115,10 +142,8 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+<script> 
+import Modal from "./../helper/Modal"; 
 import Form from 'vform'
 import axios from 'axios';
 export default {
@@ -142,23 +167,23 @@ export default {
             btn:'Create',
             items: [],
             parent_items: [],
+            companies: [],
             form: new Form({
                 id: '',
                 code: '',
                 name: '',
+                company_id:''
 
             }),
         };
     },
     created() {
-        this.fetchGroupData();
+        // this.fetchGroupData();
+        this.fetchCompanies();
     },
     methods: { 
         createAccountGroupModal: function() {
-            this.modalAccGroupActive = !this.modalAccGroupActive;
-            // setTimeout(()=> {
-            //     this.modalAccGroupActive = !this.modalAccGroupActive; 
-            // }, 2000);  
+            this.modalAccGroupActive = !this.modalAccGroupActive; 
             if(!this.modalAccGroupActive){
                 this.editMode = false;
                 this.btn='Create';
@@ -172,13 +197,23 @@ export default {
             this.isGroupSubmit = false;
         },
         
-        fetchGroupData() { 
-            // axios.get(this.apiUrl+'/account_groups', this.headerjson)
-            axios.get(this.apiUrl+'/account_classes', this.headerjson)
+        fetchGroupData(selectedId) {  
+            this.loading = true;
+            axios.get(this.apiUrl+'/account_classes?company_id='+selectedId, this.headerjson)
             .then((res) => {
                 this.items = res.data.data.account_classes;
             })
             .catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+            }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {
                 this.loading = false;

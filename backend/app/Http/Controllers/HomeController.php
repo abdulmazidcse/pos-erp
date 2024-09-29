@@ -210,4 +210,23 @@ class HomeController extends Controller
             return redirect()->back()->with('success', 'User and User All Data Delete Successfully'); 
         }
     }
+    public function accountCheck(Request $request){
+        
+        $accountClassesJsonFile = public_path('needle/account_classes.json'); 
+        $accountClassesJsonData = json_decode(file_get_contents($accountClassesJsonFile), true);   
+        foreach ($accountClassesJsonData[0]['data'] as $item) {  
+            
+            print_r( $item);
+            // AccountClass::create([
+            //     'id' => $item['id'],
+            //     'name' => $item['name'],
+            //     'code' => $item['code'],  
+            //     'is_debit_positive'  => $item['is_debit_positive'], 
+            //     'is_credit_positive'  => $item['is_credit_positive'], 
+            //     'created_at' => date('Y-m-d h:i:s'),
+            //     'updated_at' => date('Y-m-d h:i:s') ,
+            //     "deleted_at" => null
+            // ]);
+        } 
+    }
 }

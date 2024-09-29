@@ -9,6 +9,7 @@ use App\Repositories\AccountClassRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Response;
+use Illuminate\Validation\Rule;
 
 /**
  * Class AccountClassController
@@ -34,17 +35,28 @@ class AccountClassAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $accountClasses = $this->accountClassRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $accountClasses = $this->accountClassRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+
+        // $return_data   = [
+        //     'account_classes' => $accountClasses->toArray(),
+        // ];
+
+        // return $this->sendResponse($return_data, 'Account Classes retrieved successfully');
+
+        $company_id = checkCompanyId($request);
+        $accountClasses = $this->accountClassRepository->allQuery()->when($company_id, function($q, $company_id){
+            return $q->where('company_id', $company_id);
+        })->get();
 
         $return_data   = [
             'account_classes' => $accountClasses->toArray(),
         ];
 
-        return $this->sendResponse($return_data, 'Account Classes retrieved successfully');
+        return $this->sendResponse($return_data, 'Companies retrieved successfully');
     }
 
     /**
@@ -56,13 +68,26 @@ class AccountClassAPIController extends AppBaseController
      * @return Response
      */
     public function store(CreateAccountClassAPIRequest $request)
-    {
+    { 
+        $company_id = checkCompanyId($request);
         $this->validate($request, [
-           'name' => 'required|unique:account_classes,name',
-           'code' => 'required|unique:account_classes,code'
+        //    'name' => 'required|unique:account_classes,name',
+           'name' => [
+                'required', 
+                Rule::unique('account_classes')->where(function ($query) use ($company_id) {
+                    return $query->where('company_id', $company_id);
+                }),
+            ],
+           'code' => [
+                'required', 
+                Rule::unique('account_classes')->where(function ($query) use ($company_id) {
+                    return $query->where('company_id', $company_id);
+                }),
+            ]
         ]);
 
         $input = $request->all();
+        $input['company_id'] = $company_id;
 
         $accountClass = $this->accountClassRepository->create($input);
 
@@ -100,10 +125,21 @@ class AccountClassAPIController extends AppBaseController
      */
     public function update($id, UpdateAccountClassAPIRequest $request)
     {
-
+        $company_id = checkCompanyId($request);
         $this->validate($request, [
-            'name' => 'required|unique:account_classes,name,'.$id,
-            'code' => 'required|unique:account_classes,code,'.$id
+            // 'name' => 'required|unique:account_classes,name,'.$id,
+            'name' => [
+                'required',
+                Rule::unique('account_classes')->where(function ($query) use ($company_id) {
+                    return $query->where('company_id', $company_id);
+                })->ignore($id), // Replace $id with the actual id of the record being updated
+            ],
+           'code' => [
+                'required', 
+                Rule::unique('account_classes')->where(function ($query) use ($company_id) {
+                    return $query->where('company_id', $company_id);
+                })->ignore($id),
+            ]
         ]);
 
         $input = $request->all();
@@ -149,8 +185,9 @@ class AccountClassAPIController extends AppBaseController
     public function getAccountClassCode(Request $request) {
 
         $prefix = $request->get('prefix');
+        $company_id = checkCompanyId($request);
 
-        $class_code = $this->returnAccountClassCode($prefix);
+        $class_code = $this->returnAccountClassCode($company_id, $prefix);
 
         $return_data = [
             'group_code'    => $class_code

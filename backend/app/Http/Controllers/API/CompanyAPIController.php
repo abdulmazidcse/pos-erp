@@ -36,13 +36,7 @@ class CompanyAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $user = auth()->user();  
-        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
-        if (in_array('Super Admin', $roles)) { 
-            $company_id  = $request->input('company_id');
-        }else{
-            $company_id  = $user->company_id;
-        }    
+        $company_id = checkCompanyId($request);
         $companies = $this->companyRepository->allQuery()->when($company_id, function($q, $company_id){
             return $q->where('id', $company_id);
         })->get();

@@ -20,6 +20,7 @@ Route::get('/test-profit-loss', [HomeController::class, 'testProfitLoss']);
 Route::get('/test-trial-balance', [HomeController::class, 'testTrialBalance']);
 Route::get('/delete-user', [HomeController::class, 'deleteUser']);
 Route::post('/delete-user', [HomeController::class, 'deletedUser']);
+Route::get('/account-check', [HomeController::class, 'accountCheck']);
 
 Route::get('/foo', function () {
     Artisan::call('storage:link');

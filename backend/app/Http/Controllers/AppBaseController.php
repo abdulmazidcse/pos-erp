@@ -209,10 +209,10 @@ class AppBaseController extends Controller
     }
 
     // Get Custom Group Code
-    public function returnAccountClassCode($prefix='') {
+    public function returnAccountClassCode($company_id, $prefix='') {
 
         if($prefix == '' || $prefix == 0) {
-            $group_code = AccountClass::max('code')+1;
+            $group_code = AccountClass::where('company_id', $company_id)->max('code')+1;
         }else{
             $prefix_data = $prefix;
             $prefix_length = strlen($prefix_data);
@@ -240,10 +240,10 @@ class AppBaseController extends Controller
 
 
     // Get Account Type Code
-    public function returnAccountTypeCode($reference_id, $type='')
-    {
+    public function returnAccountTypeCode($company_id, $reference_id, $type='')
+    { 
         if($type == "group") {
-            $group_data = AccountClass::where('id', $reference_id)->first();
+            $group_data = AccountClass::where('id', $reference_id)->where('company_id', $company_id)->first();
             $prefix = $group_data->code;
             $prefix_length = strlen($prefix);
 
@@ -258,10 +258,10 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code');
+            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code', $company_id);
 
         }elseif ($type == "type") {
-            $type_data = AccountType::where('id', $reference_id)->first();
+            $type_data = AccountType::where('id', $reference_id)->where('company_id', $company_id)->first();
             $prefix = $type_data->type_code;
             $prefix_length = strlen($prefix);
 
@@ -282,9 +282,9 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code');
+            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code', $company_id);
         }elseif ($type == "detail_type") {
-            $type_data = AccountType::where('id', $reference_id)->first();
+            $type_data = AccountType::where('id', $reference_id)->where('company_id', $company_id)->first();
             $prefix = $type_data->type_code;
             $prefix_length = strlen($prefix);
 
@@ -305,16 +305,16 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code');
+            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_types', 'type_code', $company_id);
         }else{
-            $account_code = AccountType::max('type_code')+1;
+            $account_code = AccountType::max('type_code')->where('company_id', $company_id)+1;
         }
 
         return $account_code;
     }
 
 
-    public function returnAccountLedgerCode($group_id='', $parent_id='')
+    public function returnAccountLedgerCode($company_id, $group_id='', $parent_id='')
     {
         $ledger_code = '';
         $p_id = (int) $parent_id;
@@ -340,7 +340,7 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $ledger_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code');
+            $ledger_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code',$company_id);
         }
 
         if($group_id != '' || $group_id != 0) {
@@ -365,17 +365,17 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $ledger_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code');
+            $ledger_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code',$company_id);
         }
 
         return $ledger_code;
     }
 
     // for Account Code
-    public function returnAccountCode($reference_id='', $type) {
+    public function returnAccountCode($company_id='',$reference_id='', $type) {
 
         if($type == "dtype") {
-            $account_type   = AccountType::where('id', $reference_id)->first();
+            $account_type   = AccountType::where('company_id', $company_id)->where('id', $reference_id)->first();
             $prefix = $account_type->type_code;
             $prefix_length = strlen($prefix);
 
@@ -399,10 +399,10 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code');
+            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code', $company_id);
 
         }elseif($type == "paccount") {
-            $parent_account   = AccountLedger::where('id', $reference_id)->first();
+            $parent_account   = AccountLedger::where('company_id', $company_id)->where('id', $reference_id)->first();
             $prefix = $parent_account->ledger_code;
             $prefix_length = strlen($prefix);
 
@@ -432,7 +432,7 @@ class AppBaseController extends Controller
                     $length = 1;
                     break;
             }
-            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code');
+            $account_code = uniqueCodeWithPrefix($length, $prefix, 'account_ledgers', 'ledger_code', $company_id);
         }else{
             $account_code = AccountLedger::max('ledger_code')+1;
         }

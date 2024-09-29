@@ -18,6 +18,24 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label>
+                                <!-- @change="fetchGroupData($event.target.value)" -->
+                                <select class="form-control" @change="loadDataBasedOnCompany($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal New Account-->
         <Modal @close="createAccountModal()" :modalActive="modalAccActive">
@@ -30,6 +48,15 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <div class="">
+                                            <label for="outlet_id"> Company </label>
+                                            <select v-model="form.company_id" class="form-control" @change="fetchGroupData($event.target.value)">
+                                                <option value="">--- Select Company ---</option>
+                                                <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div> 
                                     <div class="form-group col-md-12">
                                         <label for="type_id">Account Type *</label>
                                         <select class="form-control border" v-model="form.type_id" @change="onChangeParentType($event.target.value), onkeyPress('type_id')" id="type_id" :disabled="!editMode ? true : false">
@@ -501,6 +528,7 @@ export default {
             errors: {},
             btn:'Create',
             items: [],
+            companies: [],
             account_item: '',
             all_account_types: [],
             parent_types: [],
@@ -545,6 +573,7 @@ export default {
                 ledger_code: '',
                 ledger_name: '',
                 type_id: '',
+                company_id:'',
                 detail_type_id: '',
                 parent_id: null,
                 ledger_type: 'dr',
@@ -571,6 +600,7 @@ export default {
         };
     },
     created() {
+        this.fetchCompanies();
         this.fetchCOAData();
         this.fetchCOAOptionsData();
         this.fetchAccountTypeData();
@@ -586,6 +616,13 @@ export default {
                 // Add the component back in
                 this.renderOptionComponent = true;
             });
+        },
+        loadDataBasedOnCompany: function(companyId){
+            this.fetchCOAData(companyId);
+            this.fetchCOAOptionsData(companyId);
+            this.fetchAccountTypeData(companyId);
+            this.fetchGroupData(companyId);
+            this.fetchAccountLedgerData(companyId);
         },
 
         createAccountTypeModal: function() {
@@ -640,9 +677,9 @@ export default {
             
         },
         
-        fetchCOAData() { 
+        fetchCOAData(selecteID) { 
             // axios.get(this.apiUrl+'/account_groups', this.headerjson)
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccounts', this.headerjson)
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccounts?company_id='+selecteID, this.headerjson)
             .then((res) => {
                 this.items = res.data.data.accounts;
             })
@@ -653,8 +690,8 @@ export default {
             });
         },
 
-        fetchCOAOptionsData() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption', this.headerjson)
+        fetchCOAOptionsData(selecteID) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption?company_id='+selecteID, this.headerjson)
             .then((res) => {
                 this.account_options = res.data.data.accounts;
                 this.all_options = res.data.data.accounts;
@@ -666,8 +703,8 @@ export default {
             });
         },
         
-        fetchGroupData() {
-            axios.get(this.apiUrl+'/account_classes', this.headerjson)
+        fetchGroupData(selecteID) {
+            axios.get(this.apiUrl+'/account_classes?company_id='+selecteID, this.headerjson)
             .then((res) => {
                 this.groups = res.data.data.account_classes;
             })
@@ -676,8 +713,8 @@ export default {
             }); 
         },
 
-        fetchAccountTypeData() { 
-            axios.get(this.apiUrl+'/account_types/getAccountTypeList', this.headerjson) 
+        fetchAccountTypeData(selecteID) { 
+            axios.get(this.apiUrl+'/account_types/getAccountTypeList?company_id='+selecteID, this.headerjson) 
             .then((res) => {
                 this.all_account_types = res.data.data;
                 this.account_types = res.data.data.filter((item) => {
@@ -698,14 +735,26 @@ export default {
             });
         },
 
-        fetchAccountLedgerData() {
-            axios.get(this.apiUrl+'/account_ledgers', this.headerjson)
+        fetchAccountLedgerData(selecteID) {
+            axios.get(this.apiUrl+'/account_ledgers?company_id='+selecteID, this.headerjson)
             .then((res) => {
                 this.all_ledgers = res.data.data;
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }); 
+        },
+
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => {
+                console.log('res', res.data.data)
+                this.companies = res.data.data;
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
         },
 
         onChangeAccountGroup(value) {
@@ -1213,5 +1262,19 @@ label {
 
 .actions_btn a {
     margin-right: 7px;
+}
+
+@media (max-width: 768px) {
+    .text-item {
+        font-size: 14px; /* Smaller font size for mobile */
+    }
+    .card-body{
+        width: 100%;
+    }
+    .action {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: flex-end; /* Align actions to the right */
+    }
 }
 </style>

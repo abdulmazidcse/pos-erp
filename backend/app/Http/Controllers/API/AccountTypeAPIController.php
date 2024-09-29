@@ -11,6 +11,7 @@ use App\Repositories\AccountTypeRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
 use Response;
+use Illuminate\Validation\Rule;
 
 /**
  * Class AccountTypeController
@@ -35,16 +36,10 @@ class AccountTypeAPIController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-//        $accountTypes = $this->accountTypeRepository->all(
-//            $request->except(['skip', 'limit']),
-//            $request->get('skip'),
-//            $request->get('limit')
-//        );
-
-        $accountTypes = AccountType::with(['account_classes', 'type_parents', 'type_children'])->orderBy('type_code')->get();
-
-
+    { 
+        $company_id = checkCompanyId($request);
+        $accountTypes = AccountType::with(['account_classes', 'type_parents', 'type_children'])
+            ->where('company_id', $company_id)->orderBy('type_code')->get();
         return $this->sendResponse($accountTypes->toArray(), 'Account Types retrieved successfully');
     }
 
@@ -59,8 +54,9 @@ class AccountTypeAPIController extends AppBaseController
         $dir = $request->input('dir');
         $sortKey = $request->input('sortKey');
         $searchValue = $request->input('search');
+        $company_id = checkCompanyId($request) ?? 0;
 
-//        $query = AccountLedger::with(['account_types'])->orderBy($columns[$column], $dir);
+        // $query = AccountLedger::with(['account_types'])->orderBy($columns[$column], $dir);
         $query = AccountType::with(['account_classes', 'type_parents', 'type_children'])
             ->when($sortKey == "parent_type", function($query) use($dir){
                 return pleaseSortMe($query, $dir, AccountType::select('account_types.type_name')
@@ -71,6 +67,9 @@ class AccountTypeAPIController extends AppBaseController
                 return pleaseSortMe($query, $dir, AccountClass::select('account_classes.name')
                     ->whereColumn('account_classes.id', 'account_types.class_id')
                     ->take(1));
+            })
+            ->when($company_id, function($query) use ($company_id){
+                return $query->where('account_types.company_id',$company_id);
             })
             ->when(!in_array($sortKey, ["parent_type", "group_name"]), function($query) use($dir, $columns, $column){
                 return $query->orderBy($columns[$column], $dir);
@@ -93,12 +92,20 @@ class AccountTypeAPIController extends AppBaseController
 
 
     // Type Data List
-    public function getAccountTypeList($group_id = null)
+    public function getAccountTypeList(Request $request, $group_id = null)
     {
+        $company_id = checkCompanyId($request) ?? 0;
         if($group_id) {
-            $accountTypes = AccountType::doesntHave('type_parents')->where('status', 1)->where('class_id', $group_id)->orderBy('type_name')->get();
+            $accountTypes = AccountType::doesntHave('type_parents')->where('status', 1)
+                ->when($company_id, function($query) use($company_id){
+                    return $query->where('company_id',$company_id);
+                })
+                ->where('class_id', $group_id)->orderBy('type_name')->get();
         }else {
-            $accountTypes = AccountType::where('status', 1)->orderBy('type_name')->get();
+            $accountTypes = AccountType::where('status', 1)->orderBy('type_name')
+            ->when($company_id, function($query) use($company_id){
+                return $query->where('company_id',$company_id);
+            })->get();
         }
 
         return $this->sendResponse($accountTypes, 'Account Type Return Successfully');
@@ -118,15 +125,20 @@ class AccountTypeAPIController extends AppBaseController
             'type_code' => 'required',
             'type_name' => 'required'
         ]);
+
+        $company_id = checkCompanyId($request);
+        
         $class_id = $request->get('class_id');
         $parent_id = $request->get('parent_type_id') ?? 0;
         $type_name = $request->get('type_name');
         $type_code = $request->get('type_code');
 
         $type_name_exists = AccountType::where('class_id', $class_id)
-                                        ->where('parent_type_id', $parent_id)->where('type_name', $type_name)->get();
+                                        ->where('company_id', $company_id)
+                                        ->where('parent_type_id', $parent_id)
+                                        ->where('type_name', $type_name)->get();
 
-        $type_code_exists = AccountType::where('type_code', $type_code)->get();
+        $type_code_exists = AccountType::where('type_code', $type_code)->where('company_id', $company_id)->get();
 
         if(count($type_name_exists) > 0) {
             $response = [
@@ -149,7 +161,8 @@ class AccountTypeAPIController extends AppBaseController
         }
 
         $input = $request->all();
-        $input['parent_type_id']    = $parent_id;
+        $input['parent_type_id']    = $parent_id; 
+        $input['company_id'] = $company_id;
 
         $accountType = $this->accountTypeRepository->create($input);
 
@@ -303,11 +316,11 @@ class AccountTypeAPIController extends AppBaseController
 
     //
     public function getTypesCode(Request $request) {
-
+        $company_id = checkCompanyId($request);
         $reference_id   = $request->get('reference_id');
         $type   = $request->get('reference_type');
 
-        $type_code = $this->returnAccountTypeCode($reference_id, $type);
+        $type_code = $this->returnAccountTypeCode($company_id, $reference_id, $type);
 
         return $this->sendResponse($type_code, "Type Code Retrieve Successfully");
     }

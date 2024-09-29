@@ -12,17 +12,21 @@ use Illuminate\Http\Request;
 class AccountDefaultSettingsAPIController extends AppBaseController
 {
 
-    public function getAccountDefaultSetting()
+    public function getAccountDefaultSetting(Request $request)
     {
-        $account_default_setting = AccountDefaultSetting::first();
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::when($company_id, function($q) use($company_id){
+            return $q->where('company_id', $company_id);
+        })->first();
 
         if(empty($account_default_setting)) {
             return $this->sendError('Account Default Setting Data Not Found!');
         }
 
-//        return $account_default_setting;
+        // return $account_default_setting;
 
         $return_data    = [
+            'company_id'    => $company_id,
             'supplier_payable_account_type' => $this->getTypeData($account_default_setting->supplier_payable_account_type),
             'supplier_discount_account_type' => $this->getTypeData($account_default_setting->supplier_discount_account_type),
             'supplier_advance_payment_account_type' => $this->getTypeData($account_default_setting->supplier_advance_payment_account_type),
@@ -70,6 +74,7 @@ class AccountDefaultSettingsAPIController extends AppBaseController
 
     public function setAccountDefaultSetting(Request $request)
     {
+        $company_id = checkCompanyId($request);
         $this->validate($request, [
             'supplier_payable_account_type' => 'required',
             'supplier_discount_account_type'    => 'required',
@@ -133,6 +138,7 @@ class AccountDefaultSettingsAPIController extends AppBaseController
             'rocket_charge_ledger'  => $request->get('rocket_charge_ledger'),
             'bank_reference_ledger_nagad'  => $request->get('bank_reference_ledger_nagad'),
             'nagad_charge_ledger'  => $request->get('nagad_charge_ledger'),
+            'company_id'  => $company_id,
         ];
         if($setting_data != '') {
             $setting_data_save =  $setting_data->update($inputs);

@@ -164,12 +164,12 @@ class SaleAccountPostingAPIController extends AppBaseController
                 foreach($final_non_posted_list['cash'] as $cash_sale) {
 
                     $cash_sale  = (object) $cash_sale;
-                    $new_cash_sale_date  = $cash_sale->sale_date;
-//                    if($new_cash_sale_date == $old_cash_sale_date) {
-//                        $total_cash_amount += $cash_sale->amount;
-//                    }else{
-//                        $total_cash_amount = $cash_sale->amount;
-//                    }
+                        $new_cash_sale_date  = $cash_sale->sale_date;
+                        //                    if($new_cash_sale_date == $old_cash_sale_date) {
+                        //                        $total_cash_amount += $cash_sale->amount;
+                        //                    }else{
+                        //                        $total_cash_amount = $cash_sale->amount;
+                        //                    }
 
                     $total_cash_amount  = collect($final_non_posted_list['cash'])->where('sale_date', $cash_sale->sale_date)->sum('amount');
 
@@ -230,11 +230,11 @@ class SaleAccountPostingAPIController extends AppBaseController
                         $bank_ledger_code   = $default_bank_account_ledger->ledger_code;
                     }
 
-//                    if(($new_credit_card_sale_date == $old_credit_card_sale_date) && ($new_credit_card_bank_id == $old_credit_card_bank_id)) {
-//                        $total_credit_card_amount += $credit_card_sale->amount;
-//                    }else{
-//                        $total_credit_card_amount = $credit_card_sale->amount;
-//                    }
+                    //                    if(($new_credit_card_sale_date == $old_credit_card_sale_date) && ($new_credit_card_bank_id == $old_credit_card_bank_id)) {
+                    //                        $total_credit_card_amount += $credit_card_sale->amount;
+                    //                    }else{
+                    //                        $total_credit_card_amount = $credit_card_sale->amount;
+                    //                    }
 
                     $total_credit_card_amount   = collect($final_non_posted_list['credit_card'])->where('sale_date', $credit_card_sale->sale_date)->where('bank_id', $credit_card_sale->bank_id)->sum('amount');
 

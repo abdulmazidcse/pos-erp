@@ -18,6 +18,7 @@ class AccountVoucherTransaction extends Model
 
 //    protected $guarded = [];
     public $fillable    = [
+        'company_id',
         'voucher_id',
         'cost_center_id',
         'ledger_id',

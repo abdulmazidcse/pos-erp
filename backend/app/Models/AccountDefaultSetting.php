@@ -10,6 +10,7 @@ class AccountDefaultSetting extends Model
     use HasFactory;
 
     protected $fillable = [
+        'company_id',
         'supplier_payable_account_type',
         'supplier_discount_account_type',
         'supplier_advance_payment_account_type',

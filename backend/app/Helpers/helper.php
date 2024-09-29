@@ -2,6 +2,7 @@
 // Important Global Function
 use App\Models\AccountGroup;
 use App\Models\AccountLedger;
+use App\Models\Company;
 use Illuminate\Support\Facades\DB;
 
 if(!function_exists('last_query_start')){
@@ -123,11 +124,11 @@ if(!function_exists('purchaseOrderApproveStatusName')) {
 
 
 if(!function_exists('uniqueCodeWithPrefix')){
-    function uniqueCodeWithPrefix($length,$prefix,$table,$field){
+    function uniqueCodeWithPrefix($length,$prefix,$table,$field, $company_id){
         $prefix_length = strlen($prefix);
         $max_id = DB::table($table)
-            ->when(!empty($prefix), function($query) use($prefix, $field, $length){
-              return $query->where(\DB::raw('substr(`'.$field.'`, 1, '.strlen($prefix).')'), $prefix)
+            ->when(!empty($prefix), function($query) use($prefix, $field, $length, $company_id){
+              return $query->where('company_id', $company_id)->where(\DB::raw('substr(`'.$field.'`, 1, '.strlen($prefix).')'), $prefix)
                   ->where(\DB::raw('LENGTH(`'.$field.'`)'), $length);
             })
             ->max($field);
@@ -197,7 +198,45 @@ if(!function_exists('getLedgerAccountData'))
         return $ledger_data;
     }
 }
+if(!function_exists('checkCompanyId'))
+{
+    function checkCompanyId($request)
+    {
+        $company_id = 0;
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) { 
+            $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        } 
+        return $company_id;
+    }
+} 
+if(!function_exists('getFiscalYear'))
+{ 
+    function getFiscalYear() { 
+        $currentDate = new DateTime();
+        $currentYear = $currentDate->format('Y');
 
+        // Assuming fiscal year starts on July 1
+        if ($currentDate->format('n') >= 7) {
+            // If current month is July or later, fiscal year is current year to next year
+            return [
+                'start' => "{$currentYear}-07-01",
+                'end' => ($currentYear + 1) . "-06-30",
+                'label' => $currentYear.'-'.$currentYear + 1
+            ];
+        } else {
+            // If current month is before July, fiscal year is last year to current year
+            return [
+                'start' => ($currentYear - 1) . "-07-01",
+                'end' => "{$currentYear}-06-30",
+                'label' => $currentYear.'-'.$currentYear + 1
+            ];
+        }
+    } 
+}
 function pleaseSortMe($query, $order, $orderByQuery){
     return $query->when($order == 'ASC', function($query) use($orderByQuery){
                     return $query->orderBy($orderByQuery);

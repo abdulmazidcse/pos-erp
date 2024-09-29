@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('account_default_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('supplier_payable_account_type');
             $table->unsignedBigInteger('supplier_discount_account_type');
             $table->unsignedBigInteger('supplier_advance_payment_account_type');

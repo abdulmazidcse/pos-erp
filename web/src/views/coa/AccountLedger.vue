@@ -19,6 +19,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control"  v-model="tableData.company_id" @change="loadDataBasedOnCompany($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="createAccountLedgerModal()" :modalActive="modalAccLedgerActive">
@@ -35,6 +52,15 @@
                         <div class="row">
                             <div class="col-md-12">
                                 <div class="row">
+                                    <div class="form-group col-md-12">
+                                        <div class="">
+                                            <label for="outlet_id"> Company </label>
+                                            <select v-model="form.company_id" class="form-control" @change="fetchGroupData($event.target.value)">
+                                                <option value="">--- Select Company ---</option>
+                                                <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                            </select>
+                                        </div>
+                                    </div> 
                                     <div class="form-group col-md-12">
                                         <label for="class_id">Account Group *</label> <br>
                                         <!-- <select class="form-control border " @change="onChangeAccountGroup($event.target.value), onkeyPress('class_id')" v-model="form.class_id" id="class_id"> 
@@ -310,6 +336,7 @@ export default {
             errors: {},
             btn:'Create',
             items: [],
+            companies: [],
             accounts: [],
             groups: [],
             parent_types: [],
@@ -329,6 +356,7 @@ export default {
                 id: '',
                 class_id: '',
                 type_id: '',
+                company_id: '',
                 detail_type_id: null,
                 ledger_code: '',
                 ledger_name: '',
@@ -389,6 +417,7 @@ export default {
                 column: 1,
                 dir: 'desc',
                 sortKey: 'ledger_name',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -411,6 +440,7 @@ export default {
     },
     created() {
         // this.fetchAccountLedger();
+        this.fetchCompanies();
         this.getAccountsLedgers();
         this.fetchGroupData();
     },
@@ -424,6 +454,10 @@ export default {
                 // Add the component back in
                 this.renderOptionComponent = true;
             });
+        },
+        loadDataBasedOnCompany: function(companyId){ 
+            this.fetchGroupData(companyId); 
+            this.getAccountsLedgers(companyId); 
         },
 
         createAccountLedgerModal: function() {
@@ -452,8 +486,19 @@ export default {
             });
         },
 
-        async fetchGroupData() {
-          await  axios.get(this.apiUrl+'/account_classes', this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+
+        async fetchGroupData(companyId) {
+          await  axios.get(this.apiUrl+'/account_classes?company_id='+companyId, this.headerjson)
             .then((res) => {
                 this.groups = res.data.data.account_classes.map((item) => {
                     return {label: '['+item.code+'] '+item.name, value: item.id};
@@ -500,13 +545,14 @@ export default {
             }
         },
 
-        fetchLedgerCode(reference_id='', type='') {
+        fetchLedgerCode(company_id, reference_id='', type='') {
             if(this.editMode == true && reference_id == this.temp_item.detail_type_id) {
                 this.form.ledger_code = this.temp_item.ledger_code;
             }else{
                 var formData = new FormData();
                 formData.append("reference_id", reference_id);
                 formData.append("reference_type", type);
+                formData.append("company_id", company_id);
                 axios.post(this.apiUrl+'/account_ledgers/getAccountCode', formData, this.headers)
                 .then((res) => {
                     this.form.ledger_code = res.data.data.account_code;
@@ -534,9 +580,10 @@ export default {
         
         onChangeAccountDetailType(item) {
             var detail_type_id = item.id;
+            let company_id = item.company_id; 
             if(detail_type_id != '' || detail_type_id != 0) {
 
-                this.fetchLedgerCode(detail_type_id, "dtype");
+                this.fetchLedgerCode(company_id, detail_type_id, "dtype");
             }
         },
 
@@ -572,6 +619,7 @@ export default {
             formData.append('opening_balance', this.form.opening_balance);
             formData.append('balance_date', this.form.balance_date);
             formData.append('status', this.form.status);
+            formData.append('company_id', this.form.company_id);
             if(this.editMode){
                 formData.append('_method', 'put');
                 var postEvent = axios.post(this.apiUrl+'/account_ledgers/'+this.form.id, formData, this.headers);

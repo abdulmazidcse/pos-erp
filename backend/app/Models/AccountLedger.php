@@ -33,6 +33,7 @@ class AccountLedger extends Model
         'ledger_code',
         'ledger_name',
         'parent_id',
+        'company_id',
         'type_id',
         'detail_type_id',
         'ledger_type',

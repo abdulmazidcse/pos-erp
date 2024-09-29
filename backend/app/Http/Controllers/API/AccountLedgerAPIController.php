@@ -57,20 +57,17 @@ class AccountLedgerAPIController extends AppBaseController
 
     public function getLedgerList(Request $request)
     {
+        $company_id = checkCompanyId($request);
         $columns = ['sl','ledger_name', 'ledger_code', 'name', 'type_name', 'status'];
 
         $length = $request->input('length');
         $column = $request->input('column');
         $dir = $request->input('dir');
         $sortKey = $request->input('sortKey');
-//        return [
-//            'dir' => $dir,
-//            'sortKey' => $sortKey,
-//        ];
-        $searchValue = $request->input('search');
+        $searchValue = $request->input('search'); 
 
-//        $query = AccountLedger::with(['account_types'])->orderBy($columns[$column], $dir);
-        $query = AccountLedger::with(['account_types'])
+        //$query = AccountLedger::with(['account_types'])->orderBy($columns[$column], $dir);
+        $query = AccountLedger::where('company_id',$company_id)->with(['account_types'])
         ->when($sortKey == "account_types.name", function($query) use($dir){
             return pleaseSortMe($query, $dir, AccountType::select('account_types.type_name')
                 ->whereColumn('account_types.id', 'account_ledgers.detail_type_id')
@@ -102,10 +99,10 @@ class AccountLedgerAPIController extends AppBaseController
     }
 
     // For Chart Of Accounts
-    public function getChartOfAccounts(AccountLedger $accountLedger)
+    public function getChartOfAccounts(Request $request, AccountLedger $accountLedger)
     {
-
-        $accounts = $accountLedger->getChartOfAccountsList('');
+        $company_id = checkCompanyId($request);
+        $accounts = $accountLedger->getChartOfAccountsList($company_id, '');
 
         $return_data    = [
             'accounts'    => $accounts
@@ -116,10 +113,10 @@ class AccountLedgerAPIController extends AppBaseController
     }
     
 
-    public function getChartOfAccountsOption(AccountLedger $accountLedger)
+    public function getChartOfAccountsOption(Request $request, AccountLedger $accountLedger)
     {
-
-        $accounts = $accountLedger->getChartOfAccountsList('');
+        $company_id = checkCompanyId($request);
+        $accounts = $accountLedger->getChartOfAccountsList($company_id,'');
 
         $return_data    = [
             'accounts'    => $accounts
@@ -129,8 +126,9 @@ class AccountLedgerAPIController extends AppBaseController
 
     }
 
-    public function getChartOfAccountsOnlyLedgerOption(AccountLedger $accountLedger) {
-        $accounts = $accountLedger->getChartOfAccountOptions('');
+    public function getChartOfAccountsOnlyLedgerOption(Request $request, AccountLedger $accountLedger) {
+        $company_id = checkCompanyId($request);
+        $accounts = $accountLedger->getChartOfAccountOptions($company_id,'');
 
         $return_data    = [
             'accounts'  => $accounts
@@ -261,11 +259,12 @@ class AccountLedgerAPIController extends AppBaseController
     // For Account Code
     public function getAccountCode(Request $request)
     {
+        $company_id = checkCompanyId($request);
         $reference_id = $request->get('reference_id');
         $type = $request->get('reference_type');
 
         //return [$group_id, $parent_id];
-        $ledger_code = $this->returnAccountCode($reference_id, $type);
+        $ledger_code = $this->returnAccountCode($company_id, $reference_id, $type);
 
         $return_data    = [
             'account_code'   => $ledger_code
