@@ -29,6 +29,16 @@
 
                         <div class="card-body">
                             <div class="row"> 
+  
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="outlet_id"> Company </label>
+                                        <select class="form-control"  v-model="search_terms.company_id" @change="this.filterComapany($event.target.value)">
+                                            <option value="">--- Select Company ---</option>
+                                            <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>  
                                 <div class="col-md-3">
                                     <div class="">
                                         <label for="from_date"> From Date *</label>
@@ -49,7 +59,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mb-3 mt-3 float-right">
                                         <div class="form-check form-check-inline">
                                             <input type="checkbox" class="form-check-input" id="show_code"  v-model="show_with_code" @change="showLedgerCode">
@@ -58,7 +68,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mt-3">
                                         <button type="submit" class="btn btn-primary" :disabled="disabled" @click="filterTrialBalance()">
                                             <span v-show="isSubmit">
@@ -162,8 +172,7 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 import Form from 'vform';
 
@@ -184,6 +193,7 @@ export default {
             modalActive:false,
             errors: {},
             items: [],
+            companies: [],
             total_opening_balance: 0,
             total_debit_balance: 0,
             total_credit_balance: 0,
@@ -192,6 +202,7 @@ export default {
                 from_date: '',
                 to_date: '',
                 supplier_id: '',
+                company_id: '',
             }),
             opening_balance: 0,
             from_date: '',
@@ -201,7 +212,8 @@ export default {
         };
     },
     created() {
-        this.fetchTrialBalance();
+        // this.fetchTrialBalance();
+        this.fetchCompanies(); 
     },
     methods: { 
 
@@ -212,21 +224,30 @@ export default {
         },
 
         filterTrialBalance() {
+            const companyId = this.search_terms.company_id;
             this.isSubmit = true;
             this.disabled = true;
-
-            this.fetchTrialBalance();
+            this.fetchTrialBalance(companyId);
+        },
+        filterComapany(companyId) { 
+            this.isSubmit = true;
+            this.disabled = true;
+            this.search_terms.company_id = companyId;
+            this.fetchTrialBalance(companyId);
         },
 
-        fetchTrialBalance() { 
+        fetchTrialBalance(companyId) { 
+            console.log('companyId', companyId);
             this.loading = true;
-            var url_params = ''
+            let url_params = ''
             if(this.search_terms.from_date != '' && this.search_terms.to_date != '') {
                 if(url_params == '') {
-                    url_params = '?from_date='+this.search_terms.from_date+'&to_date='+this.search_terms.to_date
+                    url_params = '?company_id='+companyId+'from_date='+this.search_terms.from_date+'&to_date='+this.search_terms.to_date
                 }else{
-                   url_params = '&from_date='+this.search_terms.from_date+'&to_date='+this.search_terms.to_date 
+                   url_params = '&company_id='+companyId+'&from_date='+this.search_terms.from_date+'&to_date='+this.search_terms.to_date 
                 }
+            }else{
+                url_params = '?company_id='+companyId;
             }
             axios.get(this.apiUrl+'/reports/trial-balance'+url_params, this.headerjson)
             .then((res) => {
@@ -250,13 +271,25 @@ export default {
             });
         },
         
-        checkRequiredPrimary()
-        {
+        checkRequiredPrimary(){
             if(this.search_terms.from_date && this.search_terms.to_date) {
                 this.disabled = false;
             }else{
                 this.disabled = true;
             }
+        },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    this.fetchTrialBalance(this.companies[0].id);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
         },
         onkeyPress: function(field) { 
             this.checkRequiredPrimary();

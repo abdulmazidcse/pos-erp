@@ -27,9 +27,15 @@
                         <div class="card-body"> 
                             <div class="row searchBox"> 
 
-                                <div class="col-md-3"> 
-
-                                </div>
+                                <div class="col-md-3">
+                                    <div class="">
+                                        <label for="outlet_id"> Company </label>
+                                        <select class="form-control"  v-model="search_terms.company_id" @change="this.filterComapany($event.target.value)">
+                                            <option value="">--- Select Company ---</option>
+                                            <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                        </select>
+                                    </div>
+                                </div> 
 
                                 <div class="col-md-3">
                                     <div class="mb-3">
@@ -232,12 +238,14 @@ export default {
             modalActive:false,
             errors: {},
             asset_items: [],
+            companies: [],
             liability_items: [],
             asset_balance: 0,
             liability_equity_balance: 0,
             search_terms: new Form({
                 as_on_date: '',
                 supplier_id: '',
+                company_id: ''
             }),
             opening_balance: 0,
             from_date: '',
@@ -247,7 +255,8 @@ export default {
         };
     },
     created() {
-        this.fetchBalanceSheet();
+        this.fetchCompanies(); 
+        // this.fetchBalanceSheet();
     },
     methods: { 
 
@@ -261,15 +270,36 @@ export default {
         {
             this.isSubmit = true;
             this.disabled = true;
-            this.fetchBalanceSheet(this.search_terms.as_on_date);
+            this.fetchBalanceSheet(search_terms.companyId, this.search_terms.as_on_date);
+        },
+        filterComapany(companyId)
+        {
+            this.isSubmit = true;
+            this.disabled = true;
+            this.search_terms.company_id = companyId;
+            this.fetchBalanceSheet(companyId, this.search_terms.as_on_date);
         },
 
-        fetchBalanceSheet(asOnDate='') { 
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    this.fetchBalanceSheet(this.companies[0].id);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+
+        fetchBalanceSheet(companyId, asOnDate='') { 
             this.loading = true;
             if(asOnDate) {
-                var getEvent = axios.get(this.apiUrl+'/reports/balance-sheet?as_on_date='+asOnDate, this.headerjson);
+                var getEvent = axios.get(this.apiUrl+'/reports/balance-sheet?company_id='+companyId+'as_on_date='+asOnDate, this.headerjson);
             }else{
-                getEvent =axios.get(this.apiUrl+'/reports/balance-sheet', this.headerjson);
+                getEvent =axios.get(this.apiUrl+'/reports/balance-sheet?company_id='+companyId, this.headerjson);
             }
             
             getEvent.then((res) => {

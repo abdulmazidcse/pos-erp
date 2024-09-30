@@ -350,6 +350,7 @@ class AccountReportAPIController extends AppBaseController
         set_time_limit(600);
         $current_date = date("Y-m-d");
         $inputs = $request->all();
+        $company_id = checkCompanyId($request);
         if(count($inputs) > 0) {
             $from_date = $request->get('from_date');
             $to_date    = $request->get('to_date');
@@ -357,7 +358,7 @@ class AccountReportAPIController extends AppBaseController
             $from_date = date("Y-m-01");
             $to_date = $current_date;
         }
-        $accounts = getAccountClassesWithBalance('', $from_date, $to_date);
+        $accounts = getAccountClassesWithBalance($company_id,'', $from_date, $to_date);
 
 
         $total_opening_balance = collect($accounts)->where('account_type', 'group')->sum('opening_balance');
@@ -380,8 +381,9 @@ class AccountReportAPIController extends AppBaseController
 
     public function reportProfitLoss(Request $request)
     {
-        $expense_class = AccountClass::where('code', 5)->first();
-        $income_class = AccountClass::where('code', 4)->first();
+        $company_id = checkCompanyId($request);
+        $expense_class = AccountClass::where('company_id', $company_id)->where('code', 5)->first();
+        $income_class = AccountClass::where('company_id', $company_id)->where('code', 4)->first();
 
         $from_date = '';
         if($request->has('from_date') && $request->get('from_date')) {
@@ -396,13 +398,13 @@ class AccountReportAPIController extends AppBaseController
 
         if($from_date && $to_date) {
 
-            $expense_accounts = getAccountTypesWithBalance('', $expense_class->id, $from_date, $to_date, false);
-            $income_accounts = getAccountTypesWithBalance('', $income_class->id, $from_date, $to_date, false);
+            $expense_accounts = getAccountTypesWithBalance( $company_id,'', $expense_class->id, $from_date, $to_date, false);
+            $income_accounts = getAccountTypesWithBalance( $company_id,'', $income_class->id, $from_date, $to_date, false);
 
         } else {
 
-            $expense_accounts = getAccountTypesWithBalance('', $expense_class->id, false, false);
-            $income_accounts = getAccountTypesWithBalance('', $income_class->id, false, false);
+            $expense_accounts = getAccountTypesWithBalance( $company_id,'', $expense_class->id, false, false);
+            $income_accounts = getAccountTypesWithBalance( $company_id,'', $income_class->id, false, false);
 
         }
 
@@ -423,22 +425,23 @@ class AccountReportAPIController extends AppBaseController
 
     public function reportBalanceSheet(Request $request)
     {
-        $asset_class = AccountClass::where('code', 1)->first();
-        $liability_class = AccountClass::where('code', 2)->first();
-        $equity_class = AccountClass::where('code', 3)->first();
+        $company_id = checkCompanyId($request);
+        $asset_class = AccountClass::where('company_id', $company_id)->where('code', 1)->first();
+        $liability_class = AccountClass::where('company_id', $company_id)->where('code', 2)->first();
+        $equity_class = AccountClass::where('company_id', $company_id)->where('code', 3)->first();
 
         $to_date = '';
         if($request->has('as_on_date') && $request->get('as_on_date')){
             $from_date = date("Y-m-d", strtotime($request->get('as_on_date')));
             $to_date = date("Y-m-d", strtotime($request->get('as_on_date')));
 
-            $asset_accounts = getAccountTypesWithBalance('', $asset_class->id, false, $to_date);
-            $liability_accounts = getAccountTypesWithBalance('', $liability_class->id, false, $to_date);
-            $equity_accounts = getAccountTypesWithBalance('', $equity_class->id, false, $to_date);
+            $asset_accounts = getAccountTypesWithBalance( $company_id,'', $asset_class->id, false, $to_date);
+            $liability_accounts = getAccountTypesWithBalance( $company_id,'', $liability_class->id, false, $to_date);
+            $equity_accounts = getAccountTypesWithBalance( $company_id,'', $equity_class->id, false, $to_date);
         }else {
-            $asset_accounts = getAccountTypesWithBalance('', $asset_class->id);
-            $liability_accounts = getAccountTypesWithBalance('', $liability_class->id);
-            $equity_accounts = getAccountTypesWithBalance('', $equity_class->id);
+            $asset_accounts = getAccountTypesWithBalance( $company_id,'', $asset_class->id);
+            $liability_accounts = getAccountTypesWithBalance( $company_id,'', $liability_class->id);
+            $equity_accounts = getAccountTypesWithBalance( $company_id,'', $equity_class->id);
         }
 
         $asset_balance = collect($asset_accounts)->where('parent', 0)->sum('opening_balance') + collect($asset_accounts)->where('parent', 0)->sum('debit_amount')+collect($asset_accounts)->where('parent', 0)->sum('credit_amount');
@@ -446,15 +449,15 @@ class AccountReportAPIController extends AppBaseController
         $equity_balance = collect($equity_accounts)->where('parent', 0)->sum('opening_balance') + collect($equity_accounts)->where('parent', 0)->sum('debit_amount')+collect($equity_accounts)->where('parent', 0)->sum('credit_amount') ?? 0;
 
         /** Surplus/Deficit from income statement */
-        $expense_class = AccountClass::where('code', 5)->first();
-        $income_class = AccountClass::where('code', 4)->first();
+        $expense_class = AccountClass::where('company_id', $company_id)->where('code', 5)->first();
+        $income_class = AccountClass::where('company_id', $company_id)->where('code', 4)->first();
 
         if($to_date) {
-            $expense_accounts = getAccountTypesWithBalance('', $expense_class->id, false, $to_date);
-            $income_accounts = getAccountTypesWithBalance('', $income_class->id, false, $to_date);
+            $expense_accounts = getAccountTypesWithBalance( $company_id,'', $expense_class->id, false, $to_date);
+            $income_accounts = getAccountTypesWithBalance( $company_id,'', $income_class->id, false, $to_date);
         }else {
-            $expense_accounts = getAccountTypesWithBalance('', $expense_class->id);
-            $income_accounts = getAccountTypesWithBalance('', $income_class->id);
+            $expense_accounts = getAccountTypesWithBalance( $company_id,'', $expense_class->id);
+            $income_accounts = getAccountTypesWithBalance( $company_id,'', $income_class->id);
         }
 
         $expense_balance = collect($expense_accounts)->where('parent', 0)->sum('opening_balance') + collect($expense_accounts)->where('parent', 0)->sum('debit_amount') + collect($expense_accounts)->where('parent', 0)->sum('credit_amount') ?? 0;

@@ -241,10 +241,178 @@ class CompanyObserver
      * @param  \App\Models\Company  $company
      * @return void
      */
-    public function updated(Company $company)
-    {
-        //
-    }
+    public function updated(Company $company) {
+        // Check if default settings exist
+        if (!AccountDefaultSetting::where('company_id', $company->id)->exists()) {
+            AccountDefaultSetting::create(['company_id' => $company->id]);  
+        } 
+    
+        // Update or create Fiscal Year
+        $fiscalYear = getFiscalYear();
+        $fiscalYearData = [
+            'label' => $fiscalYear['label'], 
+            'start_date' => $fiscalYear['start'], 
+            'end_date' => $fiscalYear['end'], 
+            'company_id' => $company->id, 
+            'status' => 1
+        ];
+        
+        FiscalYear::updateOrCreate(['company_id' => $company->id], $fiscalYearData);
+    
+        // Update or create Cost Center
+        $costCenterData = ['center_name' => $company->name, 'company_id' => $company->id, 'status' => 1];
+        CostCenter::updateOrCreate(['company_id' => $company->id], $costCenterData);
+    
+        // Prepare account classes data
+        $accountClasses = [
+            ['name' => 'ASSETS', 'code' => '1', 'is_debit_positive' => 1, 'is_credit_positive' => 0, 'company_id' => $company->id],
+            ['name' => 'LIABILITIES', 'code' => '2', 'is_debit_positive' => 0, 'is_credit_positive' => 1, 'company_id' => $company->id],
+            ['name' => 'EQUITIES', 'code' => '3', 'is_debit_positive' => 0, 'is_credit_positive' => 1, 'company_id' => $company->id],
+            ['name' => 'INCOME', 'code' => '4', 'is_debit_positive' => 0, 'is_credit_positive' => 1, 'company_id' => $company->id],
+            ['name' => 'EXPENDITURE', 'code' => '5', 'is_debit_positive' => 1, 'is_credit_positive' => 0, 'company_id' => $company->id],
+        ];
+    
+        AccountClass::insert($accountClasses);
+    
+        // Prepare account types for each class first step
+        $createdClasses = AccountClass::where('company_id', $company->id)->get();       
+        $accountTypes = [];
+        
+        foreach ($createdClasses as $accountClass) {             
+            switch ($accountClass->name) {
+                case 'ASSETS':
+                    $accountTypes[] = [
+                        ['type_code' => '11', 'type_name' => 'Non-Current Assets', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '12', 'type_name' => 'Current Assets', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1']
+                    ];
+                    break;
+                case 'LIABILITIES':
+                    $accountTypes[] = [
+                        ['type_code' => '21', 'type_name' => 'CURRENT LIABILITIES', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '22', 'type_name' => 'NON CURRENT LIABILITIES', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '23', 'type_name' => 'Accumulated Depreciation', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1']
+                    ];
+                    break;
+                case 'EQUITIES':
+                    $accountTypes[] = [
+                        ['type_code' => '31', 'type_name' => 'PAID UP CAPITAL', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '32', 'type_name' => 'Other Reserves', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '33', 'type_name' => 'PROFIT & LOSS ACCOUNT', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1']
+                    ];
+                    break;
+                case 'INCOME':
+                    $accountTypes[] = [
+                        ['type_code' => '41', 'type_name' => 'OPERATING INCOME', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1'],
+                        ['type_code' => '42', 'type_name' => 'NON-OPERATING INCOME', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1']
+                    ];
+                    break;
+                case 'EXPENDITURE':
+                    $accountTypes[] = [
+                        ['type_code' => '51', 'type_name' => 'Operating Expenses', 'company_id' => $accountClass->company_id, 'class_id' => $accountClass->id, 'parent_type_id' => '0', 'status' => '1']
+                    ];
+                    break;
+            }
+        }
+    
+        $flattenedArray = [];
+        foreach ($accountTypes as $subArray) {
+            $flattenedArray = array_merge($flattenedArray, $subArray);
+        }
+        if (!empty($flattenedArray)) {
+            AccountType::insert($flattenedArray);
+        }
+    
+        // Prepare account types for each class second step
+        $accountTypeParents = AccountType::where('company_id', $company->id)->where('parent_type_id', 0)->get();  
+        $accountTypesParents = [];
+        
+        foreach ($accountTypeParents as $aTyPrnt) {             
+            switch ($aTyPrnt->type_name) {
+                case 'Non-Current Assets':
+                    $accountTypesParents[] = [
+                        ['type_code' => '1101', 'type_name' => 'Property Plant & Equipment', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1104', 'type_name' => 'Accumulated Depreciation', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1102', 'type_name' => 'Intangibles', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'Current Assets':
+                    $accountTypesParents[] = [ 
+                        ['type_code' => '1205', 'type_name' => 'DIRECTORS CURRENT ACCOUNT', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1201', 'type_name' => 'Inventories', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1207', 'type_name' => 'Cash and Cash Equivalents', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1208', 'type_name' => 'Other Current Assets', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '1209', 'type_name' => 'Petty Cash Accounts', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'CURRENT LIABILITIES':
+                    $accountTypesParents[] = [ 
+                        ['type_code' => '2101', 'type_name' => 'Trade Payables', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1'],
+                        ['type_code' => '2102', 'type_name' => 'Loans Payable', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'NON CURRENT LIABILITIES':
+                    $accountTypesParents[] = [
+                        ['type_code' => '2201', 'type_name' => 'Long Term Loans', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'PAID UP CAPITAL':
+                    $accountTypesParents[] = [
+                        ['type_code' => '3101', 'type_name' => 'Ordinary Shares', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'OPERATING INCOME':
+                    $accountTypesParents[] = [
+                        ['type_code' => '4101', 'type_name' => 'Sales Revenue', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+                case 'Operating Expenses':
+                    $accountTypesParents[] = [
+                        ['type_code' => '5101', 'type_name' => 'Salaries Expense', 'company_id' => $aTyPrnt->company_id, 'class_id' => $aTyPrnt->class_id, 'parent_type_id' => $aTyPrnt->id, 'status' => '1']
+                    ];
+                    break;
+            }
+        }
+    
+        $flattenedArrayParents = [];
+        foreach ($accountTypesParents as $subArray) {
+            $flattenedArrayParents = array_merge($flattenedArrayParents, $subArray);
+        }
+        if (!empty($flattenedArrayParents)) {
+            AccountType::insert($flattenedArrayParents);
+        } 
+            
+        // Third Step for Account Types 
+        // Prepare account types for each class third step start 
+        if ($accountTypeParents->isNotEmpty()) { 
+            $accountTypesSecondStep = AccountType::where('company_id', $company->id)
+                                    ->whereIn('parent_type_id', $accountTypeParents->pluck('id'))
+                                    ->get();
+        } else { 
+            $accountTypesSecondStep = collect(); // or return an empty collection
+        }
+        // $accountTypesThirdStep = AccountType::where('company_id', $company->id)
+        //     ->whereIn('parent_type_id', $accountTypesSecondStep->pluck('id'))->get();  
+        $accountTypesThirdData = [];
+        foreach ($accountTypesSecondStep as $aThirdStep) {             
+            switch ($aThirdStep->type_name) {  
+                case 'Cash and Cash Equivalents':
+                    $accountTypesThirdData[] = [ 
+                        ['type_code' => '2250', 'type_name' => 'Cash at Bank', 'company_id' => $aThirdStep->company_id, 'class_id' => $aThirdStep->class_id, 'parent_type_id' => $aThirdStep->id, 'status' => '1'],
+                        ['type_code' => '2251', 'type_name' => 'Cash In Hand', 'company_id' => $aThirdStep->company_id, 'class_id' => $aThirdStep->class_id, 'parent_type_id' => $aThirdStep->id, 'status' => '1']
+                    ];
+                    break; 
+            }
+        } 
+
+        $flattenedArrayThird = [];
+        foreach ($accountTypesThirdData as $subArrayThird) {
+            $flattenedArrayThird = array_merge($flattenedArrayThird, $subArrayThird);
+        } 
+        if (!empty($flattenedArrayThird)) {
+            AccountType::insert($flattenedArrayThird);
+        }  
+        // Prepare account types for each class third step ends 
+    } 
 
     /**
      * Handle the Company "deleted" event.

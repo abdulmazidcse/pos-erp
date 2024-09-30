@@ -44,7 +44,7 @@ class StoreRequisitionAPIController extends AppBaseController
         //            $request->get('skip'),
         //            $request->get('limit')
         //        );
-
+        $company_id = checkCompanyId($request);
         $storeRequisitions = StoreRequisition::orderBy('id', 'desc')->get();
 
         $return_data    = StoreRequisitionResource::collection($storeRequisitions);
@@ -55,6 +55,7 @@ class StoreRequisitionAPIController extends AppBaseController
 
     public function getRequisitionData()
     {
+        $company_id = checkCompanyId($request);
         $requisition_data   = StoreRequisition::where('approve_status', 0)->orderBy('id', 'desc')->get();
 
         $return_data    = StoreRequisitionResource::collection($requisition_data);

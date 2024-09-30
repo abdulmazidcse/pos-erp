@@ -43,8 +43,8 @@ class BrandAPIController extends AppBaseController
         $dir = $request->input('dir');
         $sortKey = $request->input('sortKey');
         $searchValue = $request->input('search');
-
-        $query =  $this->brandRepository->allQuery()->orderBy($columns[$column], $dir); 
+        $company_id = checkCompanyId($request);
+        $query =  $this->brandRepository->allQuery()->where('company_id', $company_id)->orderBy($columns[$column], $dir); 
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {
@@ -92,6 +92,8 @@ class BrandAPIController extends AppBaseController
 
 
         $input = $request->all();
+        $company_id = checkCompanyId($request);
+        $input['company_id'] = $company_id;
 
         if ($request->hasFile('logo')) {
             $logoFile  = $request->file('logo');

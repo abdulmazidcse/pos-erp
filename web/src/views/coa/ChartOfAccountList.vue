@@ -31,7 +31,7 @@
                         <div class="col-md-6">
                             <div class="">
                                 <label for="outlet_id"> Company </label>
-                                <select class="form-control" @change="fetchGroupData($event.target.value)">
+                                <select class="form-control" @change="this.fetchCOAData($event.target.value)">
                                     <option value="">--- Select Company ---</option>
                                     <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
                                 </select>
@@ -41,7 +41,6 @@
                 </div> 
             </div>
         </div>
-
 
         <div class="row">
             <div class="col-md-12 ">
@@ -98,11 +97,8 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
-import Form from 'vform'
+<script> 
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 
 import ChartOfAccountGrid from '@/components/ChartOfAccountGrid';
@@ -121,13 +117,12 @@ export default {
         };
     },
     created() {
-        this.fetchCompanies();
-        this.fetchCOAData();
+        this.fetchCompanies(); 
     },
-    methods: { 
-        
-        fetchCOAData() { 
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccounts', this.headerjson)
+    methods: {         
+        fetchCOAData(selectedId) { 
+            this.loading = true;
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccounts?company_id='+selectedId, this.headerjson)
             .then((res) => {
                 this.items = res.data.data.accounts;
             })
@@ -139,9 +134,11 @@ export default {
         },
         fetchCompanies() {   
             axios.get(this.apiUrl+'/companies', this.headerjson)
-            .then((res) => {
-                console.log('res', res.data.data)
-                this.companies = res.data.data;
+            .then((res) => { 
+                this.companies = res.data.data; 
+                if (this.companies.length === 1) { 
+                    this.fetchCOAData(this.companies[0].id);
+                }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {

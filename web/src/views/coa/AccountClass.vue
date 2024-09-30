@@ -11,11 +11,11 @@
                             
                         </ol>
                     </div>
-                    <div class="page-title-right float-right">  
+                    <!-- <div class="page-title-right float-right">  
                         <button type="button" class="btn-sm btn btn-outline-success float-right" @click="createAccountGroupModal()"  >
                             <i class="mdi mdi-camera-timer me-1"></i> Create New Group
                         </button> 
-                    </div>
+                    </div> -->
                 </div>
             </div>
         </div>
@@ -213,6 +213,9 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((res) => { 
                 this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    this.fetchGroupData(this.companies[0].id);
+                } 
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {
@@ -247,6 +250,7 @@ export default {
             const formData = new FormData();           
             formData.append('code', this.form.code);
             formData.append('name', this.form.name);
+            formData.append('company_id', this.form.company_id);
             if(this.editMode){
                 formData.append('_method', 'put');
                 var postEvent = axios.post(this.apiUrl+'/account_classes/'+this.form.id, formData, this.headers);
@@ -259,7 +263,7 @@ export default {
                 this.disabledGroupSubmit = false;
                 if(res.status == 200){
                     this.createAccountGroupModal();
-                    this.fetchGroupData();
+                    this.fetchGroupData(this.form.company_id);
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
@@ -300,8 +304,7 @@ export default {
             }  
         },
 
-        deleteItem: function(item) {
-            console.log('item deleyt=>',item.id);
+        deleteItem: function(item) { 
             this.$swal({
                 title: 'Are you sure?',
                 text: "You want delete this item!", 
@@ -314,7 +317,7 @@ export default {
                     axios.delete(this.apiUrl+'/account_classes/'+item.id, this.headerjson) 
                     .then(res => {
                         if(res.status == 200){  
-                            this.fetchGroupData();
+                            this.fetchGroupData(item.company_id);
                             this.$toast.success(res.data.message); 
                         }else{
                             this.$toast.error(res.data.message);

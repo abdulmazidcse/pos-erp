@@ -153,7 +153,7 @@
                                         </div>
                                     </div>
                                     <div class="form-group col-md-12">
-                                        <label for="ledger_type">Opening Balance Type *</label>
+                                        <label for="ledger_type">Account Type *</label>
                                         <select class="form-control border " v-model="form.ledger_type" id="ledger_type"> 
                                             <option value="dr">Debit</option>
                                             <option value="cr">Credit</option>
@@ -162,7 +162,7 @@
                                             {{errors.ledger_type[0]}}
                                         </div>
                                     </div>
-                                    <div class="form-group col-md-12">
+                                    <!-- <div class="form-group col-md-12">
                                         <label for="opening_balance">Opening Balance *</label>
                                         <input type="number" step="any" class="form-control border" @keypress="onkeyPress('opening_balance')" v-model="form.opening_balance" id="opening_balance" placeholder="Enter Opening Balance" autocomplete="off"> 
                                         <div class="invalid-feedback" v-if="errors.opening_balance">
@@ -175,7 +175,7 @@
                                         <div class="invalid-feedback" v-if="errors.balance_date">
                                             {{errors.balance_date[0]}}
                                         </div>
-                                    </div>
+                                    </div> -->
                                     <div class="form-group col-md-12">
                                         <label for="ledger_status">Status *</label>
                                         <select class="form-control border " @change="onkeyPress('ledger_status')" v-model="form.status" id="ledger_status">

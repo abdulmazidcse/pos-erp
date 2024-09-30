@@ -44,13 +44,15 @@ class ProductCategoryAPIController extends AppBaseController
         //        );
 
         $parent_id = $request->get('parent_id');
+        $company_id = checkCompanyId($request);
 
         if(isset($parent_id)) {
             $productCategories = ProductCategory::where('status', 1)
+                ->where('company_id', $company_id)
                 ->where('parent_id', $parent_id)->orderBy('name', 'ASC')->get();
 
         }else {
-            $productCategories = ProductCategory::where('status', 1)->orderBy('parent_id', 'ASC')->orderBy('id', 'ASC')->get();
+            $productCategories = ProductCategory::where('status', 1)->where('company_id', $company_id)->orderBy('parent_id', 'ASC')->orderBy('id', 'ASC')->get();
         }
         $return_data    = ProductCategoryResource::collection($productCategories);
 
@@ -66,10 +68,11 @@ class ProductCategoryAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
-
+        $company_id = checkCompanyId($request);
         $query = ProductCategory::with(['parents' => function($query){
             $query->select('id','parent_id', 'name');
-        }])->select('id', 'name', 'parent_id', 'image', 'discount', 'description', 'status', 'created_at')->orderBy($columns[$column], $dir);
+        }])->where('company_id', $company_id)
+        ->select('id', 'name', 'parent_id', 'image', 'discount', 'description', 'status', 'created_at')->orderBy($columns[$column], $dir);
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {
@@ -212,9 +215,10 @@ class ProductCategoryAPIController extends AppBaseController
         return $this->sendSuccess('Product Category deleted successfully');
     }
 
-    public function getProductParentCategory()
+    public function getProductParentCategory(Request $request)
     {
-        $product_category = ProductCategory::where('status', 1)->get();
+        $company_id = checkCompanyId($request);
+        $product_category = ProductCategory::where('status', 1)->where('company_id', $company_id)->get();
 
         if(empty($product_category)) {
             return $this->sendError('Category data not found!');

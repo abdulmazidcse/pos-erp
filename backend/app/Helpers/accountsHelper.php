@@ -7,15 +7,15 @@ use App\Models\AccountVoucherTransaction;
 
 
 
-function getAccountClassesWithBalance($accounts, $from=false, $to=false, $prevCloseBalance=true, $step = 0){
+function getAccountClassesWithBalance($company_id, $accounts, $from=false, $to=false, $prevCloseBalance=true, $step = 0){
 
     if($step == 0) {
-        $accounts = AccountClass::orderBy('code')->get();
+        $accounts = AccountClass::where('company_id',$company_id)->orderBy('code')->get();
     }
 
     $treeData = array();
     foreach ($accounts as $key => $account) {
-        $children = getAccountTypesWithBalance('', $account->id, $from, $to, $prevCloseBalance);
+        $children = getAccountTypesWithBalance($company_id, '', $account->id, $from, $to, $prevCloseBalance);
         $debit_amount = collect($children)->where('parent', 0)->sum('debit_amount');
         $credit_amount = collect($children)->where('parent', 0)->sum('credit_amount');
         $opening_balance = collect($children)->where('parent', 0)->sum('opening_balance');
@@ -43,10 +43,10 @@ function getAccountClassesWithBalance($accounts, $from=false, $to=false, $prevCl
 
 }
 
-function getAccountTypesWithBalance($types, $class_id, $from=false, $to=false, $prevCloseBalance=true, $step=0)
+function getAccountTypesWithBalance($company_id, $types, $class_id, $from=false, $to=false, $prevCloseBalance=true, $step=0)
 {
     if($step == 0) {
-        $types  = AccountType::doesntHave('type_parents')->where('class_id', $class_id)->get();
+        $types  = AccountType::where('company_id', $company_id)->doesntHave('type_parents')->where('class_id', $class_id)->get();
 
     }
 
@@ -87,7 +87,7 @@ function getAccountTypesWithBalance($types, $class_id, $from=false, $to=false, $
             'positive_credit_amount'    => $positive_credit_amount,
             'opening_balance'   => number_format($type_opening_balance, 2, '.', ''),
             'closing_balance' => number_format($type_closing_balance, 2, '.', ''),
-            'children' => getAccountTypesWithBalance($type->type_children, '', $from, $to, $prevCloseBalance, ($step + 1)),
+            'children' => getAccountTypesWithBalance($company_id, $type->type_children, '', $from, $to, $prevCloseBalance, ($step + 1)),
         ];
 
         if($step > 0){
@@ -180,7 +180,7 @@ function getPreviousAccountTypeBalance($account_type, $type, $start_date, $accou
 }
 
 function getTypeOpeningBalance($type, $prevCloseBalance=true){
-//    $accounts = call_user_func_array('array_merge', getAllAccounts($type->id) ?: [[]]);
+    //    $accounts = call_user_func_array('array_merge', getAllAccounts($type->id) ?: [[]]);
     $accounts = call_user_func_array('array_merge', getAllAccounts($type->id, [], getAllTypesAndLedgers()) ?: [[]]);
     ////////
     $accounts = array_merge($accounts, AccountLedger::where('detail_type_id', $type->id)->pluck('id')->toArray());
@@ -188,7 +188,7 @@ function getTypeOpeningBalance($type, $prevCloseBalance=true){
     // new work
     $total_opening_balance = 0;
     if($type->parent_type_id == 0) {
-        $children   = getAccountTypesWithBalance($type->type_children, '', false, false, $prevCloseBalance, 1);
+        $children   = getAccountTypesWithBalance($type->company_id, $type->type_children, '', false, false, $prevCloseBalance, 1);
         $total_opening_balance = collect($children)->where('parent', $type->id)->sum('opening_balance');
     }else{
         foreach ($accounts as $key=>$account) {
@@ -347,7 +347,7 @@ function getAllAccounts($account_type_id, $accounts = [], $all = []){
     $types = collect($all['types'])->where('parent_type_id', $account_type_id);
     $account_data = array();
     foreach ($types as $key => $type) {
-//        echo $type->type_name." ". $type->id. "\n";
+    //        echo $type->type_name." ". $type->id. "\n";
         $account_ledgers = collect($all['accounts'])->where('detail_type_id', $type->id);
 
         if ($account_ledgers->count() > 0) {

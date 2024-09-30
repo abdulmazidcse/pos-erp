@@ -601,11 +601,11 @@ export default {
     },
     created() {
         this.fetchCompanies();
-        this.fetchCOAData();
-        this.fetchCOAOptionsData();
-        this.fetchAccountTypeData();
-        this.fetchGroupData();
-        this.fetchAccountLedgerData();
+        // this.fetchCOAData();
+        // this.fetchCOAOptionsData();
+        // this.fetchAccountTypeData();
+        // this.fetchGroupData();
+        // this.fetchAccountLedgerData();
     },
     methods: { 
         forceRerender() {
@@ -747,9 +747,11 @@ export default {
 
         fetchCompanies() {   
             axios.get(this.apiUrl+'/companies', this.headerjson)
-            .then((res) => {
-                console.log('res', res.data.data)
+            .then((res) => { 
                 this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    this.loadDataBasedOnCompany(this.companies[0].id);
+                }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {
@@ -979,10 +981,11 @@ export default {
             });
         },
 
-        fetchTypeCode(reference_id='', type='') {
+        fetchTypeCode(company_id,reference_id='', type='') {
             var formData = new FormData();
             formData.append("reference_id", reference_id);
             formData.append("reference_type", type);
+            formData.append("company_id", company_id);
             axios.post(this.apiUrl+'/account_types/getTypesCode', formData, this.headers)
             .then((res) => {
                 this.form_type.type_code = res.data.data;
@@ -997,7 +1000,7 @@ export default {
 
             this.form_type.class_id = item.id;
             this.form_type.class_name = item.name;
-            this.fetchTypeCode(item.id, item.account_type);
+            this.fetchTypeCode(item.company_id, item.id, item.account_type);
 
             this.createAccountTypeModal();
 

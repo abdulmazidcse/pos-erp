@@ -27,7 +27,7 @@
                             <div class="">
                                 <label for="outlet_id"> Company </label>
                                 <!-- @change="getAccountTypes($event.target.value)"  v-model="tableData.search"-->
-                                <select class="form-control" v-model="tableData.company_id" @change="getAccountTypes()">
+                                <select class="form-control" v-model="tableData.company_id" @change="changeCompany($event.target.value)">
                                     <option value="">--- Select Company ---</option>
                                     <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
                                 </select>
@@ -418,11 +418,20 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((res) => { 
                 this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    // this.fetchGroupData(this.companies[0].id);
+                    this.tableData.company_id = this.companies[0].id;
+                    this.getAccountTypes();
+                } 
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {
                 this.loading = false;
             });
+        },
+        changeCompany(selectedId){
+            this.tableData.company_id = selectedId;
+            this.getAccountTypes();
         },
 
         fetchParentTypes(group_id) {
@@ -500,7 +509,7 @@ export default {
                 if(res.status == 200){
                     this.createAccountTypeModal();
                     this.getAccountTypes();
-                    this.fetchGroupData();
+                    this.fetchGroupData(this.form.company_id);
                     this.$toast.success(res.data.message); 
                 }else{
                     this.$toast.error(res.data.message);
