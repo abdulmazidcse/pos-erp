@@ -16,6 +16,7 @@ import Role from "@/views/page/Role.vue";
 import RolePermission from "@/views/page/RolePermission.vue";  
 import User from "@/views/page/User.vue";  
 import Login from "@/views/page/Login.vue";  
+import AppLogin from "@/views/page/LoginFromApp.vue";  
 import Warehouse from "@/views/page/Warehouse.vue";  
 import Customer from "@/views/page/Customer.vue";  
 import CustomerLedger from "@/views/page/CustomerLedger.vue";  
@@ -115,6 +116,12 @@ route_list_array.push(
     icon_name: 'fas fa-folder',
   },
   {
+    path: '/app-login',
+    name: 'AppLogin',
+    component: AppLogin,
+    icon_name: 'fas fa-folder',
+  },
+  {
     path: '/accounting/voucher-edit/:id',
     name: 'VoucherEdit',
     component: VoucherEdit,
@@ -133,9 +140,17 @@ const router = createRouter({
   routes,
   navigations
 });
+// router.beforeEach((to, from, next) => {
+//   if (to.name !== 'Login' && !store.getters.token) next({ name: 'Login' })
+//   else next()
+// }) 
+
 router.beforeEach((to, from, next) => {
-  if (to.name !== 'Login' && !store.getters.token) next({ name: 'Login' })
-  else next()
-  // next();
-}) 
+  const isAuthenticated = store.getters.token; // Replace with your method to check auth 
+  if ((to.name !== 'Login' && to.name !== 'AppLogin') && !isAuthenticated) {
+    next({ name: 'Login' }); // Redirect to Login if not authenticated
+  } else {
+    next(); // Proceed to the requested route
+  }
+});
 export default router;

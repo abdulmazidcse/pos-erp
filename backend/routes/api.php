@@ -83,6 +83,7 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
     Route::post('users/outlet_assign', [App\Http\Controllers\API\UserOutletAssignAPIController::class, 'store']);
     Route::resource('users', App\Http\Controllers\API\UserAPIController::class);
     Route::get('user-list', [App\Http\Controllers\API\UserAPIController::class, 'userList']);
+    Route::get('user', [App\Http\Controllers\API\UserAPIController::class, 'user']);
     Route::get('user-helper-data', [App\Http\Controllers\API\UserAPIController::class, 'helperData']);
 
     // Role Routes

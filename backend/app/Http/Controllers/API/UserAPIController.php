@@ -100,6 +100,12 @@ class UserAPIController extends AppBaseController
         return $this->sendResponse($return_data, 'Users retrieved successfully');
     }
 
+    public function user(Request $request)
+    {
+        $user = auth()->user();
+        return response()->json(['user' => $user], 200);
+    }
+
     public function helperData(Request $request){
         $outlets = Outlet::active()->get();
         $outlet_by_company = []; 
