@@ -61,6 +61,7 @@ class CustomerAPIController extends AppBaseController
 
     public function customerList(Request $request)
     {
+
         $user = auth()->user();  
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
         $columns = ['sl','customer_code', 'name', 'phone', 'email', 'address', 'customer_group_name','customer_group_id','customer_receivable_account'];

@@ -439,10 +439,8 @@ export default {
         };
     },
     created() {
-        // this.fetchAccountLedger();
-        this.fetchCompanies();
-        this.getAccountsLedgers();
-        this.fetchGroupData();
+        // 
+        this.fetchCompanies(); 
     },
     methods: { 
 
@@ -457,7 +455,9 @@ export default {
         },
         loadDataBasedOnCompany: function(companyId){ 
             this.fetchGroupData(companyId); 
-            this.getAccountsLedgers(companyId); 
+            // this.getAccountsLedgers(companyId); 
+            this.getAccountsLedgers();
+            this.fetchAccountLedger();
         },
 
         createAccountLedgerModal: function() {
@@ -490,6 +490,11 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((res) => { 
                 this.companies = res.data.data;
+                if (this.companies.length === 1) { 
+                    this.tableData.company_id = this.companies[0].id;
+                    this.fetchGroupData(this.companies[0].id);
+                    this.getAccountsLedgers(this.companies[0].id);
+                }  
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {

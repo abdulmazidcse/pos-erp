@@ -10,8 +10,7 @@
   </transition>
 </template>
 <script>  
-import axios from "axios"; 
-import { APISettings } from '../api.js';
+import axios from "axios";  
 import PosLeftbar from './pos/PosLeftbar'
 import PosRightbar from './pos/PosRightbar'
 import DrawerCategory from './drawer/Category'

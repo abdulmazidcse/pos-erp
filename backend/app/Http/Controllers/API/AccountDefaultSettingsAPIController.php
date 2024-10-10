@@ -94,7 +94,7 @@ class AccountDefaultSettingsAPIController extends AppBaseController
             'cash_in_hand_account'  => 'required',
         ]);
 
-        $setting_data   = AccountDefaultSetting::first();
+        $setting_data   = AccountDefaultSetting::where('company_id', $company_id)->first();
 
         $inputs = [
             'supplier_payable_account_type' => $request->get('supplier_payable_account_type'),

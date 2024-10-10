@@ -283,7 +283,7 @@
 
                                                 <div class="col-md-6">
                                                     <div class="mb-3">
-                                                        <label for="">Inventories Account</label><br>
+                                                        <label for="">Inventories Account </label><br>
                                                         <treeselect 
                                                             v-model="form.inventory_ledger_id"
                                                             :multiple="false" 

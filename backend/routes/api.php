@@ -455,7 +455,7 @@ Route::get('/annual-report', [App\Http\Controllers\API\DashboardAPIController::c
 
 
 
-Route::get('customersss/list', [App\Http\Controllers\API\CustomerAPIController::class, 'customerList']);
+Route::get('setup-company-default-setting', [App\Http\Controllers\API\CompanyAPIController::class, 'setupCompanyDefaultSetting']);
 Route::resource('customersss', App\Http\Controllers\API\CustomerAPIController::class);
 
 // Route::get('reports/stock-report-excel-export', [App\Http\Controllers\API\ReportAPIController::class, 'stockReportExcelExport']);

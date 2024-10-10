@@ -919,26 +919,7 @@
                   </div>
                 </div>
               </div>
-            </div>
-            <div class="col-lg-4">
-              <div class="mb-3">
-                <label for="emp_code" class="form-label" >EMP ID</label>
-                <div class="input-group">
-                  <input
-                    type="text"
-                    class="form-control border"
-                    @keypress="onkeyPress('emp_code')"
-                    v-model="cform.emp_code"
-                    id="product_code"
-                    placeholder="EMP ID"
-                    autocomplete="off"
-                  /> 
-                  <div class="invalid-feedback" v-if="errors.emp_code">
-                    {{ errors.emp_code[0] }}
-                  </div>
-                </div>
-              </div>
-            </div>
+            </div> 
             <!-- end col -->
             <div class="col-lg-4" style="display: none">
               <div class="mb-3">
@@ -1423,7 +1404,7 @@
         <div class="modal-body" id="printMe">
           <div v-if="returnInfo">
             <div id="mid">
-              <div class="info">
+              <div class="info" v-if="returnInfo.customer">
                 <p class="text-left" style="font-size: 14px">
                   Name: {{ returnInfo.customer.name }}<br />
                   Address: {{ returnInfo.customer.address }} <br />
@@ -1901,15 +1882,11 @@
       </div>
     </Modal>
 
-    <Modal @close="addConfirmModal()" :modalActive="confirmModalActive">
+    <Modal  @close="addConfirmModal()" :modalActive="confirmModalActive">
       <div class="modal-content scrollbar-width-thin confirm-window">
         <div class="modal-header">
-          <h5>Invoice Preview</h5>
-          <button
-            @click="addConfirmModal()"
-            type="button"
-            class="btn btn-default"
-          >
+          <h5>Invoice Preview</h5> 
+          <button @click="addConfirmModal()" type="button" class="btn btn-default">
             X
           </button>
         </div>
@@ -1928,7 +1905,7 @@
             </div>
             <!--End InvoiceTop-->
             <div id="mid">
-              <div class="info">
+              <div class="info" v-if="customer">
                 <p class="text-left" style="font-size: 14px">
                   Customer: {{ customer.label }}<br />
                   Address: {{ customer.address }} <br />
@@ -2160,7 +2137,7 @@
             </div>
             <!--End InvoiceTop-->
             <div id="mid" class="fnt10">
-              <div class="info">
+              <div class="info" v-if="invoice_info">
                 <p class="text-left" style="font-size: 14px">
                   Customer : {{ invoice_info.customer.name }}<br />
                   Address: {{ invoice_info.customer.address }} <br />
@@ -2384,17 +2361,12 @@ import { ref } from "vue";
 import Form from "vform";
 import axios from "axios";
 import {
-  reactive,
-  toRefs,
+  reactive, 
   computed,
   inject,
   onMounted,
   getCurrentInstance,
-  onUpdated,
-  onUnmounted,
-  onBeforeMount,
-  onBeforeUnmount,
-  onBeforeUpdate,
+  onUpdated, 
 } from "vue";
 import { useStore } from "vuex";
 import { useToast } from "vue-toastification";
@@ -3700,13 +3672,15 @@ export default {
     },
 
     selectCustomer(event) {
-      this.customer = this.state.customers.find((e) => e.value == event);
-      this.pform.customer_id = this.customer.value;
-      this.pform.customer_group_id = this.customer.customer_group_id;
-      this.pform.customer_group_name  = this.customer.customer_group_name;
-      if(this.pform.customer_id ==1){
-        this.totalCollections = this.pform.payments[0].amount;
-      }  
+      if(event){      
+        this.customer = this.state.customers.find((e) => e.value == event);
+        this.pform.customer_id = this.customer.value;
+        this.pform.customer_group_id = this.customer.customer_group_id;
+        this.pform.customer_group_name  = this.customer.customer_group_name;
+        if(this.pform.customer_id ==1){
+          this.totalCollections = this.pform.payments[0].amount;
+        }  
+      }
     },
 
     handleCustomer: function () {
