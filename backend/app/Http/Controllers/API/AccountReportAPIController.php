@@ -17,14 +17,17 @@ class AccountReportAPIController extends AppBaseController
     public function reportDailyTransaction(Request $request)
     {
         $from_date = $request->get('from_date') ?? Carbon::now()->subMonths(1)->format("Y-m-d");
-        $to_date    = $request->get('to_date') ?? Carbon::now()->format("Y-m-d");
+        $to_date   = $request->get('to_date') ?? Carbon::now()->format("Y-m-d");
+        $company_id= checkCompanyId($request);
 
         $vouchers = AccountVoucher::when($from_date, function ($query) use ($from_date) {
                                         return $query->where('vdate', '>=', $from_date);
                                     })
                                     ->when($to_date, function ($query) use ($to_date) {
                                         return $query->where('vdate', '<=', $to_date);
-                                    })->orderBy('vdate', 'desc')->get();
+                                    })
+                                    ->where('company_id', $company_id)
+                                    ->orderBy('vdate', 'desc')->get();
         $transaction_array = [];
         $total_debit_amount = 0;
         $total_credit_amount = 0;
@@ -57,30 +60,30 @@ class AccountReportAPIController extends AppBaseController
             'to_date'   => $to_date,
         ];
 
-//        $transaction_data = AccountVoucherTransaction::with(['account_vouchers', 'account_ledgers'])
-//            ->when($from_date, function ($query) use ($from_date) {
-//                return $query->whereHas('account_vouchers', function ($query) use ($from_date){
-//                   return $query->where('vdate', '>=', $from_date);
-//                });
-//            })->when($to_date, function ($query) use ($to_date) {
-//                return $query->whereHas('account_vouchers', function ($query) use ($to_date){
-//                   return $query->where('vdate', '<=', $to_date);
-//                });
-//            })
-//            ->get();
-//
-//        $return_data    = $transaction_data->map(function ($item) {
-//            return [
-//                'id'    => $item->id,
-//                'vdate' => $item->account_vouchers->vdate,
-//                'vcode' => $item->account_vouchers->vcode,
-//                'vtype' => ($item->account_vouchers->vtype_id != 0) ? ucfirst($item->account_vouchers->vtype_value) : "Auto",
-//                'ledger_head'   => $item->account_ledgers->ledger_name.' ['.$item->account_ledgers->ledger_code.']',
-//                'notes' => $item->voucher_note,
-//                'debit_amount'  => $item->debit,
-//                'credit_amount' => $item->credit,
-//            ];
-//        });
+        //        $transaction_data = AccountVoucherTransaction::with(['account_vouchers', 'account_ledgers'])
+        //            ->when($from_date, function ($query) use ($from_date) {
+        //                return $query->whereHas('account_vouchers', function ($query) use ($from_date){
+        //                   return $query->where('vdate', '>=', $from_date);
+        //                });
+        //            })->when($to_date, function ($query) use ($to_date) {
+        //                return $query->whereHas('account_vouchers', function ($query) use ($to_date){
+        //                   return $query->where('vdate', '<=', $to_date);
+        //                });
+        //            })
+        //            ->get();
+        //
+        //        $return_data    = $transaction_data->map(function ($item) {
+        //            return [
+        //                'id'    => $item->id,
+        //                'vdate' => $item->account_vouchers->vdate,
+        //                'vcode' => $item->account_vouchers->vcode,
+        //                'vtype' => ($item->account_vouchers->vtype_id != 0) ? ucfirst($item->account_vouchers->vtype_value) : "Auto",
+        //                'ledger_head'   => $item->account_ledgers->ledger_name.' ['.$item->account_ledgers->ledger_code.']',
+        //                'notes' => $item->voucher_note,
+        //                'debit_amount'  => $item->debit,
+        //                'credit_amount' => $item->credit,
+        //            ];
+        //        });
 
         return $this->sendResponse($return_data, 'Transaction Data retrieve successfully!');
 
@@ -134,7 +137,7 @@ class AccountReportAPIController extends AppBaseController
                             return $query->account_vouchers->vdate;
                         })->all();
 
-//    return $report_data;
+        //    return $report_data;
 
 
         $return_data = [
@@ -199,7 +202,7 @@ class AccountReportAPIController extends AppBaseController
                             return $query->account_vouchers->vdate;
                         })->all();
 
-//    return $report_data;
+        //    return $report_data;
 
 
         $return_data = [
@@ -264,7 +267,7 @@ class AccountReportAPIController extends AppBaseController
                             return $query->account_vouchers->vdate;
                         })->all();
 
-//    return $report_data;
+        //    return $report_data;
 
 
         $return_data = [
@@ -329,7 +332,7 @@ class AccountReportAPIController extends AppBaseController
                             return $query->account_vouchers->vdate;
                         })->all();
 
-//    return $report_data;
+        //    return $report_data;
 
 
         $return_data = [

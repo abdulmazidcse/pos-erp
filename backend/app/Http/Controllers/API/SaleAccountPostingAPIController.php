@@ -146,8 +146,9 @@ class SaleAccountPostingAPIController extends AppBaseController
         if(empty($final_non_posted_list)) {
             return $this->sendError('Do not have any posting data');
         }
-
-        $account_default_setting    = AccountDefaultSetting::first();
+ 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $sales_ids    = [];
         $payment_ids    = [];
 

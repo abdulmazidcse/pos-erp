@@ -10,6 +10,9 @@ use App\Models\AccountClass;
 use App\Models\AccountType;
 use App\Models\AccountDefaultSetting;
 use App\Models\AccountLedger;
+use App\Models\EntryType;
+use App\Models\FiscalYear;
+use App\Models\CostCenter;
 use App\Repositories\CompanyRepository;
 use Illuminate\Http\Request;
 use App\Http\Controllers\AppBaseController;
@@ -175,14 +178,16 @@ class CompanyAPIController extends AppBaseController
     }
 
     public function setupCompanyDefaultSetting(Request $request){
-        $company_id = $request->get('company_id');   
-        $accountType = AccountType::where('company_id', $company_id)->get()->toArray();  
+        $company_id = $request->get('company_id');
+        self::entryTypes($company_id);
+        self::fiscalYear($company_id);
+        self::costCenter($company_id);
+        exit;
         $accountClass = self::accountClass($company_id); 
         $accountTypesFirstStep = self::accountTypesFirstStep($company_id);
         $accountTypesSecondStep = self::accountTypesSecondStep($company_id); 
         $defaultLedger = self::accountLedgers($company_id); 
-        $companyDefaultSetting = self::companyDefaultSetting($company_id);        
-        dd($companyDefaultSetting); 
+        $companyDefaultSetting = self::companyDefaultSetting($company_id);
     }
 
     public function accountClass($company_id){ 
@@ -730,6 +735,81 @@ class CompanyAPIController extends AppBaseController
         ];
         return AccountDefaultSetting::updateOrCreate(['company_id' => $company_id], $defaultSetting); 
     } 
+
+    public function entryTypes($company_id){ 
+        $entryTypeData = [
+            [
+                'label' => 'receipt',
+                'company_id' => $company_id,
+                'name' => 'Receipt',
+                'description' => 'payment receive',
+                'numbering' => 1,
+                'prefix' => 'PR',
+                'suffix' => '24x7',
+                'zero_padding' => 0,
+                'restrictions' => 2
+            ],
+            [
+                'label' => 'payment',
+                'company_id' => $company_id,
+                'name' => 'Payment',
+                'description' => 'payment voucher',
+                'numbering' => 1,
+                'prefix' => 'PV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 4
+            ],
+            [
+                'label' => 'journal',
+                'company_id' => $company_id,
+                'name' => 'Journal',
+                'description' => null,
+                'numbering' => 1,
+                'prefix' => 'JV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 1
+            ],
+            [
+                'label' => 'contra',
+                'company_id' => $company_id,
+                'name' => 'Contra',
+                'description' => 'Contra Voucher',
+                'numbering' => 1,
+                'prefix' => 'CV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 1
+            ]
+        ]; 
+        if (!empty($entryTypeData)) {
+            foreach ($entryTypeData as $entry_type) {
+                $thirdStep = EntryType::updateOrCreate(
+                    ['label' => $entry_type['label'], 'company_id' => $entry_type['company_id']],
+                    $entry_type
+                );
+            } 
+        }    
+    }
+
+    public function fiscalYear($company_id){
+        $fiscalYear = getFiscalYear();
+        $fiscalYearData = [
+            'label' => $fiscalYear['label'], 
+            'start_date' => $fiscalYear['start'], 
+            'end_date' => $fiscalYear['end'], 
+            'company_id' => $company_id, 
+            'status' => 1
+        ];        
+        FiscalYear::updateOrCreate(['company_id' => $company_id], $fiscalYearData);
+    }
+    
+    public function costCenter($company_id){
+        $company = Company::find($company_id);
+        $costCenterData = ['center_name' => $company->name, 'company_id' => $company->id, 'status' => 1];
+        CostCenter::updateOrCreate(['company_id' => $company->id], $costCenterData);
+    }
 
 
 

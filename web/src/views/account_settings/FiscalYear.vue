@@ -19,6 +19,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" v-model="tableData.company_id" @change="getFiscalYear()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="toggleModal()" :modalActive="modalActive">
@@ -122,9 +139,8 @@
                                             <div class="control" style="float: left;">
                                                 <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                 <div class="select" style="float: left;">
-                                                    <select class="form-select" v-model="tableData.length" @change="getFiscalYear()"> 
-                                                        <option value="2" selected="selected">2</option>
-                                                        <option value="5" selected="selected">5</option>
+                                                    <select class="form-select" v-model="tableData.length" @change="getFiscalYear()">  
+                                                        <option value="5">5</option>
                                                         <option value="10" selected="selected">10</option>
                                                         <option value="25">25</option>
                                                         <option value="50">50</option>
@@ -207,13 +223,10 @@
     </transition>
 </template>
 
-<script>
-import {mapGetters, mapActions} from "vuex";
-import Modal from "../helper/Modal.vue";
-import Buttons from '@/components/Buttons.vue';
+<script> 
+import Modal from "../helper/Modal.vue"; 
 import Datatable from '@/components/Datatable.vue';
-import Pagination from '@/components/Pagination.vue';
-import { ref, onMounted, getCurrentInstance } from "vue";
+import Pagination from '@/components/Pagination.vue'; 
 import Form from "vform";
 import axios from "axios";
 
@@ -303,6 +316,7 @@ export default {
                 column: 0,
                 dir: 'desc',
                 sortKey: 'label',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -346,6 +360,9 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((resp) => {
                 this.companies = resp.data.data;
+                if(this.companies.length ==1){
+                    this.tableData.company_id = this.companies[0].id
+                }
                 this.company_options = [{label: "Select Company", value: ""}];
                 resp.data.data.map((item) => {
                     this.company_options.push({label:item.name, value:item.id});

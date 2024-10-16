@@ -55,6 +55,7 @@ class BankAccountAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
+        $company_id = checkCompanyId($request);
 
         $query = BankAccount::select('bank_accounts.*', 'baal.ledger_name as bank_asset_account', 'blal.ledger_name as bank_loan_account', 'bcal.ledger_name as bank_charge_account', 'biel.ledger_name as bank_interest_expense_account', 'biil.ledger_name as bank_interest_income_account')
             ->leftJoin('account_ledgers as baal', 'baal.id', 'bank_accounts.bank_asset_account')
@@ -73,7 +74,7 @@ class BankAccountAPIController extends AppBaseController
             });
         }
 
-        $bank_accounts = $query->paginate($length);
+        $bank_accounts = $query->where('bank_accounts.company_id',$company_id)->paginate($length);
         $return_data    = [
             'data' => $bank_accounts,
             'draw' => $request->input('draw')
@@ -97,26 +98,27 @@ class BankAccountAPIController extends AppBaseController
             'company_id'    => 'sometimes',
 
             'bank_asset_account'    => 'required',
-//            'bank_loan_account'    => 'required',
-//            'bank_charge_account'    => 'required',
-//            'bank_interest_expense_account'    => 'required',
-//            'bank_interest_income_account'    => 'required',
+            //            'bank_loan_account'    => 'required',
+            //            'bank_charge_account'    => 'required',
+            //            'bank_interest_expense_account'    => 'required',
+            //            'bank_interest_income_account'    => 'required',
         ]);
 
-//        $input = $request->except(['bank_asset_account', 'bank_loan_account', 'bank_charge_account', 'bank_interest_expense_account', 'bank_interest_income_account']);
+        //        $input = $request->except(['bank_asset_account', 'bank_loan_account', 'bank_charge_account', 'bank_interest_expense_account', 'bank_interest_income_account']);
         $input = $request->except(['bank_asset_account']);
 
         $input['initial_balance']   = 0;
         $input['current_balance']   = 0;
 
-
-        $account_default_setting = AccountDefaultSetting::first();
+ 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
 
         $bank_asset_account_type = AccountType::where('id', $account_default_setting->bank_account_asset_type)->first();
-//        $bank_loan_account_type = AccountType::where('id', $account_default_setting->bank_loan_account_liability_type)->first();
-//        $bank_charge_account_type = AccountType::where('id', $account_default_setting->bank_charge_account_expense_type)->first();
-//        $bank_interest_expense_account_type = AccountType::where('id', $account_default_setting->bank_loan_interest_expense_type)->first();
-//        $bank_interest_income_account_type = AccountType::where('id', $account_default_setting->bank_interest_income_type)->first();
+        //        $bank_loan_account_type = AccountType::where('id', $account_default_setting->bank_loan_account_liability_type)->first();
+        //        $bank_charge_account_type = AccountType::where('id', $account_default_setting->bank_charge_account_expense_type)->first();
+        //        $bank_interest_expense_account_type = AccountType::where('id', $account_default_setting->bank_loan_interest_expense_type)->first();
+        //        $bank_interest_income_account_type = AccountType::where('id', $account_default_setting->bank_interest_income_type)->first();
 
         $bank_asset_account_inputs = [
             'ledger_code'   => $this->returnAccountCode($bank_asset_account_type->id, 'dtype'),
@@ -125,50 +127,50 @@ class BankAccountAPIController extends AppBaseController
             'detail_type_id'    => $bank_asset_account_type->id,
         ];
 
-//        $bank_loan_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($bank_loan_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('bank_loan_account'),
-//            'type_id'   => $bank_loan_account_type->parent_type_id,
-//            'detail_type_id'    => $bank_loan_account_type->id,
-//        ];
-//
-//        $bank_charge_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($bank_charge_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('bank_charge_account'),
-//            'type_id'   => $bank_charge_account_type->parent_type_id,
-//            'detail_type_id'    => $bank_charge_account_type->id,
-//        ];
-//
-//        $bank_interest_expense_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($bank_interest_expense_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('bank_interest_expense_account'),
-//            'type_id'   => $bank_interest_expense_account_type->parent_type_id,
-//            'detail_type_id'    => $bank_interest_expense_account_type->id,
-//        ];
-//
-//        $bank_interest_income_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($bank_interest_income_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('bank_interest_income_account'),
-//            'type_id'   => $bank_interest_income_account_type->parent_type_id,
-//            'detail_type_id'    => $bank_interest_income_account_type->id,
-//        ];
+            //        $bank_loan_account_inputs = [
+            //            'ledger_code'   => $this->returnAccountCode($bank_loan_account_type->id, 'dtype'),
+            //            'ledger_name'   => $request->get('bank_loan_account'),
+            //            'type_id'   => $bank_loan_account_type->parent_type_id,
+            //            'detail_type_id'    => $bank_loan_account_type->id,
+            //        ];
+            //
+            //        $bank_charge_account_inputs = [
+            //            'ledger_code'   => $this->returnAccountCode($bank_charge_account_type->id, 'dtype'),
+            //            'ledger_name'   => $request->get('bank_charge_account'),
+            //            'type_id'   => $bank_charge_account_type->parent_type_id,
+            //            'detail_type_id'    => $bank_charge_account_type->id,
+            //        ];
+            //
+            //        $bank_interest_expense_account_inputs = [
+            //            'ledger_code'   => $this->returnAccountCode($bank_interest_expense_account_type->id, 'dtype'),
+            //            'ledger_name'   => $request->get('bank_interest_expense_account'),
+            //            'type_id'   => $bank_interest_expense_account_type->parent_type_id,
+            //            'detail_type_id'    => $bank_interest_expense_account_type->id,
+            //        ];
+            //
+            //        $bank_interest_income_account_inputs = [
+            //            'ledger_code'   => $this->returnAccountCode($bank_interest_income_account_type->id, 'dtype'),
+            //            'ledger_name'   => $request->get('bank_interest_income_account'),
+            //            'type_id'   => $bank_interest_income_account_type->parent_type_id,
+            //            'detail_type_id'    => $bank_interest_income_account_type->id,
+            //        ];
 
-//        return response()->json([$bank_asset_account_inputs, $bank_loan_account_inputs, $bank_charge_account_inputs, $bank_interest_income_account_inputs, $bank_interest_expense_account_inputs]);
+            //        return response()->json([$bank_asset_account_inputs, $bank_loan_account_inputs, $bank_charge_account_inputs, $bank_interest_income_account_inputs, $bank_interest_expense_account_inputs]);
 
         DB::beginTransaction();
         try{
 
             $bank_asset_account   = AccountLedger::create($bank_asset_account_inputs);
-//            $bank_loan_account   = AccountLedger::create($bank_loan_account_inputs);
-//            $bank_charge_account   = AccountLedger::create($bank_charge_account_inputs);
-//            $bank_interest_expense_account   = AccountLedger::create($bank_interest_expense_account_inputs);
-//            $bank_interest_income_account   = AccountLedger::create($bank_interest_income_account_inputs);
+            //            $bank_loan_account   = AccountLedger::create($bank_loan_account_inputs);
+            //            $bank_charge_account   = AccountLedger::create($bank_charge_account_inputs);
+            //            $bank_interest_expense_account   = AccountLedger::create($bank_interest_expense_account_inputs);
+            //            $bank_interest_income_account   = AccountLedger::create($bank_interest_income_account_inputs);
 
             $input['bank_asset_account'] = $bank_asset_account->id;
-//            $input['bank_loan_account'] = $bank_loan_account->id;
-//            $input['bank_charge_account'] = $bank_charge_account->id;
-//            $input['bank_interest_expense_account'] = $bank_interest_expense_account->id;
-//            $input['bank_interest_income_account'] = $bank_interest_income_account->id;
+            //            $input['bank_loan_account'] = $bank_loan_account->id;
+            //            $input['bank_charge_account'] = $bank_charge_account->id;
+            //            $input['bank_interest_expense_account'] = $bank_interest_expense_account->id;
+            //            $input['bank_interest_income_account'] = $bank_interest_income_account->id;
 
 
             $account = $this->bankAccountRepository->create($input);
@@ -239,8 +241,9 @@ class BankAccountAPIController extends AppBaseController
         if (empty($account)) {
             return $this->sendError('Account not found');
         }
-
-        $account_default_setting = AccountDefaultSetting::first();
+ 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
 
         $bank_asset_account_type = AccountType::where('id', $account_default_setting->bank_account_asset_type)->first();
 //        $bank_loan_account_type = AccountType::where('id', $account_default_setting->bank_loan_account_liability_type)->first();

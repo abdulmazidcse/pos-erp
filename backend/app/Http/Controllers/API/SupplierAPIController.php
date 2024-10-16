@@ -38,20 +38,8 @@ class SupplierAPIController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-        // $suppliers = $this->supplierRepository->all(
-        //     $request->except(['skip', 'limit']),
-        //     $request->get('skip'),
-        //     $request->get('limit')
-        // );
-
-        $user = auth()->user();  
-        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
-        if (in_array('Super Admin', $roles)) { 
-            $company_id  = $request->input('company_id');
-        }else{
-            $company_id  = $user->company_id;
-        }     
+    { 
+        $company_id = checkCompanyId($request); 
         $suppliers =  $this->supplierRepository->allQuery()->when($company_id, function($q, $company_id){
             return $q->where('company_id', $company_id);
         })->get();  
@@ -66,11 +54,7 @@ class SupplierAPIController extends AppBaseController
     {
         $user = auth()->user();  
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
-        if (in_array('Super Admin', $roles)) { 
-            $company_id  = $request->input('company_id');
-        }else{
-            $company_id  = $user->company_id;
-        } 
+        $company_id = checkCompanyId($request); 
 
         $columns = ['name', 'phone', 'email', 'address', 'status'];
         $length = $request->input('length');
@@ -125,15 +109,15 @@ class SupplierAPIController extends AppBaseController
             'commission_percent'    => $cp_rules,
             'logo_image'      => 'sometimes|image|max:2000|mimes:jpeg,png,jpg,gif,svg',
             'supplier_payable_account' => 'required',
-//            'supplier_discount_account' => 'required',
-//            'supplier_advance_account' => 'required',
+            //            'supplier_discount_account' => 'required',
+            //            'supplier_advance_account' => 'required',
 
         ]);
 
 
-//        return response()->json($request->all());
+            //        return response()->json($request->all());
 
-//        $input = $request->except(['supplier_payable_account', 'supplier_discount_account', 'supplier_advance_account']);
+            //        $input = $request->except(['supplier_payable_account', 'supplier_discount_account', 'supplier_advance_account']);
         $input = $request->except(['supplier_payable_account']);
 
         if($request->payment_matured_days == '') {
@@ -149,48 +133,48 @@ class SupplierAPIController extends AppBaseController
             $fileName   = $this->uploadFile($file, 'supplier', 'supplier_logo_');
             $input['logo_image'] = $fileName;
         }
-
-        $account_default_setting = AccountDefaultSetting::first();
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $supplier_payable_account_type = AccountType::where('id', $account_default_setting->supplier_payable_account_type)->first();
-//        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
-//        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
+        //        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
+        //        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
 
         $payable_account_inputs = [
-            'ledger_code'   => $this->returnAccountCode($supplier_payable_account_type->id, 'dtype'),
+            'ledger_code'   => $this->returnAccountCode( $company_id, $supplier_payable_account_type->id, 'dtype'),
             'ledger_name'   => $request->get('supplier_payable_account'),
             'type_id'   => $supplier_payable_account_type->parent_type_id,
             'detail_type_id'    => $supplier_payable_account_type->id,
         ];
 
-//        $discount_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('supplier_payable_account'),
-//            'type_id'   => $supplier_discount_account_type->parent_type_id,
-//            'detail_type_id'    => $supplier_discount_account_type->id,
-//        ];
-//
-//        $advance_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('supplier_advance_account'),
-//            'type_id'   => $supplier_advance_account_type->parent_type_id,
-//            'detail_type_id'    => $supplier_advance_account_type->id,
-//        ];
+        //        $discount_account_inputs = [
+        //            'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
+        //            'ledger_name'   => $request->get('supplier_payable_account'),
+        //            'type_id'   => $supplier_discount_account_type->parent_type_id,
+        //            'detail_type_id'    => $supplier_discount_account_type->id,
+        //        ];
+        //
+        //        $advance_account_inputs = [
+        //            'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
+        //            'ledger_name'   => $request->get('supplier_advance_account'),
+        //            'type_id'   => $supplier_advance_account_type->parent_type_id,
+        //            'detail_type_id'    => $supplier_advance_account_type->id,
+        //        ];
 
         DB::beginTransaction();
         try {
             $payable_account_save   = AccountLedger::create($payable_account_inputs);
-//            $discount_account_save   = AccountLedger::create($discount_account_inputs);
-//            $advance_account_save   = AccountLedger::create($advance_account_inputs);
+        //            $discount_account_save   = AccountLedger::create($discount_account_inputs);
+        //            $advance_account_save   = AccountLedger::create($advance_account_inputs);
 
             $input['payable_ledger_id'] = $payable_account_save->id;
-//            $input['discount_ledger_id'] = $discount_account_save->id;
-//            $input['advance_ledger_id'] = $advance_account_save->id;
+        //            $input['discount_ledger_id'] = $discount_account_save->id;
+        //            $input['advance_ledger_id'] = $advance_account_save->id;
             $supplier = $this->supplierRepository->create($input);
-//            $supplier->update([
-//                'payable_ledger_id' => $payable_account_save->id,
-//                'discount_ledger_id' => $discount_account_save->id,
-//                'advance_ledger_id' => $advance_account_save->id,
-//            ]);
+        //            $supplier->update([
+        //                'payable_ledger_id' => $payable_account_save->id,
+        //                'discount_ledger_id' => $discount_account_save->id,
+        //                'advance_ledger_id' => $advance_account_save->id,
+        //            ]);
 
             DB::commit();
             return $this->sendResponse($supplier->toArray(), 'Supplier saved successfully');
@@ -211,48 +195,49 @@ class SupplierAPIController extends AppBaseController
         ]);
 
         $input = [
-            'name'  => $request->get('name'),
+            'name'      => $request->get('name'),
             'type_id'   => $request->get('supplier_type_id'),
             'phone'     => $request->get('phone'),
             'email'     => $request->get('email'),
             'payment_terms_conditions'  => 4
         ];
 
-        $account_default_setting = AccountDefaultSetting::first();
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $supplier_payable_account_type = AccountType::where('id', $account_default_setting->supplier_payable_account_type)->first();
-//        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
-//        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
+        //        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
+        //        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
 
         $payable_account_inputs = [
-            'ledger_code'   => $this->returnAccountCode($supplier_payable_account_type->id, 'dtype'),
+            'ledger_code'   => $this->returnAccountCode($company_id, $supplier_payable_account_type->id, 'dtype'),
             'ledger_name'   => $request->get('name'),
             'type_id'   => $supplier_payable_account_type->parent_type_id,
             'detail_type_id'    => $supplier_payable_account_type->id,
         ];
 
-//        $discount_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('name'). " Discount",
-//            'type_id'   => $supplier_discount_account_type->parent_type_id,
-//            'detail_type_id'    => $supplier_discount_account_type->id,
-//        ];
-//
-//        $advance_account_inputs = [
-//            'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
-//            'ledger_name'   => $request->get('name'). " Advance",
-//            'type_id'   => $supplier_advance_account_type->parent_type_id,
-//            'detail_type_id'    => $supplier_advance_account_type->id,
-//        ];
+        //        $discount_account_inputs = [
+        //            'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
+        //            'ledger_name'   => $request->get('name'). " Discount",
+        //            'type_id'   => $supplier_discount_account_type->parent_type_id,
+        //            'detail_type_id'    => $supplier_discount_account_type->id,
+        //        ];
+        //
+        //        $advance_account_inputs = [
+        //            'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
+        //            'ledger_name'   => $request->get('name'). " Advance",
+        //            'type_id'   => $supplier_advance_account_type->parent_type_id,
+        //            'detail_type_id'    => $supplier_advance_account_type->id,
+        //        ];
 
         DB::beginTransaction();
         try {
             $payable_account_save   = AccountLedger::create($payable_account_inputs);
-//            $discount_account_save   = AccountLedger::create($discount_account_inputs);
-//            $advance_account_save   = AccountLedger::create($advance_account_inputs);
+        //            $discount_account_save   = AccountLedger::create($discount_account_inputs);
+        //            $advance_account_save   = AccountLedger::create($advance_account_inputs);
 
             $input['payable_ledger_id'] = $payable_account_save->id;
-//            $input['discount_ledger_id'] = $discount_account_save->id;
-//            $input['advance_ledger_id'] = $advance_account_save->id;
+        //            $input['discount_ledger_id'] = $discount_account_save->id;
+        //            $input['advance_ledger_id'] = $advance_account_save->id;
             $supplier = $this->supplierRepository->create($input);
 
             DB::commit();
@@ -309,12 +294,12 @@ class SupplierAPIController extends AppBaseController
             'commission_percent'    => $cp_rules,
             'logo_image'      => 'sometimes|image|max:2000|mimes:jpeg,png,jpg,gif,svg',
             'supplier_payable_account' => 'required',
-//            'supplier_discount_account' => 'required',
-//            'supplier_advance_account' => 'required',
+            //            'supplier_discount_account' => 'required',
+            //            'supplier_advance_account' => 'required',
 
         ]);
 
-//        $input = $request->except(['supplier_payable_account', 'supplier_discount_account', 'supplier_advance_account']);
+        //        $input = $request->except(['supplier_payable_account', 'supplier_discount_account', 'supplier_advance_account']);
         $input = $request->except(['supplier_payable_account']);
 
         /** @var Supplier $supplier */
@@ -335,28 +320,29 @@ class SupplierAPIController extends AppBaseController
         }
 
         // Account Added
-        $account_default_setting = AccountDefaultSetting::first();
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $supplier_payable_account_type = AccountType::where('id', $account_default_setting->supplier_payable_account_type)->first();
-//        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
-//        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
+        //        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
+        //        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
 
         $supplier_payable_ledger    = $supplier->payable_accounts;
-//        $supplier_discount_ledger   = $supplier->discount_accounts;
-//        $supplier_advance_ledger    = $supplier->advance_accounts;
+        //        $supplier_discount_ledger   = $supplier->discount_accounts;
+        //        $supplier_advance_ledger    = $supplier->advance_accounts;
 
 
-//        return $this->sendResponse($supplier_payable_ledger, "Test");
+        //        return $this->sendResponse($supplier_payable_ledger, "Test");
         DB::beginTransaction();
         try {
             // Payable Ledger
-//            if(!empty($supplier_payable_ledger)) {
-//                $supplier_payable_ledger->update(['ledger_name' => $request->get('supplier_payable_account')]);
-//
-//            }
+            //            if(!empty($supplier_payable_ledger)) {
+            //                $supplier_payable_ledger->update(['ledger_name' => $request->get('supplier_payable_account')]);
+            //
+            //            }
 
             if(empty($supplier_payable_ledger)) {
                 $supplier_payable_inputs    = [
-                    'ledger_code'   => $this->returnAccountCode($supplier_payable_account_type->id, 'dtype'),
+                    'ledger_code'   => $this->returnAccountCode($company_id, $supplier_payable_account_type->id, 'dtype'),
                     'ledger_name'   => $request->get('supplier_payable_account'),
                     'type_id'   => $supplier_payable_account_type->parent_type_id,
                     'detail_type_id'    => $supplier_payable_account_type->id,
@@ -367,39 +353,39 @@ class SupplierAPIController extends AppBaseController
                 $input['payable_ledger_id'] = $payable_account_save->id;
             }
 
-//            // Discount Ledger
-//            if(!empty($supplier_discount_ledger)) {
-//                $supplier_discount_ledger->update(['ledger_name' => $request->get('supplier_discount_account')]);
-//
-//            }else{
-//                $supplier_discount_inputs    = [
-//                    'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
-//                    'ledger_name'   => $request->get('supplier_discount_account'),
-//                    'type_id'   => $supplier_discount_account_type->parent_type_id,
-//                    'detail_type_id'    => $supplier_discount_account_type->id,
-//                ];
-//
-//                $discount_account_save   = AccountLedger::create($supplier_discount_inputs);
-//
-//                $input['discount_ledger_id'] = $discount_account_save->id;
-//            }
-//
-//            // Advance Ledger
-//            if(!empty($supplier_advance_ledger)) {
-//                $supplier_advance_ledger->update(['ledger_name' => $request->get('supplier_advance_account')]);
-//
-//            }else{
-//                $supplier_advance_inputs    = [
-//                    'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
-//                    'ledger_name'   => $request->get('supplier_advance_account'),
-//                    'type_id'   => $supplier_advance_account_type->parent_type_id,
-//                    'detail_type_id'    => $supplier_advance_account_type->id,
-//                ];
-//
-//                $advance_account_save   = AccountLedger::create($supplier_advance_inputs);
-//
-//                $input['advance_ledger_id'] = $advance_account_save->id;
-//            }
+        //            // Discount Ledger
+        //            if(!empty($supplier_discount_ledger)) {
+        //                $supplier_discount_ledger->update(['ledger_name' => $request->get('supplier_discount_account')]);
+        //
+        //            }else{
+        //                $supplier_discount_inputs    = [
+        //                    'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
+        //                    'ledger_name'   => $request->get('supplier_discount_account'),
+        //                    'type_id'   => $supplier_discount_account_type->parent_type_id,
+        //                    'detail_type_id'    => $supplier_discount_account_type->id,
+        //                ];
+        //
+        //                $discount_account_save   = AccountLedger::create($supplier_discount_inputs);
+        //
+        //                $input['discount_ledger_id'] = $discount_account_save->id;
+        //            }
+        //
+        //            // Advance Ledger
+        //            if(!empty($supplier_advance_ledger)) {
+        //                $supplier_advance_ledger->update(['ledger_name' => $request->get('supplier_advance_account')]);
+        //
+        //            }else{
+        //                $supplier_advance_inputs    = [
+        //                    'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
+        //                    'ledger_name'   => $request->get('supplier_advance_account'),
+        //                    'type_id'   => $supplier_advance_account_type->parent_type_id,
+        //                    'detail_type_id'    => $supplier_advance_account_type->id,
+        //                ];
+        //
+        //                $advance_account_save   = AccountLedger::create($supplier_advance_inputs);
+        //
+        //                $input['advance_ledger_id'] = $advance_account_save->id;
+        //            }
 
             $supplier = $this->supplierRepository->update($input, $id);
 

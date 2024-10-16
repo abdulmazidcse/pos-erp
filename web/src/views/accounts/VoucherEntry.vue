@@ -19,6 +19,23 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12"> 
+                    <div class="col-md-10">
+                        <div class="row">  
+                            <div class="col-md-6">
+                                <div class="">
+                                    <label for="outlet_id"> Company </label> 
+                                    <select class="form-control" @change="onChangeConpany($event.target.value)">
+                                        <option value="">--- Select Company ---</option>
+                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> 
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -418,6 +435,8 @@ export default {
             errors: {},
             vitem: '',
             entry_types: [],
+            company_id : '',
+            companies: [],
             vtype_value: this.$route.query.type ?? '',
             vtype_id: '',
             fiscal_years: [],
@@ -495,11 +514,7 @@ export default {
         };
     },
     created() {
-        this.fetchEntryTypes();
-        this.fetchVoucherCode();
-        this.fetchFiscalYear();
-        this.fetchCostCenter();
-        this.fetchAccountLedgers();
+        this.fetchCompanies()
     },
     methods: {
         redirectRoute: function(route_link) {
@@ -507,11 +522,8 @@ export default {
         },
 
         toggleVoucherPrintModal() {
-
             this.voucherModalPrintActive = !this.voucherModalPrintActive;
-
         },
-
         forceRerender() {
             // Remove my-component from the DOM
             this.renderOptionComponent = false;
@@ -527,8 +539,37 @@ export default {
             this.vform.cheque_date = '';
         },
 
-        fetchEntryTypes() {
-            axios.get(this.apiUrl+'/entry_types', this.headerjson)
+        onChangeConpany(companyId){
+            this.company_id = companyId;
+            this.fetchEntryTypes(companyId);
+            this.fetchVoucherCode(companyId);
+            this.fetchFiscalYear(companyId);
+            this.fetchCostCenter(companyId);
+            this.fetchAccountLedgers(companyId);
+        },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+
+                if(this.companies.length == 1){
+                    const companyId = this.companies[0].id; 
+                    this.company_id = companyId;
+                    this.fetchEntryTypes(companyId);
+                    this.fetchVoucherCode(companyId);
+                    this.fetchFiscalYear(companyId);
+                    this.fetchCostCenter(companyId);
+                    this.fetchAccountLedgers(companyId);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        }, 
+        
+        fetchEntryTypes(company_id) {
+            axios.get(this.apiUrl+'/entry_types?company_id='+company_id, this.headerjson)
             .then((resp) => {
                 this.entry_types = resp.data.data;
             })
@@ -537,9 +578,9 @@ export default {
             });
         },
 
-        fetchVoucherCode() {
+        fetchVoucherCode(company_id) {
             var data = {vtype: this.vtype_value}
-            axios.post(this.apiUrl+'/accounts/getVoucherCode', data, this.headerjson) 
+            axios.post(this.apiUrl+'/accounts/getVoucherCode?company_id='+company_id, data, this.headerjson) 
             .then((resp) => {
                 this.vform.vcode = resp.data.data.voucher_code;
                 this.vtype_id = resp.data.data.voucher_type_id;
@@ -549,8 +590,8 @@ export default {
             });
         },
 
-        fetchFiscalYear() {
-            axios.get(this.apiUrl+'/fiscal_years/getActiveFiscalYear', this.headerjson) 
+        fetchFiscalYear(company_id) {
+            axios.get(this.apiUrl+'/fiscal_years/getActiveFiscalYear?company_id='+company_id, this.headerjson) 
             .then((resp) => {
                 this.fiscal_years = resp.data.data;
                 this.vform.fiscalyear_id = resp.data.data[0].id;
@@ -562,8 +603,8 @@ export default {
             });
         },
 
-        fetchCostCenter() {
-            axios.get(this.apiUrl+'/cost_centers', this.headerjson)
+        fetchCostCenter(company_id) {
+            axios.get(this.apiUrl+'/cost_centers?company_id='+company_id, this.headerjson)
             .then((resp) => {
                 this.cost_centers = resp.data.data;
             })
@@ -572,8 +613,8 @@ export default {
             })
         },
 
-        fetchAccountLedgers() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption', this.headerjson)
+        fetchAccountLedgers(company_id) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption?company_id='+company_id, this.headerjson)
             .then((resp) => {
                 this.ledgers = resp.data.data.accounts;  
             })
@@ -592,6 +633,7 @@ export default {
             this.vform.vreceipt_type = 'cash';
             this.vform.cheque_no = '';
             this.vform.cheque_date = '';
+            const companyId = this.company_id;
 
             if(this.vtype_value != "") {
 
@@ -607,7 +649,7 @@ export default {
                 }
                 var type_id = event.target.options[event.target.options.selectedIndex].dataset.id;
                 this.vtype_id = type_id;
-                this.fetchVoucherCode();
+                this.fetchVoucherCode(companyId);
             }else{
                 this.vtype_id = '';
                 this.vform.vcode = '';
@@ -780,6 +822,7 @@ export default {
 
             if((this.total_debit_amount == this.total_credit_amount) && (this.total_debit_amount != '0.00' && this.total_credit_amount != '0.00')) {
                 var formData = new FormData();
+                formData.append("company_id", this.vform.company_id);
                 formData.append("vcode", this.vform.vcode);
                 formData.append("vnumber", this.vform.vnumber);
                 formData.append("cost_center_id", this.vform.cost_center_id);
@@ -797,14 +840,12 @@ export default {
                     this.isSubmit = false;
                     this.disabled = false;
                     if(resp.status == 200){
-
-                        console.log("datatdatata==", resp.data.data );
                         this.vform.reset();
                         this.vtype_id = '';
                         this.vtype_value = this.$route.query.type ?? '';
                         this.vitem  = resp.data.data;
                         this.forceRerender();
-                        this.fetchVoucherCode();
+                        this.fetchVoucherCode(this.vform.company_id);
                         this.vform.fiscalyear_id = this.fiscal_years[0].id;
                         this.$toast.success(resp.data.message); 
 

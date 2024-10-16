@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('account_vouchers', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->string('vcode')->unique();
             $table->string('invoice_reference', 191)->nullable();
             $table->string('invoice_type', 20)->nullable();

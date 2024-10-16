@@ -44,8 +44,7 @@ class ProductCategoryAPIController extends AppBaseController
         //        );
 
         $parent_id = $request->get('parent_id');
-        $company_id = checkCompanyId($request);
-
+        $company_id = checkCompanyId($request); 
         if(isset($parent_id)) {
             $productCategories = ProductCategory::where('status', 1)
                 ->where('company_id', $company_id)
@@ -68,11 +67,12 @@ class ProductCategoryAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
-        $company_id = checkCompanyId($request);
+        $company_id = checkCompanyId($request); 
         $query = ProductCategory::with(['parents' => function($query){
             $query->select('id','parent_id', 'name');
         }])->where('company_id', $company_id)
-        ->select('id', 'name', 'parent_id', 'image', 'discount', 'description', 'status', 'created_at')->orderBy($columns[$column], $dir);
+        ->select('id', 'name', 'parent_id', 'image', 'discount', 'description', 'status', 'created_at')
+        ->orderBy($columns[$column], $dir);
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {
@@ -102,14 +102,9 @@ class ProductCategoryAPIController extends AppBaseController
             'name'      => 'required',
             'is_featured'   => 'required',
             'image'     => 'sometimes|image|mimes:jpeg,png,jpg,gif,svg|max:2000'
-        ]); 
-
-        
-
+        ]);  
         $input = $request->all(); 
-
-        // return Request::file('image');
-        // return $request->file('image');
+        $company_id = checkCompanyId($request); 
 
         if($request->hasFile('image')){
 
@@ -117,11 +112,8 @@ class ProductCategoryAPIController extends AppBaseController
             $file_name = $this->uploadFile($file, 'product_categories', 'pcat_');
 
             $input['image'] = $file_name;
-        }
-        if(!$request->company_id){
-            $input['company_id'] = Auth::user() ? Auth::user()->company_id : 1;
-        }
-        
+        } 
+        $input['company_id'] = $company_id;        
 
         $productCategory = $this->productCategoryRepository->create($input);
 

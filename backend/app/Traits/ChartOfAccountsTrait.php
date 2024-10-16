@@ -261,12 +261,11 @@ trait ChartOfAccountsTrait
 
 
     // AccountsOptions
-    public function getChartOfAccountOptions($accounts, $step = 0, $chosen=0){
+    public function getChartOfAccountOptions($company_id, $accounts, $step = 0, $chosen=0){
 
         if($step == 0) {
-            $accounts = AccountLedger::doesntHave('parent')->orderBy('ledger_code')->get();
+            $accounts = AccountLedger::doesntHave('parent')->where('company_id', $company_id)->orderBy('ledger_code')->get();
         }
-
         $treeData = array();
         foreach ($accounts as $key => $account) {
             $treeData[] = [
@@ -276,14 +275,8 @@ trait ChartOfAccountsTrait
                 'account_type'  => "ledger",
                 'account_type_name'  => ucwords(strtolower($account->account_types->type_name)),
                 'detail_type_id'  => $account->detail_type_id,
-                'children'  => $this->getChartOfAccountOptions($account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
-            ];
-            //            $treeData[] = [
-            //                'id'    => $account->id,
-            //                'label'   => '['.$account->ledger_code.'] '.$account->ledger_name,
-            //                'children'      => $this->getChartOfAccountOptions($account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
-            //            ];
-
+                'children'  => $this->getChartOfAccountOptions($company_id, $account->children_accounts()->where('is_control_transaction', 0)->get(), $step + 1),
+            ]; 
         }
 
         return $treeData;

@@ -1154,9 +1154,12 @@ export default {
 
         fetchCompanies() {   
             axios.get(this.apiUrl+'/companies', this.headerjson)
-            .then((res) => {
-                console.log('res', res.data.data)
+            .then((res) => { 
                 this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.fetchAccountDefaultSettings(this.companies[0].id);
+                    this.fetchAccountLedgers(this.companies[0].id);
+                }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
             }).finally((ress) => {

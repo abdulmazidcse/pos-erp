@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('entry_types', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->string('label');
             $table->string('name')->unique();
             $table->string('description')->nullable();

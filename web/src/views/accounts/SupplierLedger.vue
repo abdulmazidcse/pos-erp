@@ -19,6 +19,23 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12"> 
+                    <div class="col-md-10">
+                        <div class="row">  
+                            <div class="col-md-6">
+                                <div class="">
+                                    <label for="outlet_id"> Company </label> 
+                                    <select class="form-control" @change="fetchSuppliers($event.target.value)">
+                                        <option value="">--- Select Company ---</option>
+                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> 
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -208,6 +225,7 @@ export default {
             errors: {},
             items: [],
             suppliers: [],
+            companies:[],
             search_terms: new Form({
                 from_date: '',
                 to_date: '',
@@ -222,7 +240,7 @@ export default {
     created() {
         // this.fetchProductExpiredReport();
         // this.fetchSupplierLedgers();
-        this.fetchSuppliers();
+        this.fetchCompanies();
     },
     methods: { 
 
@@ -231,8 +249,21 @@ export default {
             this.errors = '';
             this.isSubmit = false;
         },
-        fetchSuppliers() {
-            axios.get(this.apiUrl+'/suppliers', this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.fetchSuppliers(this.companies[0].id); 
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+        fetchSuppliers(companyId) {
+            axios.get(this.apiUrl+'/suppliers?company_id='+companyId, this.headerjson)
             .then((resp) => {
                 this.suppliers = resp.data.data;
             })

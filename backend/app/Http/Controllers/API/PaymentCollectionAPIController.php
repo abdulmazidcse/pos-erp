@@ -157,8 +157,9 @@ class PaymentCollectionAPIController extends AppBaseController
         ]; 
         $accountVoucher = AccountVoucher::create($inputs); 
 
-        $customer = Customer::with(['receivable_accounts'])->find($input['customer_id']);
-        $accountDefaultSetting  = AccountDefaultSetting::first();
+        $customer = Customer::with(['receivable_accounts'])->find($input['customer_id']); 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $cash_ledger    = getLedgerAccountById($accountDefaultSetting->cash_in_hand_account); // dr assets 
         $account_receivable_ledger    = $customer->receivable_accounts ? getLedgerAccountById($customer->receivable_accounts->id) : getLedgerAccountById($accountDefaultSetting->account_reaceivable_ledger); // cr assets 
 

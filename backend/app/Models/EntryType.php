@@ -28,6 +28,7 @@ class EntryType extends Model
 
     public $fillable = [
         'label',
+        'company_id',
         'name',
         'description',
         'numbering',

@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('general_settings', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->boolean('invoice_sms_status')->default(true)->comment('1=Active 0=In-Active');
             $table->unsignedTinyInteger('payment_status')->default(1)->comment('1=Active 0=In-Active');
             $table->unsignedTinyInteger('date_status')->default(1)->comment('1=Active 0=In-Active');

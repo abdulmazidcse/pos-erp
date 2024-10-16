@@ -20,6 +20,24 @@
             </div>
         </div>
 
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" v-model="tableData.company_id" @change="getCostCenters()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
+
         <!-- Modal -->
         <Modal @close="toggleModal()" :modalActive="modalActive">
             <div class="modal-content scrollbar-width-thin">
@@ -323,6 +341,7 @@ export default {
                 column: 0,
                 dir: 'asc',
                 sortKey: 'center_name',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -366,6 +385,9 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((res) => {
                 this.companies = res.data.data;
+                if(this.companies.length ==1){
+                    this.tableData.company_id = this.companies[0].id
+                }
                 
                 this.company_options = [{label: "Select Company", value: ""}];
                 res.data.data.map((item) => {

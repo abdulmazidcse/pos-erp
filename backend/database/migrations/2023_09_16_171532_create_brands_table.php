@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('brands', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->string('name');
             $table->mediumText('description')->nullable();
             $table->string('website')->nullable();

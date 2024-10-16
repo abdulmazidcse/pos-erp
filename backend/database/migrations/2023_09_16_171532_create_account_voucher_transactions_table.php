@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('account_voucher_transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('voucher_id');
             $table->string('cost_center_id')->nullable();
             $table->unsignedBigInteger('ledger_id');

@@ -45,9 +45,10 @@ class FiscalYearAPIController extends AppBaseController
     }
 
     //Get Fiscal Year
-    public function getActiveFiscalYear()
+    public function getActiveFiscalYear(Request $request)
     {
-        $fiscalYears = FiscalYear::where('status', 1)->get();
+        $company_id = checkCompanyId($request);
+        $fiscalYears = FiscalYear::where('status', 1)->where('company_id',$company_id)->get();
         if(empty($fiscalYears)) {
             $this->sendError('Fiscal year not found!');
         }
@@ -64,6 +65,7 @@ class FiscalYearAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
+        $company_id = checkCompanyId($request);
 
         $query = FiscalYear::with(['companies'])->orderBy($columns[$column], $dir);
 
@@ -75,7 +77,7 @@ class FiscalYearAPIController extends AppBaseController
             });
         }
 
-        $fiscal_years = $query->paginate($length);
+        $fiscal_years = $query->where('company_id',$company_id)->paginate($length);
         $return_data    = [
             'data' => $fiscal_years,
             'draw' => $request->input('draw')
@@ -103,6 +105,7 @@ class FiscalYearAPIController extends AppBaseController
 
         $start = date('Y-m-d', strtotime($request->get('start_date')));
         $end = date('Y-m-d', strtotime($request->get('end_date')));
+        $company_id = checkCompanyId($request);
 
         $checkExists = FiscalYear::where(function ($query) use($start, $end){
                             return $query->where(function($query) use($start, $end){
@@ -127,12 +130,13 @@ class FiscalYearAPIController extends AppBaseController
                                                 ->where('end_date', '<=', $end);
                                 });
                             });
-                    })->get();
+                    })->where('company_id',$company_id)->get();
 
         if(count($checkExists) > 0) {
             return $this->sendError("This fiscal year can't be added because this date range found in database!");
         }
         $input = $request->all();
+        $input['company_id'] = 
 
         $status = $request->get('status');
         if($status == 1) {
@@ -195,6 +199,7 @@ class FiscalYearAPIController extends AppBaseController
 
         $start = date('Y-m-d', strtotime($request->get('start_date')));
         $end = date('Y-m-d', strtotime($request->get('end_date')));
+        $company_id = checkCompanyId($request);
 
         $checkExists = FiscalYear::where('id', '!=', $id)->where(function ($query) use($start, $end){
             return $query->where(function($query) use($start, $end){
@@ -207,25 +212,26 @@ class FiscalYearAPIController extends AppBaseController
                             ->where('end_date', '<=', $end);
                     });
             })
-                ->orWhere(function($query) use($start, $end){
-                    return $query->where(function($query) use($start, $end){
-                        return $query->where('start_date', '>=', $start)
-                            ->where('start_date', '<=', $end);
-                    });
-                })
-                ->orWhere(function($query) use($start, $end){
-                    return $query->where(function($query) use($start, $end){
-                        return $query->where('end_date', '>=', $start)
-                            ->where('end_date', '<=', $end);
-                    });
+            ->orWhere(function($query) use($start, $end){
+                return $query->where(function($query) use($start, $end){
+                    return $query->where('start_date', '>=', $start)
+                        ->where('start_date', '<=', $end);
                 });
-        })->get();
+            })
+            ->orWhere(function($query) use($start, $end){
+                return $query->where(function($query) use($start, $end){
+                    return $query->where('end_date', '>=', $start)
+                        ->where('end_date', '<=', $end);
+                });
+            });
+        })->where('company_id',$company_id)->get();
 
         if(count($checkExists) > 0) {
             return $this->sendError("This fiscal year can't be updated because this date range found in database!");
         }
 
         $input = $request->all();
+        $input['company_id'] = checkCompanyId($request);
 
         /** @var FiscalYear $fiscalYear */
         $fiscalYear = $this->fiscalYearRepository->find($id);

@@ -34,11 +34,13 @@ class EntryTypeAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $entryTypes = $this->entryTypeRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $entryTypes = $this->entryTypeRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        $company_id = checkCompanyId($request);
+        $entryTypes = $this->entryTypeRepository->allQuery()->where('company_id',$company_id )->get();
 
         return $this->sendResponse($entryTypes->toArray(), 'Entry Types retrieved successfully');
     }
@@ -51,7 +53,7 @@ class EntryTypeAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
-
+        $company_id = checkCompanyId($request);
         $query = EntryType::orderBy($columns[$column], $dir);
 
         if($searchValue) {
@@ -62,7 +64,7 @@ class EntryTypeAPIController extends AppBaseController
             });
         }
 
-        $entry_types = $query->paginate($length);
+        $entry_types = $query->where('company_id',$company_id)->paginate($length);
         $return_data    = [
             'data' => $entry_types,
             'draw' => $request->input('draw')
@@ -84,7 +86,8 @@ class EntryTypeAPIController extends AppBaseController
             'label'     => 'required',
             'name'      => 'required|unique:entry_types,name'
         ]);
-        $input = $request->all();
+        $input = $request->all(); 
+        $input['company_id'] = checkCompanyId($request);
 
         $entryType = $this->entryTypeRepository->create($input);
 
@@ -127,6 +130,7 @@ class EntryTypeAPIController extends AppBaseController
             'name'      => 'required|unique:entry_types,name,'.$id
         ]);
         $input = $request->all();
+        $input['company_id'] = checkCompanyId($request);
 
         /** @var EntryType $entryType */
         $entryType = $this->entryTypeRepository->find($id);

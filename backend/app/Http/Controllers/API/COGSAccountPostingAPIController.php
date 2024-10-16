@@ -57,8 +57,9 @@ class COGSAccountPostingAPIController extends AppBaseController
             return $this->sendError("COGS Data not found!");
         }
 
-
-        $account_default_setting    = AccountDefaultSetting::first();
+ 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
 
         $inventory_account_ledger  = getLedgerAccountById($account_default_setting->inventory_account);
         $cogs_account_ledger  = getLedgerAccountById($account_default_setting->cogs_account);

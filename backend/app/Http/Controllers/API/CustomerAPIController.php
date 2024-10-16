@@ -127,13 +127,14 @@ class CustomerAPIController extends AppBaseController
             'discount_percent' => 'required',
             'customer_receivable_account' => 'required',
         ]);
-        $input = $request->except(['customer_receivable_account','emp_code']);
-        $account_default_setting = AccountDefaultSetting::first();
+        $input = $request->except(['customer_receivable_account','emp_code']); 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $customer_receivable_account_type = AccountType::where('id', $account_default_setting->customer_receivable_account_type)->first();
 
 
         $receivable_account_inputs = [
-            'ledger_code'   => $this->returnAccountCode($customer_receivable_account_type->id, 'dtype'),
+            'ledger_code'   => $this->returnAccountCode($company_id, $customer_receivable_account_type->id, 'dtype'),
             'ledger_name'   => $request->get('customer_receivable_account').' ('.$request->get('phone').')',
             'type_id'   => $customer_receivable_account_type->parent_type_id,
             'detail_type_id'    => $customer_receivable_account_type->id,
@@ -233,8 +234,9 @@ class CustomerAPIController extends AppBaseController
             return $this->sendError('Customer not found');
         }
 
-        // Account Added
-        $account_default_setting = AccountDefaultSetting::first();
+        // Account Added 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $customer_receivable_account_type = AccountType::where('id', $account_default_setting->customer_receivable_account_type)->first();
 
         $customer_receivable_ledger    = $customer->receivable_accounts;
@@ -248,7 +250,7 @@ class CustomerAPIController extends AppBaseController
 //            }
             if(empty($customer_receivable_ledger)) {
                 $customer_receivable_inputs    = [
-                    'ledger_code'   => $this->returnAccountCode($customer_receivable_account_type->id, 'dtype'),
+                    'ledger_code'   => $this->returnAccountCode($company_id,$customer_receivable_account_type->id, 'dtype'),
                     'ledger_name'   => $request->get('customer_receivable_account').' ('.$request->get('phone').')',
                     'type_id'   => $customer_receivable_account_type->parent_type_id,
                     'detail_type_id'    => $customer_receivable_account_type->id,

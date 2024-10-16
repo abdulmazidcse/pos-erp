@@ -9,6 +9,7 @@ use App\Models\AccountLedger;
 use App\Models\AccountDefaultSetting;
 use App\Models\FiscalYear;
 use App\Models\CostCenter; 
+use App\Models\EntryType; 
 class CompanyObserver
 {
     /**
@@ -22,32 +23,23 @@ class CompanyObserver
         // You can perform any additional logic here before the company is created
     }
 
-    public function created(Company $company) {
-        $accountSetting = AccountDefaultSetting::create(['company_id'=>$company->id]);  
-        $fiscalYear = getFiscalYear();
-        $start_date = $fiscalYear['start'];
-        $end_date = $fiscalYear['end'];
-        $label = $fiscalYear['label'];
-        FiscalYear::create(['label'=>$label, 'start_date'=>$start_date, 'end_date'=>$end_date, 'company_id'=>$company->id, 'status'=>1]); 
-        
-        $start_date = $fiscalYear['start'];
-        $end_date = $fiscalYear['end'];
-        $label = $fiscalYear['label'];   
-        CostCenter::create(['center_name'=>$company->name, 'company_id'=> $company->id, 'status'=>1]); 
-        // Prepare account classes data
+    public function created(Company $company) {  
                  
-        $accountClass = self::accountClass($company->id); 
+        self::costCenter($company->id); 
+        self::fiscalYear($company->id); 
+        self::accountClass($company->id); 
         // Prepare account types for each class first step start 
-        $accountTypesFirstStep = self::accountTypesFirstStep($company->id);
+        self::accountTypesFirstStep($company->id);
         // Prepare account types for each class first step ends
         // Prepare account types for each class second step start
-        $accountTypesSecondStep = self::accountTypesSecondStep($company->id); 
+        self::accountTypesSecondStep($company->id); 
          
         // Prepare account types for each class second step ends
-        $defaultLedger = self::accountLedgers($company->id);
+        self::accountLedgers($company->id);
         // Prepare account types for each class third step start          
          
-        $companyDefaultSetting = self::companyDefaultSetting($company->id);  
+        self::companyDefaultSetting($company->id);  
+        self::entryTypes($company->id);
         // Prepare account types for each class third step ends 
     } 
     
@@ -58,40 +50,21 @@ class CompanyObserver
      * @return void
      */
     public function updated(Company $company) {
-        // Check if default settings exist
-        if (!AccountDefaultSetting::where('company_id', $company->id)->exists()) {
-            AccountDefaultSetting::create(['company_id' => $company->id]);  
-        } 
-    
-        // Update or create Fiscal Year
-        $fiscalYear = getFiscalYear();
-        $fiscalYearData = [
-            'label' => $fiscalYear['label'], 
-            'start_date' => $fiscalYear['start'], 
-            'end_date' => $fiscalYear['end'], 
-            'company_id' => $company->id, 
-            'status' => 1
-        ];
-        
-        FiscalYear::updateOrCreate(['company_id' => $company->id], $fiscalYearData);
-    
-        // Update or create Cost Center
-        $costCenterData = ['center_name' => $company->name, 'company_id' => $company->id, 'status' => 1];
-        CostCenter::updateOrCreate(['company_id' => $company->id], $costCenterData);
-    
-        $accountClass = self::accountClass($company->id); 
+        self::costCenter($company->id); 
+        self::fiscalYear($company->id); 
+        self::accountClass($company->id); 
         // Prepare account types for each class first step start 
-        $accountTypesFirstStep = self::accountTypesFirstStep($company->id);
+        self::accountTypesFirstStep($company->id);
         // Prepare account types for each class first step ends
         // Prepare account types for each class second step start
-        $accountTypesSecondStep = self::accountTypesSecondStep($company->id); 
+        self::accountTypesSecondStep($company->id); 
          
         // Prepare account types for each class second step ends
-        $defaultLedger = self::accountLedgers($company->id);
+        self::accountLedgers($company->id);
         // Prepare account types for each class third step start          
          
-        $companyDefaultSetting = self::companyDefaultSetting($company->id);  
-        // Prepare account types for each class third step ends 
+        self::companyDefaultSetting($company->id);  
+        self::entryTypes($company->id);
     } 
 
     /**
@@ -673,4 +646,79 @@ class CompanyObserver
         ];
         return AccountDefaultSetting::updateOrCreate(['company_id' => $company_id], $defaultSetting); 
     } 
+
+    public function entryTypes($company_id){ 
+        $entryTypeData = [
+            [
+                'label' => 'receipt',
+                'company_id' => $company_id,
+                'name' => 'Receipt',
+                'description' => 'payment receive',
+                'numbering' => 1,
+                'prefix' => 'PR',
+                'suffix' => '24x7',
+                'zero_padding' => 0,
+                'restrictions' => 2
+            ],
+            [
+                'label' => 'payment',
+                'company_id' => $company_id,
+                'name' => 'Payment',
+                'description' => 'payment voucher',
+                'numbering' => 1,
+                'prefix' => 'PV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 4
+            ],
+            [
+                'label' => 'journal',
+                'company_id' => $company_id,
+                'name' => 'Journal',
+                'description' => null,
+                'numbering' => 1,
+                'prefix' => 'JV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 1
+            ],
+            [
+                'label' => 'contra',
+                'company_id' => $company_id,
+                'name' => 'Contra',
+                'description' => 'Contra Voucher',
+                'numbering' => 1,
+                'prefix' => 'CV',
+                'suffix' => null,
+                'zero_padding' => 4,
+                'restrictions' => 1
+            ]
+        ]; 
+        if (!empty($entryTypeData)) {
+            foreach ($entryTypeData as $entry_type) {
+                $thirdStep = EntryType::updateOrCreate(
+                    ['label' => $entry_type['label'], 'company_id' => $entry_type['company_id']],
+                    $entry_type
+                );
+            } 
+        }    
+    }
+    
+    public function fiscalYear($company_id){
+        $fiscalYear = getFiscalYear();
+        $fiscalYearData = [
+            'label' => $fiscalYear['label'], 
+            'start_date' => $fiscalYear['start'], 
+            'end_date' => $fiscalYear['end'], 
+            'company_id' => $company_id, 
+            'status' => 1
+        ];        
+        FiscalYear::updateOrCreate(['company_id' => $company_id], $fiscalYearData); 
+    }
+    
+    public function costCenter($company_id){
+        $company = Company::find($company_id);
+        $costCenterData = ['center_name' => $company->name, 'company_id' => $company->id, 'status' => 1];
+        CostCenter::updateOrCreate(['company_id' => $company->id], $costCenterData);
+    }
 }

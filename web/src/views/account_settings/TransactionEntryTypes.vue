@@ -19,6 +19,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" v-model="tableData.company_id" @change="getEntryTypes()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="toggleModal()" :modalActive="modalActive">
@@ -284,6 +301,7 @@ export default {
             modalActive:false,
             errors: {},
             btn:'Create',
+            companies:[],
             retrict_options: [
                 
                 {
@@ -380,6 +398,7 @@ export default {
                 column: 0,
                 dir: 'desc',
                 sortKey: 'name',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -402,7 +421,7 @@ export default {
         }
     },
     created() {
-        this.getEntryTypes();
+        this.fetchCompanies();
     },
 
     methods: {
@@ -415,6 +434,21 @@ export default {
             this.errors = '';
             this.isSubmit = false;
             this.form.reset();
+        },
+
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data; 
+                if(this.companies.length ==1){
+                    this.tableData.company_id = this.companies[0].id
+                }
+                this.getEntryTypes(); 
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
         },
 
         edit: function(item) {

@@ -28,7 +28,17 @@
                         </div>
 
                         <div class="card-body">
-                            <div class="row">  
+                            <div class="row">   
+                                <div class="col-md-2">
+                                    <div class="">
+                                        <label for="outlet_id"> Company </label> 
+                                        <!-- @change="fetchAccountLedgers($event.target.value)" -->
+                                        <select class="form-control"  v-model="search_terms.company_id">
+                                            <option value="">--- Select Company ---</option>
+                                            <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                        </select>
+                                    </div>
+                                </div>  
                                 <div class="col-md-3">
                                     <div class="mb-3">
                                         <label for="from_date"> From Date *</label>
@@ -49,7 +59,7 @@
                                     </div>
                                 </div>
                                 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mb-3 mt-3 float-right">
                                         <div class="form-check form-check-inline">
                                             <input type="checkbox" class="form-check-input" id="show_code"  v-model="show_with_code" @change="showLedgerCode">
@@ -58,7 +68,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-3">
+                                <div class="col-md-2">
                                     <div class="mt-3">
                                         <button type="submit" class="btn btn-primary" :disabled="disabled" @click="filterProfitLoss()">
                                             <span v-show="isSubmit">
@@ -267,12 +277,14 @@ export default {
             modalActive:false,
             errors: {},
             expense_items: [],
+            companies: [],
             income_items: [],
             expense_balance: 0,
             income_balance: 0,
             search_terms: new Form({
                 from_date: '',
                 to_date: '',
+                company_id:''
             }),
             opening_balance: 0,
             from_date: '',
@@ -282,7 +294,7 @@ export default {
         };
     },
     created() {
-        this.fetchProfitLoss();
+        this.fetchCompanies();
     },
     methods: { 
 
@@ -295,15 +307,30 @@ export default {
         filterProfitLoss() {
             this.isSubmit = true;
             this.disabled = true;
-            this.fetchProfitLoss(this.search_terms.from_date, this.search_terms.to_date);
+            this.fetchProfitLoss(this.search_terms.company_id, this.search_terms.from_date, this.search_terms.to_date);
         },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
 
-        fetchProfitLoss(from_date='', to_date='') { 
+                if(this.companies.length == 1){
+                    this.search_terms.company_id = this.companies[0].id;  
+                    this.fetchProfitLoss(this.search_terms.company_id);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        }, 
+
+        fetchProfitLoss(company_id, from_date='', to_date='') { 
             this.loading = true;
             if(from_date && to_date) {
-               var getEvent = axios.get(this.apiUrl+'/reports/profit-loss?from_date='+from_date+'&to_date='+to_date, this.headerjson); 
-            }else {
-                getEvent    = axios.get(this.apiUrl+'/reports/profit-loss', this.headerjson);
+               var getEvent = axios.get(this.apiUrl+'/reports/profit-loss?company_id='+company_id+'from_date='+from_date+'&to_date='+to_date, this.headerjson); 
+            } else {
+                getEvent    = axios.get(this.apiUrl+'/reports/profit-loss?company_id='+company_id, this.headerjson);
             }
             
             getEvent.then((res) => {

@@ -19,6 +19,23 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12"> 
+                    <div class="col-md-10">
+                        <div class="row">  
+                            <div class="col-md-6">
+                                <div class="">
+                                    <label for="outlet_id"> Company </label> 
+                                    <select class="form-control" @change="fetchSuppliers($event.target.value), fetchAccountLedgers($event.target.value)">
+                                        <option value="">--- Select Company ---</option>
+                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> 
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -211,11 +228,9 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
-import Form from 'vform';
-import { json } from "body-parser";
+import Form from 'vform'; 
 
 export default {
     name: 'PosLeftbar',
@@ -229,6 +244,7 @@ export default {
             disabled: true,
             showModal: false,
             modalActive:false,
+            companies:[],
             errors: {},
             purchase_form: new Form({
                 date: new Date().toISOString().slice(0,10),
@@ -264,14 +280,9 @@ export default {
         };
     },
     created() {
-        this.fetchSuppliers();
-        this.fetchAccountLedgers();
+       this.fetchCompanies();
     },
-    methods: {
-        redirectRoute: function(route_link) {
-            
-        },
-
+    methods: { 
         forceRerender() {
             // Remove my-component from the DOM
             this.renderOptionComponent = false;
@@ -282,8 +293,23 @@ export default {
             });
         },
 
-        fetchSuppliers() {
-            axios.get(this.apiUrl+'/suppliers', this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.fetchSuppliers(this.companies[0].id);
+                    this.fetchAccountLedgers(this.companies[0].id); 
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+
+        fetchSuppliers(companyId) {
+            axios.get(this.apiUrl+'/suppliers?company_id='+companyId, this.headerjson)
             .then((resp) => {
                 this.suppliers = resp.data.data;
                 this.supplier_options = [{label: "Select Supplier", value: ""}]
@@ -296,8 +322,8 @@ export default {
             });
         },
 
-        fetchAccountLedgers() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption', this.headerjson)
+        fetchAccountLedgers(companyId) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOption?company_id='+companyId, this.headerjson)
             .then((resp) => {
                 this.accounts = resp.data.data.accounts;  
             })

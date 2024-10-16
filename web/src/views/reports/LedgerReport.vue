@@ -19,6 +19,23 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12"> 
+                    <div class="col-md-10">
+                        <div class="row">  
+                            <div class="col-md-6">
+                                <div class="">
+                                    <label for="outlet_id"> Company </label> 
+                                    <select class="form-control" @change="fetchAccountLedgers($event.target.value)">
+                                        <option value="">--- Select Company ---</option>
+                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> 
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -41,18 +58,21 @@
                                         </div>
                                     </div>
                                 </div> -->
+                                
                                 <div class="col-md-3">
                                     <div class="">
                                         <label for="supplier_id"> Ledger *</label><br>
                                         <treeselect 
                                             v-model="search_terms.ledger_id"
-                                            :multiple="false" 
+                                            :multiple="false"  
+                                            :disable-children-nodes="false"
                                             :always-open="false"
                                             :options="ledgers"
                                             :normalizer="normalizer"
                                             :value-consists-of="valueConsistsOf"
                                             :default-expand-level="Infinity"
                                             :search-nested="true"     
+                                            noOptionsText=""
                                             @select="onkeyPress('ledger_id')"                                           
                                             placeholder='Select Ledger account'
                                             v-if="renderOptionComponent"
@@ -282,6 +302,7 @@ export default {
             errors: {},
             items: [],
             ledgers: [],
+            companies: [],
             ledger_options: [],
             ledger_id: null,
             renderOptionComponent: true,
@@ -314,8 +335,8 @@ export default {
         };
     },
     created() {
-        this.fetchAccountLedgers();
-        // this.fetchLedgerReport();
+        // this.fetchAccountLedgers();
+        this.fetchCompanies() 
         this.newItemAry = [];
     },
     methods: { 
@@ -340,8 +361,24 @@ export default {
             this.isSubmit = false;
         },
 
-        fetchAccountLedgers() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOnlyLedgerOption', this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+
+                if(this.companies.length == 1){
+                    const companyId = this.companies[0].id;  
+                    this.fetchAccountLedgers(companyId);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        }, 
+
+        fetchAccountLedgers(companyId) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOnlyLedgerOption?company_id='+companyId, this.headerjson)
             .then((resp) => {
                 this.ledgers = resp.data.data.accounts;  
             })
@@ -473,6 +510,9 @@ export default {
 }
 </script>
 <style scoped>
+.vue-treeselect__no-options {
+  display: none !important;
+}
 .modal-content.scrollbar-width-thin { 
     width: 90%;
     display: block;

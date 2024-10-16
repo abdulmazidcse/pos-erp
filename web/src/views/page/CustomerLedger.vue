@@ -2,17 +2,34 @@
     <transition  >
     <div class="container-fluid ">
         <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box">
-                        <div class="page-title-right float-left">
-                            <ol class="breadcrumb m-0"> 
-                                <li class="breadcrumb-item active">Customer </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Customer ledger</a></li>
-                            </ol>
+            <div class="col-12">
+                <div class="page-title-box">
+                    <div class="page-title-right float-left">
+                        <ol class="breadcrumb m-0"> 
+                            <li class="breadcrumb-item active">Customer </li>
+                            <li class="breadcrumb-item"><a href="javascript: void(0);">Customer ledger</a></li>
+                        </ol>
+                    </div> 
+                </div>
+            </div>
+        </div>  
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" @change="fetchCustomers($event.target.value)">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
                         </div> 
                     </div>
-                </div>
-        </div>  
+                </div> 
+            </div>
+        </div>
         <div class="row">
             <div class="col-12">
                 <div class="card">
@@ -181,19 +198,9 @@
     </div>
     </transition>
 </template>
-<script>
-// const today = new Date();
-// const yyyy = today.getFullYear();
-// let mm = today.getMonth() + 1; // Months start at 0!
-// let dd = today.getDate();
-
-// const formattedToday = dd + '/' + mm + '/' + yyyy;
-// var strdate = document.getElementById('start_date').value = formattedToday;
-// console.log('strdate', formattedToday)
-
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+<script> 
+ 
+import Modal from "./../helper/Modal"; 
 import Form from 'vform'
 import axios from 'axios';
 export default {
@@ -213,6 +220,7 @@ export default {
             errors: {},
             btn:'Create',
             items: [],
+            companies: [], 
             customers: [], 
             customer: '', 
             loading: false, 
@@ -234,15 +242,28 @@ export default {
             } 
         };
     },
-    created() {  
-        this.fetchCustomers(); 
+    created() {   
+        this.fetchCompanies();
     },
     methods: {  
         selectCustomer(event) {  
           this.customer = this.customers.find(e => e.value == event);   
         },
-        fetchCustomers(){
-          axios.get(this.apiUrl+'/customers',this.headerjson)
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.fetchCustomers(this.companies[0].id); 
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+        fetchCustomers(companyID){
+          axios.get(this.apiUrl+'/customers?company_id='+companyID,this.headerjson)
           .then((res) => { 
             this.customers = res.data.data.map(({ id, name, discount_percent, customer_group_discount, available_point }) => (
               { label: name, value: id, discount: discount_percent, group_discount: customer_group_discount, points: available_point }

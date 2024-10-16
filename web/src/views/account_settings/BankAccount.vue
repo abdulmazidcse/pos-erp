@@ -19,6 +19,23 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <select class="form-control" v-model="tableData.company_id" @change="getBankAccounts()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <!-- Modal -->
         <Modal @close="toggleModal()" :modalActive="modalActive">
@@ -258,13 +275,10 @@
     </transition>
 </template>
 
-<script>
-import {mapGetters, mapActions} from "vuex";
-import Modal from "../helper/Modal.vue";
-import Buttons from '@/components/Buttons.vue';
+<script> 
+import Modal from "../helper/Modal.vue"; 
 import Datatable from '@/components/Datatable.vue';
-import Pagination from '@/components/Pagination.vue';
-import { ref, onMounted, getCurrentInstance } from "vue";
+import Pagination from '@/components/Pagination.vue'; 
 import Form from "vform";
 import axios from "axios";
 
@@ -367,6 +381,7 @@ export default {
                 column: 0,
                 dir: 'desc',
                 sortKey: 'bank_name',
+                company_id:''
             },
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -388,8 +403,7 @@ export default {
             
         }
     },
-    created() {
-        this.getBankAccounts();
+    created() { 
         this.fetchCompany();
     },
 
@@ -409,10 +423,16 @@ export default {
             axios.get(this.apiUrl+'/companies', this.headerjson)
             .then((res) => {
                 this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.tableData.company_id = this.companies[0].id;
+                    this.getBankAccounts();
+                }
             })
             .catch((err) => {
                 this.$toast.error(err.response.data.message);
-            }); 
+            }).finally(() => {
+                this.loading = false;
+            });
         },
 
         // Ledger Account Name Setup
@@ -517,6 +537,7 @@ export default {
 
         // For Pagination 
         getBankAccounts(url = this.apiUrl+'/bank_accounts/list') {
+            this.loading = true;
             this.tableData.draw++;
             axios.get(url, {params:this.tableData, headers: this.headerparams})
             .then((response) => {

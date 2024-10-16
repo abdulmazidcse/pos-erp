@@ -858,7 +858,7 @@ class SaleReturnAPIController extends AppBaseController
 
 
     // Sale Return Account Transactions
-    protected function saleReturnAccountTransaction($data=array(), $return_type="void_return")
+    protected function saleReturnAccountTransaction(Request $request, $data=array(), $return_type="void_return")
     {
         if($return_type == "void_return") {
             $gnote  = "Product Sale return void invoice";
@@ -876,8 +876,9 @@ class SaleReturnAPIController extends AppBaseController
             'global_note'   => $gnote,
             'modified_item' => 0,
         ];
-
-        $account_default_setting    = AccountDefaultSetting::first();
+ 
+        $company_id = checkCompanyId($request); 
+        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
 
 
         if(isset($data['payment_status']) && $data['payment_status'] == 'due') {

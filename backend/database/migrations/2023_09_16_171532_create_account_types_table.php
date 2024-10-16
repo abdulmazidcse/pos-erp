@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('account_types', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->string('type_code');
             $table->string('type_name');
             $table->unsignedBigInteger('class_id');

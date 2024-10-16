@@ -19,6 +19,23 @@
                     </div>
                 </div>
             </div>
+            <div class="row">
+                <div class="col-12"> 
+                    <div class="col-md-10">
+                        <div class="row">  
+                            <div class="col-md-6">
+                                <div class="">
+                                    <label for="outlet_id"> Company </label> 
+                                    <select class="form-control" @change="fetchAccountLedgers($event.target.value)">
+                                        <option value="">--- Select Company ---</option>
+                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                    </select>
+                                </div>
+                            </div> 
+                        </div>
+                    </div> 
+                </div>
+            </div>
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -224,8 +241,7 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 import Form from 'vform';
 
@@ -247,6 +263,7 @@ export default {
             showModal: false,
             modalActive:false,
             errors: {},
+            companies: [],
             items: [],
             ledgers: [],
             ledger_options: [],
@@ -281,7 +298,7 @@ export default {
         };
     },
     created() {
-        this.fetchAccountLedgers();
+        this.fetchCompanies();
     },
     methods: { 
         balance: function(type){
@@ -304,9 +321,24 @@ export default {
             this.errors = '';
             this.isSubmit = false;
         },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
 
-        fetchAccountLedgers() {
-            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOnlyLedgerOption', this.headerjson)
+                if(this.companies.length == 1){
+                    const companyId = this.companies[0].id;  
+                    this.fetchAccountLedgers(companyId);
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        }, 
+
+        fetchAccountLedgers(companyId) {
+            axios.get(this.apiUrl+'/account_ledgers/getChartOfAccountsOnlyLedgerOption?company_id='+companyId, this.headerjson)
             .then((resp) => {
                 this.ledgers = resp.data.data.accounts;  
             })

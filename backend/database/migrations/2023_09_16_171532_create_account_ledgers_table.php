@@ -15,6 +15,7 @@ return new class extends Migration
     {
         Schema::create('account_ledgers', function (Blueprint $table) {
             $table->bigIncrements('id');
+            $table->unsignedBigInteger('company_id');
             $table->unsignedBigInteger('ledger_code')->unique();
             $table->string('ledger_name');
             $table->unsignedBigInteger('parent_id')->default(0);

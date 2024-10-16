@@ -584,11 +584,11 @@ class AccountVoucherAPIController extends AppBaseController
 
     }
 
-    public function getVoucherCode(Request $request)
-    {
+    public function getVoucherCode(Request $request)  {
+        $company_id = checkCompanyId($request);
         $voucher_type = $request->get('vtype');
         if ($voucher_type != '') {
-            $entry_data = EntryType::where('label', $voucher_type)->first();
+            $entry_data = EntryType::where('label', $voucher_type)->where('company_id', $company_id)->first();
             $voucher_code = $this->returnVoucherCode($voucher_type);
 
             $return_data = [

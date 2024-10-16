@@ -34,11 +34,14 @@ class CostCenterAPIController extends AppBaseController
      */
     public function index(Request $request)
     {
-        $costCenters = $this->costCenterRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        
+        // $costCenters = $this->costCenterRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        $company_id = checkCompanyId($request);
+        $costCenters = $this->costCenterRepository->allQuery()->where('company_id',$company_id )->get();
 
         return $this->sendResponse($costCenters->toArray(), 'Cost Centers retrieved successfully');
     }
@@ -52,15 +55,17 @@ class CostCenterAPIController extends AppBaseController
         $column = $request->input('column');
         $dir = $request->input('dir');
         $searchValue = $request->input('search');
+        $company_id = checkCompanyId($request);
 
         $query = CostCenter::with(['companies', 'outlets'])->orderBy($columns[$column], $dir);
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {
-                $query->where('center_name', 'like', '%' .$searchValue. '%');
-//                $query->orWhere('name', 'like', '%' .$searchValue. '%');
-//                $query->orWhere('numbering', 'like', '%' .$searchValue. '%');
+                $query->where('center_name', 'like', '%' .$searchValue. '%'); 
             });
+        }
+        if($company_id){
+            $query->where('company_id',$company_id);
         }
 
         $entry_types = $query->paginate($length);

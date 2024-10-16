@@ -493,7 +493,7 @@ export default {
                 if (this.companies.length === 1) { 
                     this.tableData.company_id = this.companies[0].id;
                     this.fetchGroupData(this.companies[0].id);
-                    this.getAccountsLedgers(this.companies[0].id);
+                    this.getAccountsLedgers();
                 }  
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);

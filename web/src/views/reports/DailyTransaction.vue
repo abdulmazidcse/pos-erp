@@ -18,7 +18,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div> 
 
             <div class="row">
                 <div class="col-md-12 ">
@@ -29,17 +29,14 @@
 
                         <div class="card-body">
                             <div class="row">
-                                <div class="col-md-3">
-                                    <!-- <div class="">
-                                        <label for="supplier_id"> Branch </label>
-                                        <select class="form-control" id="supplier_id" v-model="search_terms.branch_id" @change="onkeyPress('branch_id')">
-                                            <option value="">--- Select Branch ---</option>
-                                            <option v-for="(branch, i) in branches" :key="i" :value="branch.id">{{ branch.name }}</option>
+                                <div class="col-md-3"> 
+                                    <div class="">
+                                        <label for="outlet_id"> Company </label>  
+                                        <select class="form-control" v-model="search_terms.company_id">
+                                            <option value="">--- Select Company ---</option>
+                                            <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
                                         </select>
-                                        <div class="invalid-feedback" v-if="errors.branch_id">
-                                            {{errors.branch_id[0]}}
-                                        </div>
-                                    </div> -->
+                                    </div> 
                                 </div>
                                 <div class="col-md-3">
                                     <div class="">
@@ -196,8 +193,7 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 import Form from 'vform';
 
@@ -214,11 +210,13 @@ export default {
             showModal: false,
             modalActive:false,
             errors: {},
+            companies: [],
             items: [],
             search_terms: new Form({
                 from_date: '',
                 to_date: '',
                 branch_id: '',
+                company_id: '',
             }),
             opening_balance: 0,
             from_date: '',
@@ -227,8 +225,8 @@ export default {
             total_credit_amount: 0,
         };
     },
-    created() {
-        this.fetchDailyTransaction();
+    created() { 
+        this.fetchCompanies()
     },
     methods: { 
 
@@ -244,13 +242,28 @@ export default {
             this.fetchDailyTransaction();
         },
 
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data;
+                if(this.companies.length == 1){
+                    this.search_terms.company_id = this.companies[0].id;
+                    this.fetchDailyTransaction(); 
+                }
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
+        },
+
         fetchDailyTransaction() { 
             var formData    = new FormData();
             formData.append('from_date', this.search_terms.from_date);
             formData.append('to_date', this.search_terms.to_date);
+            formData.append('company_id', this.search_terms.company_id);
             axios.post(this.apiUrl+'/reports/daily-transaction', formData, this.headers)
-            .then((res) => {
-                // console.log("res.data.data", res.data.data);
+            .then((res) => { 
                 this.items = res.data.data.transactions;
                 this.total_debit_amount = res.data.data.total_debit_amount,
                 this.total_credit_amount = res.data.data.total_credit_amount,
