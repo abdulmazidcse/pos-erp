@@ -20,6 +20,25 @@
             </div>
         </div> 
         <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <!-- @change="getSuppliers($event.target.value)" -->
+                                <select class="form-control" v-model="tableData.company_id" @change="fetchItems()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
+
+        <div class="row">
             <div class="col-md-12 ">
                 <div class="card">
                     <div class="card-body"> 
@@ -35,8 +54,7 @@
                                             <div class="control" style="float: left;">
                                                 <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                 <div class="select" style="float: left;">
-                                                    <select class="form-select" v-model="tableData.length" @change="fetchItems()"> 
-                                                        <option value="5" selected="selected">5</option>
+                                                    <select class="form-select" v-model="tableData.length" @change="fetchItems()">  
                                                         <option value="10" selected="selected">10</option>
                                                         <option value="25">25</option>
                                                         <option value="50">50</option>
@@ -238,10 +256,8 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+<script> 
+import Modal from "./../helper/Modal"; 
 import Form from 'vform'
 import axios from 'axios';
 
@@ -340,10 +356,10 @@ export default {
                 draw: 0,
                 length: 10,
                 search: '',
-                column: 1,
-                // dir: 'desc',
+                column: 1, 
                 dir: 'asc',
                 sortKey: 'name', 
+                company_id:''
             }, 
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -366,6 +382,7 @@ export default {
     },
     created() {
         this.fetchItems();
+        this.fetchCompanies();
     },
     methods: { 
         toggleModal: function() {
@@ -377,6 +394,16 @@ export default {
             this.errors = '';
             this.isSubmit = false;
             this.form.reset(); 
+        },
+        fetchCompanies() {   
+            axios.get(this.apiUrl+'/companies', this.headerjson)
+            .then((res) => { 
+                this.companies = res.data.data; 
+            }).catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            }).finally((ress) => {
+                this.loading = false;
+            });
         },
         // fetchIndexData() { 
         //     axios.get(this.apiUrl+'/product_categories', this.headerjson) 

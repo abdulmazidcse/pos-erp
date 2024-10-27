@@ -39,7 +39,8 @@
                     <div class="card-body" v-if="!loading">                        
                         <!-- <form id="purchase_order_form" @submit.prevent="submitForm()"> -->
 
-                            <div class="row">
+                            <div class="row">  
+                     
                                 <div class="col-md-3 mb-3">
                                     <div class="form-check">
                                         <input type="radio" id="spo" name="po_type" class="form-check-input" value="spo" checked @change="poGenerateType($event)">
@@ -80,15 +81,17 @@
                                 </div>
 
                                 <div class="col-md-6">
-                                    <label for="warehouse_id" style="width: 100%;">Delivery Location</label>
+                                    
                                     <div class="row">
-                                        <div class="col-md-6">
+                                        <div class="col-md-6" style="display: none;">
+                                            <label for="warehouse_id" style="width: 100%;">Delivery Location to Warehouse</label>
                                             <select class="form-control border" id="warehouse_id" v-model="obj.warehouse_id" @change="onkeyPress('warehouse_id'), onChangeWarehouse" :disabled="obj.outlet_id != '' ? true : false">
                                                 <option value="">--- Select Warehouse ---</option>
                                                 <option v-for="(warehouse, index) in warehouses" :key="index" :value="warehouse.id">{{ warehouse.name }}</option>
                                             </select>
                                         </div>
                                         <div class="col-md-6">
+                                            <label for="warehouse_id" style="width: 100%;">Delivery Location to Outlet</label>
                                             <select class="form-control border" id="outlet_id" v-model="obj.outlet_id" @change="onkeyPress('outlet_id'), onChangeOutlet" :disabled="obj.warehouse_id != '' ? true : false">
                                                 <option value="">--- Select Outlet ---</option>
                                                 <option v-for="(outlet, index) in outlets" :key="index" :value="outlet.id">{{ outlet.name }}</option>

@@ -44,9 +44,9 @@ class Sale extends Model
     protected $casts = [
         'customer_id' => 'integer',
         'customer_name' => 'string',
-//        'total_amount' => 'double',
-//        'collection_amount' => 'double',
-//        'return_amount' => 'double',
+        //        'total_amount' => 'double',
+        //        'collection_amount' => 'double',
+        //        'return_amount' => 'double',
     ];
 
     /**
@@ -78,16 +78,18 @@ class Sale extends Model
     public function customerLedger() {
         return $this->hasOne(CustomerLedger::class, 'sale_id','id');
     }
+    
     public function customer() {
         return $this->hasOne(Customer::class, 'id','customer_id');
     }
 
     public function outlets() {
-        return $this->belongsTo(Outlet::class, 'outlet_id','id');
+        return $this->belongsTo(Outlet::class, 'outlet_id','id')->with('company');
     }
+
     public function createdBy() {
         return $this->hasOne(User::class, 'id','created_by');
-    }
+    } 
 
     public function scopeFiltered(Builder $builder) {
         $search = request('search') ?? null;

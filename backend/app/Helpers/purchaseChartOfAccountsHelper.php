@@ -1,8 +1,8 @@
 <?php
 
-function getLedgerAccounts($keys="", $specific_ledger="")
+function getLedgerAccounts($company_id, $keys="", $specific_ledger="")
 {
-    $default_account_settings = \App\Models\AccountDefaultSetting::first();
+    $default_account_settings = \App\Models\AccountDefaultSetting::where('company_id', $company_id)->first();
 
     $default_payable_ledger = getLedgerAccountById($default_account_settings->trade_payable_account);
 

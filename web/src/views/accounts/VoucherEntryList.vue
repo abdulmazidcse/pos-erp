@@ -49,7 +49,6 @@
                                                             <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                             <div class="select" style="float: left;">
                                                                 <select class="form-select" v-model="tableData.length" @change="getVoucherList()">  
-                                                                    <option value="5" selected="selected">5</option>
                                                                     <option value="10" selected="selected">10</option>
                                                                     <option value="25">25</option>
                                                                     <option value="50">50</option>
@@ -139,9 +138,9 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="company_info">
-                                                <h4 style="text-transform: uppercase; text-align: center;">Twenty Four 7</h4>
-                                                <h5 style="text-transform: uppercase; text-align: center;">UNCEP CHEYNE TOwer, Segunbagicha, Dhaka</h5>
-
+                                                <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
+                                                <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>
+                                                
                                                 <h3 style="text-align: center;">{{ vitem.vtype_name }} Voucher</h3>
                                             </div>
                                             <table class="table voucher_view">
@@ -244,8 +243,8 @@
                                     <div class="card">
                                         <div class="card-body">
                                             <div class="container" id="printArea">
-                                                <p class="text-uppercase text-center mt-2"><strong>Twenty Four 7</strong></p>
-                                                <p class="text-uppercase text-center mt-2">3rd floor, UCEP Cheyne Tower, 25 Segun Bagicha Rd, Dhaka 1000</p><br>
+                                                <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
+                                                <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>
                                                 <hr class="m-zero">
                                                 <!-- <p class="text-center m-0 font-italic"><strong>Cash Received Voucher (Approval)</strong></p> -->
                                                 <p class="text-center m-0 font-italic"><strong>{{ vitem.vtype_name }} Voucher (Approval)</strong></p>
@@ -336,12 +335,10 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import Datatable from '@/components/Datatable.vue';
 import Pagination from '@/components/Pagination.vue';
-import axios from 'axios';
-import Form from 'vform';
+import axios from 'axios'; 
 import NumberToWord from './../page/NumberToWord.vue';           
 import '@/assets/css/print.css';       
 export default {

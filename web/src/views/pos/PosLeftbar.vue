@@ -1894,9 +1894,10 @@
           <div id="invoice-perview">
             <div id="top">
               <div class="row">
-                <h2 class="text-center">{{this.retailShopName}}</h2>
+                <h2 class="text-center">{{ $store.getters.userData.user.outlet_name }}</h2>
                 <p class="text-center cmb-5">
-                  {{ this.retailShopAddress }}
+                  {{ $store.getters.userData.user.outlet_address }} 
+
                   <span v-if="invHeadPhone">  <br>  Mobile: {{ this.invHeadPhone }} </span>
                 </p>
                   <h2 class="text-center ">INVOICE</h2>
@@ -2127,9 +2128,9 @@
           <div id="invoice-POS" v-if="invoice_info">
             <div id="top">
               <div class="row">
-                <h3 class="text-center"> {{ this.retailShopName }}</h3>
+                <h3 class="text-center">{{ invoice_info.outlets?.name}}</h3>
                 <p class="text-center cmb-5">
-                  {{ this.retailShopAddress }}
+                 {{ invoice_info.outlets?.address}}
                  <span v-if="invHeadPhone"> <br> Mobile: {{ this.invHeadPhone }} </span>
                 </p> 
                 <p class="text-center" ><strong> INVOICE </strong></p> 

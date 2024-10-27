@@ -100,7 +100,11 @@ class ProductsAPIController extends AppBaseController
 
         $query = Product::with(['category' => function($query){
             $query->select('id', 'name');
-        }])->select('id', 'product_name', 'product_native_name', 'product_code', 'category_id', 'sub_category_id', 'brand_id', 'barcode_symbology', 'min_order_qty', 'cost_price', 'depo_price', 'mrp_price', 'abp_price','abp_qty', 'tax_method', 'product_tax', 'alert_quantity', 'thumbnail', 'short_description', 'description', 'purchase_measuring_unit', 'sales_measuring_unit', 'convertion_rate', 'carton_size', 'carton_cpu', 'quantity', 'status','discount')->orderBy($columns[$column], $dir);
+        }])
+        ->with(['company' => function($query){
+            $query->select('id', 'name');
+        }])
+        ->select('id', 'product_name', 'product_native_name', 'product_code', 'category_id', 'sub_category_id', 'brand_id', 'barcode_symbology', 'min_order_qty', 'cost_price', 'depo_price', 'mrp_price', 'abp_price','abp_qty', 'tax_method', 'product_tax', 'alert_quantity', 'thumbnail', 'short_description', 'description', 'purchase_measuring_unit', 'sales_measuring_unit', 'convertion_rate', 'carton_size', 'carton_cpu', 'quantity', 'status','discount','company_id')->orderBy($columns[$column], $dir);
 
         if($searchValue) {
             $query->where(function ($query) use ($searchValue) {

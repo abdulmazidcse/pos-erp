@@ -176,8 +176,8 @@
                                 <div class="container" id="printArea">
                                     <div class="text-center col-xs-12">
                                         <div class="row">
-                                            <p class="text-uppercase text-center mt-2"><strong>Twenty Four 7</strong></p>
-                                            <p class="text-uppercase text-center mt-2">{{ this.address }}</p><br>   
+                                            <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
+                                            <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>  
                                         </div>                                                                                         
                                     </div>
                                     <div class="d-flex justify-content-between "> 

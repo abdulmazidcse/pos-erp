@@ -28,8 +28,10 @@ class UserResource extends JsonResource
             "profile_image" => $this->profile_image,
             "company_id" => $this->company_id,
             "company_name"  => $this->company->name ?? "Default",
+            "company_address"  => $this->company->address ?? "Default",
             "outlet_id" => $this->outlet_id,
             "outlet_name" => $this->outlet ? $this->outlet->name : '',
+            "outlet_address" => $this->outlet ? $this->outlet->address : '',
             "roles" => $this->roles->map(function ($items){
                 return $items->id;
             }),

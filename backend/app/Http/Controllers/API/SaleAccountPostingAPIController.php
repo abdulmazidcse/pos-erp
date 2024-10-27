@@ -13,6 +13,7 @@ use App\Models\Customer;
 use App\Models\CustomerLedger;
 use App\Models\EntryType;
 use App\Models\FiscalYear;
+use App\Models\CostCenter;
 use App\Models\MobileWallet;
 use App\Models\PaymentCollection;
 use App\Models\Sale;
@@ -36,6 +37,7 @@ class SaleAccountPostingAPIController extends AppBaseController
         $from_date  = $request->input('from_date');
         $to_date    = $request->input('to_date');
 
+        $company_id =  checkCompanyIdByOutletId($request); 
 
         $query   = Sale::with(['payments', 'salesItems'])->where('outlet_id', $outlet_id)
                                         ->whereIn('account_post_status', [0,1])
@@ -145,10 +147,8 @@ class SaleAccountPostingAPIController extends AppBaseController
 
         if(empty($final_non_posted_list)) {
             return $this->sendError('Do not have any posting data');
-        }
- 
-        $company_id = checkCompanyId($request); 
-        $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
+        } 
+        $account_default_setting = AccountDefaultSetting::where('company_id', $company_id)->first();
         $sales_ids    = [];
         $payment_ids    = [];
 
@@ -303,11 +303,11 @@ class SaleAccountPostingAPIController extends AppBaseController
                     $bkash_wallet = MobileWallet::find($bkash_sale->wallet_id);
 
 
-//                    if (($new_bkash_sale_date == $old_bkash_sale_date)) {
-//                        $total_bkash_sale_amount += $bkash_sale->amount;
-//                    } else {
-//                        $total_bkash_sale_amount = $bkash_sale->amount;
-//                    }
+                    //                    if (($new_bkash_sale_date == $old_bkash_sale_date)) {
+                    //                        $total_bkash_sale_amount += $bkash_sale->amount;
+                    //                    } else {
+                    //                        $total_bkash_sale_amount = $bkash_sale->amount;
+                    //                    }
 
                     $total_bkash_sale_amount    = collect($final_non_posted_list['bkash'])->where('sale_date', $bkash_sale->sale_date)->sum('amount');
                     $charge_percent = $bkash_wallet ? $bkash_wallet->charge_percent : 0;
@@ -366,11 +366,11 @@ class SaleAccountPostingAPIController extends AppBaseController
                     $nagad_wallet   = MobileWallet::find($nagad_sale->wallet_id);
 
 
-//                    if(($new_nagad_sale_date == $old_nagad_sale_date)) {
-//                        $total_nagad_sale_amount += $nagad_sale->amount;
-//                    }else{
-//                        $total_nagad_sale_amount = $nagad_sale->amount;
-//                    }
+                    //                    if(($new_nagad_sale_date == $old_nagad_sale_date)) {
+                    //                        $total_nagad_sale_amount += $nagad_sale->amount;
+                    //                    }else{
+                    //                        $total_nagad_sale_amount = $nagad_sale->amount;
+                    //                    }
 
                     $total_nagad_sale_amount = collect($final_non_posted_list['nagad'])->where('sale_date', $nagad_sale->sale_date)->sum('amount');
 
@@ -430,11 +430,11 @@ class SaleAccountPostingAPIController extends AppBaseController
                     $rocket_wallet   = MobileWallet::find($rocket_sale->wallet_id);
 
 
-//                    if(($new_rocket_sale_date == $old_rocket_sale_date)) {
-//                        $total_rocket_sale_amount += $rocket_sale->amount;
-//                    }else{
-//                        $total_rocket_sale_amount = $rocket_sale->amount;
-//                    }
+                    //                    if(($new_rocket_sale_date == $old_rocket_sale_date)) {
+                    //                        $total_rocket_sale_amount += $rocket_sale->amount;
+                    //                    }else{
+                    //                        $total_rocket_sale_amount = $rocket_sale->amount;
+                    //                    }
                     $total_rocket_sale_amount   = collect($final_non_posted_list['rocket'])->where('sale_date', $rocket_sale->sale_date)->sum('amount');
 
                     $charge_percent = $rocket_wallet ? $rocket_wallet->charge_percent : 0;
@@ -498,11 +498,11 @@ class SaleAccountPostingAPIController extends AppBaseController
                         $receivable_ledger_code   = $receivable_account_ledger->ledger_code;
                     }
 
-//                    if(($new_credit_sale_date == $old_credit_sale_date) && ($new_credit_sale_customer_id == $old_credit_sale_customer_id)) {
-//                        $total_credit_sale_amount += $credit_sale->amount;
-//                    }else{
-//                        $total_credit_sale_amount = $credit_sale->amount;
-//                    }
+                        //                    if(($new_credit_sale_date == $old_credit_sale_date) && ($new_credit_sale_customer_id == $old_credit_sale_customer_id)) {
+                        //                        $total_credit_sale_amount += $credit_sale->amount;
+                        //                    }else{
+                        //                        $total_credit_sale_amount = $credit_sale->amount;
+                        //                    }
 
 
                     $credit_sale_posting_list[$credit_sale->sale_date.'__'.($customer->id ?? 0)]    = [
@@ -533,7 +533,7 @@ class SaleAccountPostingAPIController extends AppBaseController
         }
 
 
-//        return [$cash_posting_list, $credit_card_posting_list, $bkash_sale_posting_list, $nagad_sale_posting_list, $rocket_sale_posting_list, $credit_sale_posting_list];
+        // return [$cash_posting_list, $credit_card_posting_list, $bkash_sale_posting_list, $nagad_sale_posting_list, $rocket_sale_posting_list, $credit_sale_posting_list];
 
         $data = array_merge($cash_posting_list, $credit_card_posting_list, $bkash_sale_posting_list, $nagad_sale_posting_list, $rocket_sale_posting_list, $credit_sale_posting_list);
 
@@ -560,8 +560,10 @@ class SaleAccountPostingAPIController extends AppBaseController
     // Store Sale Account Posting List
     public function storeSaleAccountPosting(Request $request)
     {
+        $company_id = checkCompanyIdByOutletId($request);          
+        $fiscal_year = FiscalYear::where('status', 1)->where('company_id', $company_id)->first();
+        $cost_center_id = CostCenter::where('company_id', $company_id)->first()->id;
 
-        $fiscal_year = FiscalYear::where('status', 1)->first();
         $start_date = $fiscal_year->start_date;
         $end_date   = $fiscal_year->end_date;
 
@@ -570,7 +572,7 @@ class SaleAccountPostingAPIController extends AppBaseController
         }
 
         $inputs = $request->all();
-//
+ 
         $post_items = (array) json_decode($request->get('post_items'));
         $sales_ids = json_decode($request->get('sales_ids'));
         $payment_ids = (array) json_decode($request->get('payment_ids'));
@@ -655,13 +657,13 @@ class SaleAccountPostingAPIController extends AppBaseController
 
 
 
-//        return [$post_items, $sales_ids, $payment_ids, $customer_data, $sale_posted_ids, $sale_partial_posted_ids, $sale_payment_posted_ids];
+        // return [$post_items, $sales_ids, $payment_ids, $customer_data, $sale_posted_ids, $sale_partial_posted_ids, $sale_payment_posted_ids];
 
         DB::beginTransaction();
         try{
 
             if(count($post_items) > 0) {
-                $entry_type = EntryType::where('label', 'journal')->first();
+                $entry_type = EntryType::where('label', 'journal')->where('company_id', $company_id)->first();
 
                 foreach ($post_items as $post_item) {
 
@@ -689,7 +691,7 @@ class SaleAccountPostingAPIController extends AppBaseController
                     $transactions = [];
                     // Debit Ledger
                     if($post_item->debit_ledger_code != "") {
-                        $debit_ledger   = AccountLedger::where('ledger_code', $post_item->debit_ledger_code)->first();
+                        $debit_ledger   = AccountLedger::where('ledger_code', $post_item->debit_ledger_code)->where('company_id', $company_id)->first();
 
                         if($post_item->charge_ledger_code != "" && $post_item->commission_amount > 0){
                             $debit_amount = $post_item->amount - $post_item->commission_amount;
@@ -697,7 +699,8 @@ class SaleAccountPostingAPIController extends AppBaseController
                             $debit_amount   = $post_item->amount;
                         }
                         $transactions[] = new AccountVoucherTransaction([
-                            'cost_center_id' => 2,
+                            'company_id' => $company_id,
+                            'cost_center_id' => $cost_center_id,
                             'vaccount_type' => 'dr',
                             'ledger_id' => $debit_ledger->id,
                             'ledger_code' => $post_item->debit_ledger_code,
@@ -718,7 +721,8 @@ class SaleAccountPostingAPIController extends AppBaseController
                         $charge_ledger   = AccountLedger::where('ledger_code', $post_item->charge_ledger_code)->first();
 
                         $transactions[] = new AccountVoucherTransaction([
-                            'cost_center_id' => 2,
+                            'company_id' => $company_id,
+                            'cost_center_id' => $cost_center_id,
                             'vaccount_type' => 'dr',
                             'ledger_id' => $charge_ledger->id,
                             'ledger_code' => $post_item->charge_ledger_code,
@@ -739,7 +743,8 @@ class SaleAccountPostingAPIController extends AppBaseController
                         $credit_ledger   = AccountLedger::where('ledger_code', $post_item->credit_ledger_code)->first();
 
                         $transactions[] = new AccountVoucherTransaction([
-                            'cost_center_id' => 2,
+                            'company_id' => $company_id,
+                            'cost_center_id' => $cost_center_id,
                             'vaccount_type' => 'cr',
                             'ledger_id' => $credit_ledger->id,
                             'ledger_code' => $post_item->credit_ledger_code,
@@ -756,6 +761,7 @@ class SaleAccountPostingAPIController extends AppBaseController
 
                     $voucher_code   = $this->returnVoucherCode('journal');
                     $account_voucher_inputs  = [
+                        'company_id' => $company_id,
                         'vcode' => $voucher_code,
                         'invoice_type'  => 'SALE',
                         'cost_center_id'    => 2,

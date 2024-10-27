@@ -8,10 +8,12 @@ use App\Models\AccountLedger;
 use App\Models\AccountVoucher;
 use App\Models\AccountVoucherTransaction;
 use App\Models\BankAccount;
+use App\Models\Outlet;
 use App\Models\Customer;
 use App\Models\DamageProduct;
 use App\Models\EntryType;
 use App\Models\FiscalYear;
+use App\Models\CostCenter;
 use App\Models\MobileWallet;
 use App\Models\Sale;
 use Illuminate\Http\Request;
@@ -34,6 +36,8 @@ class COGSAccountPostingAPIController extends AppBaseController
         $from_date  = $request->input('from_date');
         $to_date    = $request->input('to_date');
 
+        $company_id =  checkCompanyIdByOutletId($request); 
+
 
         $query   = Sale::with(['payments', 'salesItems'])->where('outlet_id', $outlet_id)
                                         ->where('inventory_post_status', 0)
@@ -51,14 +55,11 @@ class COGSAccountPostingAPIController extends AppBaseController
 
 
         $damage_product_non_posted_list = $query_damage_product->get();
-//        $damage_product_non_posted_list = [];
+        //        $damage_product_non_posted_list = [];
 
         if(empty($sale_non_posted_list) && empty($damage_product_non_posted_list)) {
             return $this->sendError("COGS Data not found!");
-        }
-
- 
-        $company_id = checkCompanyId($request); 
+        } 
         $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
 
         $inventory_account_ledger  = getLedgerAccountById($account_default_setting->inventory_account);
@@ -177,9 +178,11 @@ class COGSAccountPostingAPIController extends AppBaseController
 
     // Store COGS and Damage Account Posting List
     public function storeCOGSAccountPosting(Request $request)
-    {
+    {  
+        $company_id =  checkCompanyIdByOutletId($request); 
 
-        $fiscal_year = FiscalYear::where('status', 1)->first();
+        $fiscal_year = FiscalYear::where('status', 1)->where('company_id', $company_id)->first();
+        $cost_center_id = CostCenter::where('company_id', $company_id)->first()->id;
         $start_date = $fiscal_year->start_date;
         $end_date   = $fiscal_year->end_date;
 
@@ -188,7 +191,7 @@ class COGSAccountPostingAPIController extends AppBaseController
         }
 
         $inputs = $request->all();
-//
+ 
         $post_items = (array) json_decode($request->get('post_items'));
         $sales_ids = json_decode($request->get('sales_ids'));
         $damage_ids = json_decode($request->get('damage_ids'));
@@ -198,7 +201,7 @@ class COGSAccountPostingAPIController extends AppBaseController
         try{
 
             if(count($post_items) > 0) {
-                $entry_type = EntryType::where('label', 'journal')->first();
+                $entry_type = EntryType::where('label', 'journal')->where('company_id', $company_id)->first();
 
                 foreach ($post_items as $post_item) {
 
@@ -217,12 +220,13 @@ class COGSAccountPostingAPIController extends AppBaseController
                     $transactions = [];
                     // Debit Ledger
                     if($post_item->debit_ledger_code != "") {
-                        $debit_ledger   = AccountLedger::where('ledger_code', $post_item->debit_ledger_code)->first();
+                        $debit_ledger   = AccountLedger::where('ledger_code', $post_item->debit_ledger_code)->where('company_id', $company_id)->first();
 
                         $debit_amount   = $post_item->amount;
 
                         $transactions[] = new AccountVoucherTransaction([
-                            'cost_center_id' => 2,
+                            'company_id' => $company_id,
+                            'cost_center_id' => $cost_center_id,
                             'vaccount_type' => 'dr',
                             'ledger_id' => $debit_ledger->id,
                             'ledger_code' => $post_item->debit_ledger_code,
@@ -240,10 +244,11 @@ class COGSAccountPostingAPIController extends AppBaseController
                     // Credit Ledger
                     if($post_item->credit_ledger_code != "") {
 
-                        $credit_ledger   = AccountLedger::where('ledger_code', $post_item->credit_ledger_code)->first();
+                        $credit_ledger   = AccountLedger::where('ledger_code', $post_item->credit_ledger_code)->where('company_id', $company_id)->first();
 
                         $transactions[] = new AccountVoucherTransaction([
-                            'cost_center_id' => 2,
+                            'company_id' => $company_id,
+                            'cost_center_id' => $cost_center_id,
                             'vaccount_type' => 'cr',
                             'ledger_id' => $credit_ledger->id,
                             'ledger_code' => $post_item->credit_ledger_code,
@@ -260,9 +265,10 @@ class COGSAccountPostingAPIController extends AppBaseController
 
                     $voucher_code   = $this->returnVoucherCode('journal');
                     $account_voucher_inputs  = [
+                        'company_id' => $company_id,
                         'vcode' => $voucher_code,
                         'invoice_type'  => $invoice_type,
-                        'cost_center_id'    => 2,
+                        'cost_center_id'    => $cost_center_id,
                         'vtype_id'  => $entry_type->id,
                         'vtype_value'   => 'auto voucher',
                         'fiscal_year_id'    => $fiscal_year->id,

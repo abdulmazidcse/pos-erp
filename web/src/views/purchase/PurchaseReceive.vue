@@ -917,7 +917,7 @@ export default {
             this.product_items[index].name = p_name;
             this.product_items[index].sub_category_id = sub_category_id;
             this.product_items[index].product_unit_id = unit_id;
-            this.product_items[index].unit_code = unit_data.unit_code.toLowerCase();
+            this.product_items[index].unit_code = unit_data? unit_data.unit_code.toLowerCase() : '';
             this.product_items[index].purchase_price = p_tp;
             this.product_items[index].sale_price = p_mrp;
             this.product_items[index].is_expirable = (expireable == 1) ? true : false;
@@ -1247,9 +1247,10 @@ export default {
         },
         
         totalAmount: function(){
+            let item_value = 0;
             return this.product_items.reduce(function(total, item){
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (item.purchase_price * item.rcv_weight);
+                    item_value = (item.purchase_price * item.rcv_weight);
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (item.purchase_price * item.rcv_qty);
@@ -1264,9 +1265,10 @@ export default {
         },
         
         netAmount: function(){
+            let item_value = 0;
             let net_amount = this.product_items.reduce(function(total, item){
                 if((item.rcv_qty != 0 && item.rcv_qty > 0) && (item.rcv_weight != 0 && item.rcv_weight > 0)) {
-                    let item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
+                    item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_weight));
                 }
                 else if(item.rcv_qty != 0 && item.rcv_qty > 0) {
                     item_value = (parseFloat(item.purchase_price) * parseFloat(item.rcv_qty));

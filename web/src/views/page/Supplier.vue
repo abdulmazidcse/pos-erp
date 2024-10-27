@@ -20,6 +20,24 @@
                 </div>
             </div>
         </div>
+        <div class="row">
+            <div class="col-12"> 
+                <div class="col-md-10">
+                    <div class="row">  
+                        <div class="col-md-6">
+                            <div class="">
+                                <label for="outlet_id"> Company </label> 
+                                <!-- @change="getSuppliers($event.target.value)" -->
+                                <select class="form-control" v-model="tableData.company_id"  @change="getSuppliers()">
+                                    <option value="">--- Select Company ---</option>
+                                    <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
+                                </select>
+                            </div>
+                        </div> 
+                    </div>
+                </div> 
+            </div>
+        </div>
 
         <Modal @close="toggleModal()" :modalActive="modalActive">
             <div class="modal-content scrollbar-width-thin">
@@ -509,12 +527,10 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script> 
 import Modal from "./../helper/Modal";
 import Datatable from '@/components/Datatable.vue';
-import Pagination from '@/components/Pagination.vue';
-import { ref, onMounted } from "vue";
+import Pagination from '@/components/Pagination.vue'; 
 import Form from 'vform'
 import axios from 'axios'; 
 
@@ -639,6 +655,7 @@ export default {
                 column: 0,
                 dir: 'desc',
                 sortKey: 'name', 
+                company_id:''
             }, 
             lang: {
                 lengthMenu: this.$props.language.lengthMenu ? this.$props.language.lengthMenu : 'Show_MENU_entries',
@@ -764,7 +781,7 @@ export default {
         },
         checkForm: function(e) {
 
-        },
+        }, 
 
         submitForm: function(e) {  
             this.isSubmit = true;

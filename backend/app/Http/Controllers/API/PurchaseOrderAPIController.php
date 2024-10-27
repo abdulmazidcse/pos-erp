@@ -44,12 +44,7 @@ class PurchaseOrderAPIController extends AppBaseController
      * @return Response
      */
     public function index(Request $request)
-    {
-//        $purchaseOrders = $this->purchaseOrderRepository->all(
-//            $request->except(['skip', 'limit']),
-//            $request->get('skip'),
-//            $request->get('limit')
-//        );
+    { 
 
         $purchaseOrders = PurchaseOrder::orderBy('id', 'desc')->get();
 

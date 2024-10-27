@@ -7,7 +7,7 @@
                         <div class="page-title-right float-left">
                             <ol class="breadcrumb m-0"> 
                                 <li class="breadcrumb-item active">Sales </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Sales Posting</a></li>
+                                <li class="breadcrumb-item"><a href="javascript: void(0);">Sales Posting d</a></li>
                                 
                             </ol>
                         </div>
@@ -258,7 +258,7 @@ export default {
                 this.loading = false;
                 this.isSubmit = false;
                 this.disabled = false;
-                this.search_terms.reset();
+                // this.search_terms.reset();
 
                 this.items = res.data.data.sales_posting_data_desc;
                 this.items_asc = res.data.data.sales_posting_data_asc;
@@ -310,6 +310,7 @@ export default {
             this.postDisabled = true;
 
             var formData    = new FormData();
+            formData.append('outlet_id', this.search_terms.outlet_id);
             formData.append("post_items", JSON.stringify(this.items_asc));
             formData.append("sales_ids", JSON.stringify(this.sales_ids));
             formData.append("payment_ids", JSON.stringify(this.payment_ids));

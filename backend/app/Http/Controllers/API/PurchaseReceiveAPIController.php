@@ -10,6 +10,7 @@ use App\Models\AccountLedger;
 use App\Models\AccountVoucher;
 use App\Models\AccountVoucherTransaction;
 use App\Models\EntryType;
+use App\Models\CostCenter;
 use App\Models\FiscalYear;
 use App\Models\OrderRequisitionDetail;
 use App\Models\Product;
@@ -85,7 +86,9 @@ class PurchaseReceiveAPIController extends AppBaseController
      */
     public function store(CreatePurchaseReceiveAPIRequest $request)
     {
-        $fiscal_year = FiscalYear::where('status', 1)->first();
+        $company_id = checkCompanyIdByOutletId($request);
+        $fiscal_year = FiscalYear::where('status', 1)->where('company_id', $company_id)->first();
+        $cost_center_id = CostCenter::where('company_id', $company_id)->first()->id;
         $start_date = $fiscal_year->start_date;
         $end_date   = $fiscal_year->end_date;
 
@@ -98,9 +101,9 @@ class PurchaseReceiveAPIController extends AppBaseController
             'outlet_id'     => 'required|not_in:0',
         ]);
 
-//        return $request->all();
-//        $products = json_decode($request->get('products'));
-//        return $products;
+        // return $request->all();
+        // $products = json_decode($request->get('products'));
+        // return $products;
         // For Without purchase order to receive product
         if($request->purchase_order_id == "direct") {
             // $outlet_id = auth()->user()->outlet_id ?? 1;
@@ -120,14 +123,13 @@ class PurchaseReceiveAPIController extends AppBaseController
             $total_free_amount = 0;
             $total_discount_amount = 0;
             $total_rcv_amount = 0;
-            $total_vat_amount = 0;
+            $total_vat_amount = 0; 
             if(count($products) > 0)
             {
                 foreach ($products as $product) {
-
-//                    if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
+                    //  if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
                     if($product->id != "" && $product->purchase_price >= 0  && ($product->sale_price != 0 && $product->sale_price != "") && (($product->rcv_qty != 0 && $product->rcv_qty != "")) || ($product->rcv_weight != 0 && $product->rcv_weight != "")) {
-
+                         
                         if($product->unit_code == 'kg') {
                             $product_amount = $product->rcv_weight * $product->purchase_price;
                         }else {
@@ -138,20 +140,21 @@ class PurchaseReceiveAPIController extends AppBaseController
                         $product_rcv_amount = ($product_amount - $product->disc_amount) + 0;
 
                         $product_ids[]  = $product->id;
-//                        $product_array[$product->id]    = [
-//                            'receive_purchase_price'    => $product->purchase_price,
-//                            'receive_supplier_id'       => $request->get('supplier_id'),
-//                            'receive_mrp_price'         => $product->sale_price,
-//                            'receive_quantity'          => $product->rcv_qty,
-//                            'receive_discount_percent'  => $product->disc_percent,
-//                            'receive_discount_amount'   => $product->disc_amount,
-//                            'receive_free_quantity'     => $product->free_qty,
-//                            'receive_free_amount'       => $free_amount,
-//                            'receive_product_value'     => $product_amount,
-//                            'receive_vat_amount'        => 0,
-//                            'receive_amount'            => $product_rcv_amount,
-//                            'receive_status'            => 2,
-//                        ];
+                        
+                        //    $product_array[$product->id]    = [
+                        //        'receive_purchase_price'    => $product->purchase_price,
+                        //        'receive_supplier_id'       => $request->get('supplier_id'),
+                        //        'receive_mrp_price'         => $product->sale_price,
+                        //        'receive_quantity'          => $product->rcv_qty,
+                        //        'receive_discount_percent'  => $product->disc_percent,
+                        //        'receive_discount_amount'   => $product->disc_amount,
+                        //        'receive_free_quantity'     => $product->free_qty,
+                        //        'receive_free_amount'       => $free_amount,
+                        //        'receive_product_value'     => $product_amount,
+                        //        'receive_vat_amount'        => 0,
+                        //        'receive_amount'            => $product_rcv_amount,
+                        //        'receive_status'            => 2,
+                        //    ];
                         $product_array[$product->id]    = [
                             'receive_main_quantity'          => $product->rcv_qty,
                             'receive_quantity'          => $product->rcv_qty + $product->free_qty,
@@ -160,7 +163,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                             'receive_mrp_price'         => $product->sale_price,
                         ];
 
-//                        $receive_details_product_array[]   = new PurchaseReceiveDetails([
+                        //    $receive_details_product_array[]   = new PurchaseReceiveDetails([
                         $receive_details_product_array[]   = [
                             'receive_product_id'        => $product->id,
                             'receive_product_unit_id'   => $product->product_unit_id,
@@ -180,7 +183,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                         ];
 
 
-//                        $total_rcv_quantity += $product->rcv_qty;
+                        // $total_rcv_quantity += $product->rcv_qty;
                         $total_rcv_quantity += $product->rcv_qty + $product->free_qty;
                         $total_rcv_weight += $product->rcv_weight;
                         $total_rcv_product_value    += $product_amount;
@@ -222,7 +225,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                 }
             }
 
-//            $net_total_amount = ($total_rcv_amount - $request->get('additional_discount')) + $request->get('additional_cost');
+            // $net_total_amount = ($total_rcv_amount - $request->get('additional_discount')) + $request->get('additional_cost');
             $net_total_amount = $request->get('net_amount');
 
             $receive_inputs = [
@@ -267,8 +270,8 @@ class PurchaseReceiveAPIController extends AppBaseController
 
             // For Central Ledger
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
-            $ledger_data    = getLedgerAccounts('grn', $specific_ledger);
-//            return response()->json($ledger_data);
+            $ledger_data    = getLedgerAccounts($company_id, 'grn', $specific_ledger); 
+            //   return response()->json($ledger_data);
             if(empty($ledger_data)) {
                 return $this->sendError('Please configure settings purchase transaction ledger');
             }
@@ -276,7 +279,8 @@ class PurchaseReceiveAPIController extends AppBaseController
             if(count($ledger_data) > 0) {
                 $t = 0;
                 foreach ($ledger_data as $key => $v) {
-                    $account_ledger = AccountLedger::where('ledger_code', $key)->first();
+                    $account_ledger = AccountLedger::where('ledger_code', $key)->where('company_id', $company_id)->first();
+                    // dd( $cost_center_id, $ledger_data, $account_ledger);
                     if($v == 'D') {
                         $debit_amount = $net_total_amount;
                         $credit_amount = 0;
@@ -292,9 +296,11 @@ class PurchaseReceiveAPIController extends AppBaseController
                     }else{
                         $reference_id = array_keys($ledger_data)[0];
                     }
+                    dd( $company_id, $cost_center_id, $account_ledger->id, $account_ledger->ledger_code,  $vaccount_type, $debit_amount, $credit_amount, $reference_id);
 
                     $transactions[] = new AccountVoucherTransaction([
-                        'cost_center_id' => 2, // Based on selected cost center
+                        'company_id' => $company_id,
+                        'cost_center_id' => $cost_center_id, // Based on selected cost center
                         'ledger_id' => $account_ledger->id,
                         'ledger_code'   => $account_ledger->ledger_code,
                         'vaccount_type' => $vaccount_type,
@@ -303,7 +309,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                         'reference_id'  => $reference_id,
                         'transaction_sl'    => 1,
                         'voucher_note'  => 'Purchase product receive from supplier - challan no: '.$request->get('reference_no'),
-                        'transaction_date'    => date("Y-m-d"),
+                        'transaction_date' => date("Y-m-d"),
                         'created_at'    => date("Y-m-d H:i:s"),
                         'updated_at'    => date("Y-m-d H:i:s"),
                     ]);
@@ -312,11 +318,12 @@ class PurchaseReceiveAPIController extends AppBaseController
                 }
             }
 
-            $entry_type = EntryType::where('label', 'journal')->first();
+            $entry_type = EntryType::where('label', 'journal')->where('company_id', $company_id)->first();
             $voucher_inputs = [
+                'company_id' => $company_id,
                 'vcode' => $this->returnVoucherCode('journal'),
                 'vtype_id'  => $entry_type->id,
-                'cost_center_id'  => 2,
+                'cost_center_id'  => $cost_center_id,
                 'invoice_type'  => 'PR',
                 'vtype_value'   => 'auto voucher',
                 'fiscal_year_id' => $fiscal_year->id,
@@ -325,7 +332,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                 'modified_item' => 0,
             ];
 
-            // Final Submission
+            // Final Submission 
             if(count($product_ids) > 0) {
 
                 DB::beginTransaction();
@@ -669,7 +676,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                         $order_details_product[$product->order_details_id]    = [
                             'receive_quantity'          => $item_rcv_quantity,
-//                            'receive_weight'            => $total_rcv_weight,
+                            //   'receive_weight'            => $total_rcv_weight,
                             'receive_status'            => $prcv_status,
                         ];
 
@@ -706,7 +713,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                 }
             }
 
-//            $net_total_amount = ($total_rcv_amount - $request->get('additional_discount')) + $request->get('additional_cost');
+            //            $net_total_amount = ($total_rcv_amount - $request->get('additional_discount')) + $request->get('additional_cost');
             $net_total_amount = $request->get('net_amount');
 
             $receive_inputs = [
@@ -752,7 +759,7 @@ class PurchaseReceiveAPIController extends AppBaseController
 
             // For Central Ledger
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
-            $ledger_data    = getLedgerAccounts('grn', $specific_ledger);
+            $ledger_data    = getLedgerAccounts($company_id, 'grn', $specific_ledger);
 
             if(empty($ledger_data)) {
                 return $this->sendError('Please configure settings purchase transaction ledger');
@@ -772,12 +779,12 @@ class PurchaseReceiveAPIController extends AppBaseController
                         $vaccount_type = 'cr';
                     }
 
-//                    if($i == 0) {
-//                        $reference_id = NULL;
-//                    }else{
-//                        $reference_ledger = AccountLedger::where('ledger_code', '120101')->first();
-//                        $reference_id = $reference_ledger->id;
-//                    }
+                    //                    if($i == 0) {
+                    //                        $reference_id = NULL;
+                    //                    }else{
+                    //                        $reference_ledger = AccountLedger::where('ledger_code', '120101')->first();
+                    //                        $reference_id = $reference_ledger->id;
+                    //                    }
                     if($i == 0) {
                         $reference_id = NULL;
                     }else{
@@ -785,7 +792,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                     }
 
                     $transactions[] = new AccountVoucherTransaction([
-                        'cost_center_id' => 2, // Based on selected cost center
+                        'cost_center_id' => $cost_center_id, // Based on selected cost center
                         'ledger_id' => $account_ledger->id,
                         'ledger_code'   => $account_ledger->ledger_code,
                         'vaccount_type' => $vaccount_type,
@@ -806,7 +813,7 @@ class PurchaseReceiveAPIController extends AppBaseController
             $voucher_inputs = [
                 'vcode' => $this->returnVoucherCode('journal'),
                 'vtype_id'  => $entry_type->id,
-                'cost_center_id'    => 2,
+                'cost_center_id'    => $cost_center_id,
                 'invoice_type'  => 'PR',
                 'vtype_value'   => 'auto_voucher',
                 'fiscal_year_id' => $fiscal_year->id,
@@ -1100,38 +1107,38 @@ class PurchaseReceiveAPIController extends AppBaseController
         $receive_product_data = [];
         $total_free_quantity = 0;
         $total_free_amount   = 0;
-//        if($purchaseReceive->purchase_order_id != 0) {
-//
-//            if(count($purchaseReceive->receive_products) > 0)
-//            {
-//                foreach ($purchaseReceive->receive_products as $receive_product)
-//                {
-//                    $receive_product_data[] = [
-//                        'receive_details_id'    => $receive_product->id,
-//                        'product_id'    => $receive_product->product_id,
-//                        'product_unit_id'   => $receive_product->product_unit_id,
-//                        'product_name'  => $receive_product->product->product_name,
-//                        'product_code'  => $receive_product->product->product_code,
-//                        'cost_price'    => $receive_product->receive_purchase_price,
-//                        'depo_price'    => $receive_product->product->depo_price,
-//                        'mrp_price'     => $receive_product->product->mrp_price,
-//                        'purchase_measuring_unit'   => $receive_product->product->purchase_measuring_unit,
-//                        'sales_measuring_unit'  => $receive_product->product->sales_measuring_unit,
-//                        'purchase_unit' => $receive_product->product->purchase_unit->unit_code,
-//                        'sales_unit'    => $receive_product->product->sales_unit->sales_unit,
-//                        'carton_size'   => $receive_product->product->carton_size ?? 'N/A',
-//                        'order_quantity'       => $receive_product->order_quantity,
-//                        'receive_quantity'       => $receive_product->receive_quantity,
-//
-//                    ];
-//
-//                    $total_free_quantity += $receive_product->receive_free_quantity;
-//                    $total_free_amount += $receive_product->receive_purchase_price *             $receive_product->receive_free_quantity;
-//                }
-//            }
-//        }
+            //        if($purchaseReceive->purchase_order_id != 0) {
+            //
+            //            if(count($purchaseReceive->receive_products) > 0)
+            //            {
+            //                foreach ($purchaseReceive->receive_products as $receive_product)
+            //                {
+            //                    $receive_product_data[] = [
+            //                        'receive_details_id'    => $receive_product->id,
+            //                        'product_id'    => $receive_product->product_id,
+            //                        'product_unit_id'   => $receive_product->product_unit_id,
+            //                        'product_name'  => $receive_product->product->product_name,
+            //                        'product_code'  => $receive_product->product->product_code,
+            //                        'cost_price'    => $receive_product->receive_purchase_price,
+            //                        'depo_price'    => $receive_product->product->depo_price,
+            //                        'mrp_price'     => $receive_product->product->mrp_price,
+            //                        'purchase_measuring_unit'   => $receive_product->product->purchase_measuring_unit,
+            //                        'sales_measuring_unit'  => $receive_product->product->sales_measuring_unit,
+            //                        'purchase_unit' => $receive_product->product->purchase_unit->unit_code,
+            //                        'sales_unit'    => $receive_product->product->sales_unit->sales_unit,
+            //                        'carton_size'   => $receive_product->product->carton_size ?? 'N/A',
+            //                        'order_quantity'       => $receive_product->order_quantity,
+            //                        'receive_quantity'       => $receive_product->receive_quantity,
+            //
+            //                    ];
+            //
+            //                    $total_free_quantity += $receive_product->receive_free_quantity;
+            //                    $total_free_amount += $receive_product->receive_purchase_price *             $receive_product->receive_free_quantity;
+            //                }
+            //            }
+            //        }
 
-//        else{
+            //        else{
 
             if(count($purchaseReceive->purchase_receive_details) > 0)
             {
@@ -1163,7 +1170,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                 }
             }
 
-//        }
+        //        }
 
         $return_data    = [
             'receive_data'  =>  [
@@ -1239,15 +1246,15 @@ class PurchaseReceiveAPIController extends AppBaseController
     public function destroy($id)
     {
         /** @var PurchaseReceive $purchaseReceive */
-//        $purchaseReceive = $this->purchaseReceiveRepository->find($id);
-//
-//        if (empty($purchaseReceive)) {
-//            return $this->sendError('Purchase Receive not found');
-//        }
-//
-//        $purchaseReceive->delete();
-//
-//        return $this->sendSuccess('Purchase Receive deleted successfully');
+    //        $purchaseReceive = $this->purchaseReceiveRepository->find($id);
+    //
+    //        if (empty($purchaseReceive)) {
+    //            return $this->sendError('Purchase Receive not found');
+    //        }
+    //
+    //        $purchaseReceive->delete();
+    //
+    //        return $this->sendSuccess('Purchase Receive deleted successfully');
     }
 
 
@@ -1259,9 +1266,7 @@ class PurchaseReceiveAPIController extends AppBaseController
            $outlet_id   = $request->get('outlet_id');
         }else{
             $outlet_id = auth()->user()->outlet_id ?? 1;
-        }
-
-//        return $outlet_id;
+        } 
         $reference_no = $this->returnPurchaseReceiveReferenceNo('SR', $outlet_id);
 
         return $this->sendResponse([
@@ -1314,49 +1319,49 @@ class PurchaseReceiveAPIController extends AppBaseController
                 'gifts' => [],
                 'is_expirable' => false,
             ];
-//            if (count($products) > 0) {
-//
-//                foreach ($products as $purchase_product) {
-//
-//                    //if ($purchase_product->receive_quantity == 0) {
-//                        $supplier_products[] = [
-//                            'order_details_id' => $purchase_product->id,
-//                            'id' => $purchase_product->id,
-//                            'name' => $purchase_product->product_name,
-//                            'code' => $purchase_product->product_code,
-//                            'unit_code' => ($purchase_product->purchase_unit) ? $purchase_product->purchase_unit->unit_code : '',
-//                            'carton_size' => $purchase_product->carton_size ?? '',
-//                            'wh_stk' => 0,
-//                            'last_po_qty' => 0,
-//                            'last_purchase_qty' => 0,
-//                            'po_qty' => 0,
-//                            'remain_qty' => 0,
-//                            'cpu' => $purchase_product->cost_price,
-//                            'purchase_price' => $purchase_product->cost_price,
-//                            'rcv_qty' => 0,
-//                            'free_qty' => 0,
-//                            'free_amount' => 0,
-//                            'disc_percent' => 0,
-//                            'disc_amount' => 0,
-//                            'vat' => 0.000,
-//                            'amount' => 0,
-//                            'sale_price' => $purchase_product->mrp_price,
-//                            'profit_percent_cpu' => 0,
-//                            'profit_percent_mrp' => 0,
-//                            'checked' => false,
-//                            'is_expires' => false,
-//                            'expires_data' => [],
-//                            'is_gifts' => false,
-//                            'gifts' => [],
-//                            'is_expirable' => ($purchase_product->is_expirable == 1) ? true : false,
-//                        ];
-////                    }
-//
-//                }
-//            }
+            //            if (count($products) > 0) {
+            //
+            //                foreach ($products as $purchase_product) {
+            //
+            //                    //if ($purchase_product->receive_quantity == 0) {
+            //                        $supplier_products[] = [
+            //                            'order_details_id' => $purchase_product->id,
+            //                            'id' => $purchase_product->id,
+            //                            'name' => $purchase_product->product_name,
+            //                            'code' => $purchase_product->product_code,
+            //                            'unit_code' => ($purchase_product->purchase_unit) ? $purchase_product->purchase_unit->unit_code : '',
+            //                            'carton_size' => $purchase_product->carton_size ?? '',
+            //                            'wh_stk' => 0,
+            //                            'last_po_qty' => 0,
+            //                            'last_purchase_qty' => 0,
+            //                            'po_qty' => 0,
+            //                            'remain_qty' => 0,
+            //                            'cpu' => $purchase_product->cost_price,
+            //                            'purchase_price' => $purchase_product->cost_price,
+            //                            'rcv_qty' => 0,
+            //                            'free_qty' => 0,
+            //                            'free_amount' => 0,
+            //                            'disc_percent' => 0,
+            //                            'disc_amount' => 0,
+            //                            'vat' => 0.000,
+            //                            'amount' => 0,
+            //                            'sale_price' => $purchase_product->mrp_price,
+            //                            'profit_percent_cpu' => 0,
+            //                            'profit_percent_mrp' => 0,
+            //                            'checked' => false,
+            //                            'is_expires' => false,
+            //                            'expires_data' => [],
+            //                            'is_gifts' => false,
+            //                            'gifts' => [],
+            //                            'is_expirable' => ($purchase_product->is_expirable == 1) ? true : false,
+            //                        ];
+            //                    }
+            //
+            //                }
+            //            }
 
             $return_data = [
-//            'purchase_order' => new PurchaseOrderResource($purchaseOrder),
+            //  'purchase_order' => new PurchaseOrderResource($purchaseOrder),
                 'purchase_order' => [
                     'total_qty' => 0,
                     'total_value' => 0,
@@ -1499,7 +1504,9 @@ class PurchaseReceiveAPIController extends AppBaseController
     /** Purchase Receive With Purchase Receive Board */
     public function purchaseReceiveWithBoard(Request $request)
     {
+        $company_id = checkCompanyIdByOutletId($request);
         $fiscal_year = FiscalYear::where('status', 1)->first();
+        $cost_center_id = CostCenter::where('company_id', $company_id)->first()->id;
         $start_date = $fiscal_year->start_date;
         $end_date   = $fiscal_year->end_date;
 
@@ -1791,7 +1798,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                         // Account Transaction Data
                         // For Central Ledger
                         $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
-                        $ledger_data    = getLedgerAccounts('grn', $specific_ledger);
+                        $ledger_data    = getLedgerAccounts($company_id, 'grn', $specific_ledger);
 
                         if(empty($ledger_data)) {
                             return $this->sendError('Please configure settings purchase transaction ledger');
@@ -1800,7 +1807,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                         if(count($ledger_data) > 0) {
                             $t = 0;
                             foreach ($ledger_data as $key => $v) {
-                                $account_ledger = AccountLedger::where('ledger_code', $key)->first();
+                                $account_ledger = AccountLedger::where('ledger_code', $key)->where('company_id', $company_id)->first();
                                 if($v == 'D') {
                                     $debit_amount = $net_total_amount;
                                     $credit_amount = 0;
@@ -1818,7 +1825,8 @@ class PurchaseReceiveAPIController extends AppBaseController
                                 }
 
                                 $account_transaction_array[] = new AccountVoucherTransaction([
-                                    'cost_center_id' => 2, // Based on selected cost center
+                                    'company_id' => $company_id,
+                                    'cost_center_id' => $cost_center_id, // Based on selected cost center
                                     'ledger_id' => $account_ledger->id,
                                     'ledger_code'   => $account_ledger->ledger_code,
                                     'vaccount_type' => $vaccount_type,
@@ -1896,11 +1904,12 @@ class PurchaseReceiveAPIController extends AppBaseController
 
 
                 if(count($account_transaction_array) > 0) {
-                    $entry_type = EntryType::where('label', 'journal')->first();
+                    $entry_type = EntryType::where('label', 'journal')->where('company_id', $company_id)->first();
                     $voucher_inputs = [
+                        'company_id' => $company_id,
                         'vcode' => $this->returnVoucherCode('journal'),
                         'vtype_id'  => $entry_type->id,
-                        'cost_center_id'  => 2,
+                        'cost_center_id'  => $cost_center_id,
                         'invoice_type'  => 'PR',
                         'vtype_value'   => 'auto voucher',
                         'fiscal_year_id' => $fiscal_year->id,

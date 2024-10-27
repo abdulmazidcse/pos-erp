@@ -91,15 +91,15 @@ if((location.host == 'localhost:8080') || (location.host == '127.0.0.1:8080')){
 
 app.config.globalProperties.$createElement = '';
 app.config.globalProperties.reRenderRoute = 0;
-app.config.globalProperties.address =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
-app.config.globalProperties.invHeadAddress =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
+app.config.globalProperties.address =  "North Bashaboo, Dhaka 1000";  
+app.config.globalProperties.invHeadAddress =  "North Bashaboo, Dhaka 1000";  
 app.config.globalProperties.invHeadPhone =  "";// 01739897087  
 app.config.globalProperties.prepareBy =  "Khandakar Kudrat E Khuda";  
 app.config.globalProperties.checkedBy =  "Khandakar Kudrat E Khuda";  
 app.config.globalProperties.approvedBy =  "Khandakar Kudrat E Khuda";  
   
 app.config.globalProperties.retailShopName =  "Retail Shop 1.";  
-app.config.globalProperties.retailShopAddress =  "34/4/A/10, North Bashaboo, Dhaka 1000";  
+app.config.globalProperties.retailShopAddress =  "North Bashaboo, Dhaka 1000";  
 
 // for turn off warning
 app.config.warnHandler = function (msg, vm, trace) {

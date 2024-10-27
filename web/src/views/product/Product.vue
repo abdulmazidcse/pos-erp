@@ -98,9 +98,7 @@
                                             <div class="control" style="float: left;">
                                                 <span style="float: left; margin-right: 10px; padding: 7px 0px;">Show </span>
                                                 <div class="select" style="float: left;">
-                                                    <select class="form-select" v-model="tableData.length" @change="fetchItems()"> 
-                                                        <option value="2" selected="selected">2</option>
-                                                        <option value="5" selected="selected">5</option>
+                                                    <select class="form-select" v-model="tableData.length" @change="fetchItems()">   
                                                         <option value="10" selected="selected">10</option>
                                                         <option value="25">25</option>
                                                         <option value="50">50</option>
@@ -123,6 +121,7 @@
                             <template #body >  
                                 <tbody v-if="items.length > 0">
                                     <tr class="border" v-for="(item, i) in items" v-if="items.length > 0">
+                                      <td>{{ item.company? item.company.name : ''}} </td>
                                       <td>{{ item.product_name}} </td>
                                       <td>{{ item.product_native_name}} </td>
                                       <td>{{ item.cost_price}}</td>
@@ -995,15 +994,12 @@
       </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import VueEditor from "./../helper/Modal";
+<script> 
+import Modal from "./../helper/Modal"; 
 import { ref } from "vue";
 import Form from 'vform'  
 import Vue3Barcode from 'vue3-barcode'
-import axios from 'axios';
-import { reactive, toRefs } from 'vue' 
+import axios from 'axios'; 
 import Bulkupload from './Bulkupload'; 
 import Datatable from '@/components/Datatable.vue';
 import Pagination from '@/components/Pagination.vue';
@@ -1122,6 +1118,11 @@ export default {
               clearIcon: '', 
             }, 
             columns: [ 
+                {
+                    label: 'Company Name',
+                    name: 'company',           
+                    width: '10%'
+                },  
                 {
                     label: 'Product Name',
                     name: 'product_name',           

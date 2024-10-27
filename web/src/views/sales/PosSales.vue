@@ -223,12 +223,8 @@
             <div id="invoice-POS" v-if="invoice_info">
               <div id="top">
                 <div class="row">
-                  <h2 class="text-center">TWENTY FOUR 7-Basundhara</h2>
-                  <p class="text-center">
-                    Uncep cheyne tower, Segunbagicha, Dhaka, <br />
-                    Dhaka-1212
-                  </p>
-                  <p class="text-center">Mobile: 01739897087</p>
+                  <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
+                  <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>
                   <p>
                     <span class="float-left">{{
                       invoice_info.invoice_number

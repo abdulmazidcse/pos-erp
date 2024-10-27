@@ -3,6 +3,7 @@
 use App\Models\AccountGroup;
 use App\Models\AccountLedger;
 use App\Models\Company;
+use App\Models\Outlet;
 use Illuminate\Support\Facades\DB;
 
 if(!function_exists('last_query_start')){
@@ -207,6 +208,21 @@ if(!function_exists('checkCompanyId'))
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
         if (in_array('Super Admin', $roles)) { 
             $company_id  = $request->input('company_id');
+        }else{
+            $company_id  = $user->company_id;
+        } 
+        return $company_id;
+    }
+} 
+if(!function_exists('checkOutletId'))
+{
+    function checkCompanyIdByOutletId($request)
+    {
+        $company_id = 0;
+        $user = auth()->user();
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
+        if (in_array('Super Admin', $roles)) {             
+            $company_id  = Outlet::find($request->input('outlet_id'))->company_id;
         }else{
             $company_id  = $user->company_id;
         } 

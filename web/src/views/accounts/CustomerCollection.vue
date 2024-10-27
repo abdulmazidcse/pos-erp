@@ -219,8 +219,8 @@
                                 <div class="card">
                                     <div class="card-body">
                                         <div class="container" id="printArea">
-                                            <p class="text-uppercase text-center mt-2 fw-500">Twenty Four 7</p>
-                                            <p class="text-uppercase text-center mt-2 fw-500">3rd floor, UCEP Cheyne Tower, 25 Segun Bagicha Rd, Dhaka 1000</p><br>
+                                            <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
+                                            <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>
                                             <hr class="m-zero">
                                             <!-- <p class="text-center m-0 font-italic"><strong>Cash Received Voucher (Approval)</strong></p> -->
                                             <p class="text-center m-0 font-italic fw-500">{{ vitem.vtype_name }} Voucher (Approval)</p>

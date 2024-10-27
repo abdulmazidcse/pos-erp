@@ -223,6 +223,303 @@ class SaleAPIController extends AppBaseController
             $smsReturnData = $sms->send($number, $mes);
         }
     }
+    public function storeOld(CreateSalesAPIRequest $request)
+    {
+        $this->validate($request, [
+            'customer_id'  => 'required', 
+        ]);  
+        $fiscal_year = FiscalYear::where('status', 1)->first();
+        $start_date = $fiscal_year->start_date;
+        $end_date   = $fiscal_year->end_date;
+
+        if($start_date >= date("Y-m-d") && date("Y-m-d") <= $end_date) {
+            return $this->sendError("Date must be range of Fiscal Year");
+        }
+
+        $input = $request->all(); 
+
+        $pointsSettings = PointsSettings::first();
+        $payments = [];
+        if($request->hold_sale_info) {
+            $holdSale = HoldSale::find($request->hold_sale_info['id']);   
+            $holdSale->salesItems()->forceDelete();
+            $holdSale->forceDelete();
+        }
+
+        $redeem_point=false;
+        $total_value_amount = 0; // For account transaction
+
+        if ($request->payments) {
+            $getPayments = $request->payments;  
+            $paidByCount = 0;
+            foreach ($getPayments as $key => $value) { 
+                if($value['paid_by'] =='cash'){
+                    if($paidByCount ==0){
+                        $paidByCount++;
+                        $value['amount'] = $value['amount'] - $request->return_amount; 
+                    }
+                } else if($value['paid_by'] =='redeem_point'){                    
+                    $convartRate = $pointsSettings->cart_price_rate / $pointsSettings->cart_points_rate;
+                    $value['amount'] = ($convartRate * $value['redeem_point']);  
+                    $redeem_point=true;
+                    $redeemValue = $value['redeem_point'];
+                }
+                $payments[] = new PaymentCollection([
+                    'amount'        => $value['amount'],
+                    'credit_card'   => $value['card_reference_code'],
+                    'gift_card'     => $value['gift_card'],
+                    'paying_by'     => $value['paid_by'],
+                    'payment_note'  => $value['payment_note'],
+                    'wallet_id'     => $value['wallet_id'],
+                ]);
+
+                $total_value_amount += $value['amount'];
+            } 
+        }
+
+        $items = [];
+        $smsItemInfo = [];
+        $update_stock = [];
+        $salesDiscount = [];
+
+        $total_item_discount = 0;
+        $total_item_vat = 0;
+        $total_item_mrp_amount = 0;
+        $total_item_cost_amount = 0;
+
+        if ($request->items) {
+            $getItems = $request->items;  
+            foreach ($getItems as $key => $value) {  
+                $product = Product::find($value['product_id']);  
+                $stockPro = StockProduct::where('product_id', $value['product_id'])
+                                ->where('id', $value['product_stock_id'])->first(); 
+                $update_stock_arr = [
+                    'id' => $stockPro->id,
+                    'out_stock_quantity' => $stockPro->out_stock_quantity + $value['quantity'],
+                    'stock_quantity'    => $stockPro->stock_quantity - $value['quantity'],
+                    'out_stock_weight' => $stockPro->out_stock_weight + $value['weight'], 
+                    'stock_weight'    => $stockPro->stock_weight ? ($stockPro->stock_weight - $value['weight']) : $stockPro->stock_weight,
+                    'in_stock_weight'  => $stockPro->in_stock_weight + $value['weight'], 
+                ];
+                $update_stock[] = $update_stock_arr;
+
+                $items[] = new SaleItem([
+                    'stock_id'=> $value['product_stock_id'],
+                    'product_id'=> $value['product_id'],
+                    'quantity'  => $value['quantity'],
+                    'discount'  => $value['discount'], 
+                    'vat'       => $value['tax'],
+                    'vat_id'    => $product->product_tax, 
+                    'mrp_price' => $value['mrp_price'] ? $value['mrp_price'] : $product->mrp_price,
+                    'cost_price'=> $product->cost_price,
+                    'uom'       => $value['uom'],
+                    'weight'    => $value['weight']
+                ]);
+                if($value['weight']){
+                    $smsItemInfo[] = array(
+                        'pro_name' => strtoupper($product->product_native_name), 
+                        'wt' => $value['weight'].'KG', 
+                        'price'=> $product->mrp_price.'tk',  
+                    );
+                }else{
+                    $smsItemInfo[] = array(
+                        'pro_name' => strtoupper($product->product_native_name), 
+                        'wt' => $value['quantity'], 
+                        'price'=> $product->mrp_price.'tk',  
+                    );
+                }
+                
+                if(sizeof($value['dis_array']) > 0 ){ 
+                    foreach ($value['dis_array'] as $key2 => $dis_array) {    
+                        if($dis_array > 0){
+                            $salesDiscount[$key][] =  new SalesDiscount([  
+                                'key'   => $key2, 
+                                'value' => $dis_array, 
+                            ]);  
+                        } 
+                    }  
+                }
+
+                $total_item_discount += ($value['quantity'] * $value['discount']);
+                $total_item_vat += $value['tax'];
+                $total_item_mrp_amount += ($value['quantity'] * $product->mrp_price);
+                $total_item_cost_amount += ($value['quantity'] * $product->cost_price);
+
+            }
+        } 
+
+        
+        $customer = Customer::find($request->customer_id);   
+        $id=\DB::select("show table status where name='sales'; ");
+        $next_sale_id=$id[0]->Auto_increment; 
+        $outlet_id = auth('api')->user() ? (auth('api')->user()->outlet_id ? auth('api')->user()->outlet_id : 1 ) : 1;
+        if ($request->items) {
+            $salesData = array(
+                'customer_id' => $request->customer_id,
+                'invoice_number' => 'INV'.sprintf('%03d',$outlet_id).date('y').sprintf('%06d',$next_sale_id),
+                'customer_name' => $customer->name,
+                'total_amount' => $request->total_amount,
+                'grand_total' => $request->grand_total,
+                'collection_amount' => $request->total_collect_amount,
+                'paid_amount' => $request->paid_amount,
+                'return_amount' => $request->return_amount,
+                'sale_type' => 'pos',
+                'customer_discount' => $request->customer_discount ? $request->customer_discount : 0,
+                'customer_group_discount' => $request->customer_group_discount ? $request->customer_group_discount : 0,
+                'order_discount' => $request->order_discount,
+                'order_discount_value' => $request->order_discount_value,
+                'order_vat' => $request->order_vat, 
+                'order_items_vat' => $request->order_items_vat, 
+                'outlet_id' => $outlet_id, 
+                'status' => $request->status,
+                'sale_note' => $request->sale_note,
+                'staff_note' => $request->staff_note,
+                'created_by' => Auth::user()->id,
+            ); 
+        }
+        
+        if(($pointsSettings->enable_points_rewards) && ($pointsSettings->enable_points_order_total)){ 
+            foreach ($pointsSettings->points_within_order_range as $key => $value) { 
+                if(($value['minimum'] < $request->grand_total) && ($value['maximum'] > $request->grand_total)){
+                    $points = $value['points'];
+                }else{
+                    $points = $request->grand_total/100;
+                }
+            }
+        }else if($pointsSettings->enable_points_rewards){
+            $points = $request->grand_total/100;
+        }else{
+            $points = '';
+        }
+        $insertPoint = new UsersPoints();
+        $insertPoint->user_id = $request->customer_id;
+        $insertPoint->type = 'insert';
+        $insertPoint->points = $points;
+
+        if($redeem_point){
+            $redeemPoint = new UsersPoints();
+            $redeemPoint->user_id = $request->customer_id;
+            $redeemPoint->type = 'redeem';
+            $redeemPoint->points = $redeemValue;
+        } 
+
+        $CustomerLedger = CustomerLedger::orderBy('id', 'DESC')->where('customer_id',$request->customer_id)->first();
+        if(empty($CustomerLedger)) {
+            $customer_closing_balance = 0;
+            $closing_balance = $request->grand_total - $request->total_collect_amount;
+        } else {
+            $customer_closing_balance = $CustomerLedger->closing_balance;
+            $diff = $request->grand_total - $request->total_collect_amount;
+            $closing_balance = ($customer_closing_balance + $diff);
+        }
+
+        $customer_ledger_data = new CustomerLedger();
+        $customer_ledger_data->customer_id = $request->get('customer_id');
+        $customer_ledger_data->transaction_type = 'sale';
+        $customer_ledger_data->note = 'POS Sale';
+        $customer_ledger_data->debit_amount = $request->grand_total;
+        $customer_ledger_data->credit_amount = $request->total_collect_amount;
+        $customer_ledger_data->opening_balance = $customer_closing_balance;
+        $customer_ledger_data->closing_balance = $closing_balance;
+        $customer_ledger_data->transaction_date = date("Y-m-d");
+
+        /** For Sales Account Transaction  */
+        $cust_discount = $request->customer_discount ? $request->customer_discount : 0;
+        $cust_group_discount = $request->customer_group_discount ? $request->customer_group_discount : 0;
+        $order_discount = $request->order_discount_value;
+
+        $total_discount = ($cust_discount + $cust_group_discount + $order_discount + $total_item_discount);
+        $total_vat_amount = ($request->order_items_vat + $request->order_vat);
+
+        $sales_transaction_data = [
+            'fiscal_year_id'    => $fiscal_year->id,
+            'total_discount'    => $total_discount,
+            'total_vat_amount'  => $total_vat_amount,
+            'total_item_mrp_amount' => $total_item_mrp_amount,
+            'total_cogs_amount'    => $total_item_cost_amount,
+            'total_cash_amount' => (($total_item_mrp_amount + $total_vat_amount) - $total_discount),
+            'sale_status'   => $request->status,
+            'paid_amount'   => $request->paid_amount,
+        ];
+        /** For Sales Account Transaction  */ 
+
+        DB::beginTransaction();
+        try{ 
+            $sale = $this->saleRepository->create($salesData);
+            if($pointsSettings->enable_points_rewards){
+                $sale->point()->save($insertPoint);
+            }
+
+            foreach ($update_stock as $key => $value) {
+                StockProduct::where('id',$value['id'])->update([
+                    'out_stock_quantity'=> $value['out_stock_quantity'],
+                    'stock_quantity' => $value['stock_quantity'],
+                    'in_stock_weight' => $value['in_stock_weight'],                    
+                    'stock_weight'   => $value['stock_weight'], 
+                    'out_stock_weight' => $value['out_stock_weight'],
+                ]); 
+            }
+
+            if($redeem_point){
+               $sale->point()->save($redeemPoint); 
+            }
+
+            $ddd = array();
+            $itemsInstance = $sale->salesItems()->saveMany($items);
+            $i = 0;
+            foreach ($itemsInstance as $key => $itemsInstanc) {
+                //SaleItem::find($itemsInstanc->id);
+                //$saleDataItem = SaleItem::find($itemsInstanc->id);
+                //$saleDataItem->salesDiscount()->saveMany($salesDiscount[$i]);
+                if($salesDiscount){
+                    $itemsInstanc->salesDiscount()->saveMany($salesDiscount[$i]);
+                } 
+                // for($j=0; $j<count($salesDiscount[$i]); $j++) {
+                //     $salesDiscount[$i][$j]['sale_item_id'] = $itemsInstanc->id;
+                //     $salesDiscount[$i][$j]['created_at'] = date("Y-m-d H:i:s");
+                //     $salesDiscount[$i][$j]['updated_at'] = date("Y-m-d H:i:s");
+                // }
+                // (new SalesDiscount)->insert($salesDiscount[$i]);
+               $i++;
+            }
+
+            $sale->payments()->saveMany($payments);
+            $sale->customerLedger()->save($customer_ledger_data);
+
+            // Account Transaction
+            $account_transaction = $this->saleAccountTransaction($sales_transaction_data);
+            $sale->update(['voucher_id' => $account_transaction->id]);
+
+            // sale data query
+            $query = Sale::with(['payments','salesItems','customer','createdBy','salesDiscount']);
+            $query->where('invoice_number',$sale->invoice_number);
+            $saleInfo = $query->get()->toArray(); 
+
+            // Sms 
+            // $smsItemInfo = array(
+            //     'pro_name' => 'GRASS CARP', 
+            //     'wt' =>'W: 2.56 KG', 
+            //     'price'=> 'R: TK 300/KG', 
+            //     'total' => 'T: 768 TK'
+            // );
+            $payment_type = 'CASH';
+            $date = date('Ymd');
+            $order_call = '09610774774';
+            $paymentinfo = array(
+                'grand_total' => $request->grand_total,
+                'collection_amount' => $request->total_collect_amount,
+                'due' => ($request->grand_total - $request->total_collect_amount)
+            );
+
+            $this->sendInvoiceSMS(($customer->phone ? $customer->phone : $order_call ),$smsItemInfo, $paymentinfo, $payment_type, $date, $order_call );
+            DB::commit();
+            return $this->sendResponse($saleInfo, 'Sale saved successfully');
+
+        }catch(\Exception $e){
+            // \DB::rollback();
+            return $this->sendError($e->getTrace());
+        }  
+    }
 
     public function store(CreateSalesAPIRequest $request)
     {

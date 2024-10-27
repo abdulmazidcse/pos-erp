@@ -147,13 +147,14 @@ class ReportAPIController extends AppBaseController
 
     public function getDailySummaryReport(Request $request)
     {
+        $outlet_id = $request->get('outlet_id');
         $src_date   = $request->get('src_date') ?? Carbon::now()->format("Y-m-d");
 
         // Purchase Report
-        $purchase_query = PurchaseReceive::with(['suppliers'])->where('status', 1)->orderBy("id", 'desc');
+        $purchase_query = PurchaseReceive::where('outlet_id', $outlet_id)->with(['suppliers'])->where('status', 1)->orderBy("id", 'desc');
 
         // Sales Report
-        $sale_query     = Sale::with(['customer'])->orderBy('id', 'desc');
+        $sale_query     = Sale::where('outlet_id', $outlet_id)->with(['customer'])->orderBy('id', 'desc');
 
         // Collections Query
         $collection_query = PaymentCollection::with(['sales'])->orderBy('id', 'desc');

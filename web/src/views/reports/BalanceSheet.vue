@@ -286,11 +286,10 @@ export default {
                 this.companies = res.data.data;
                 if (this.companies.length === 1) { 
                     this.fetchBalanceSheet(this.companies[0].id);
+                    this.search_terms.company_id = this.companies[0].id;
                 }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
-                this.loading = false;
             });
         },
 
