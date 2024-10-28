@@ -29,6 +29,7 @@ use App\Models\HoldSaleItem;
 use App\Models\SalesDiscount;
 use App\Models\BankAccount;
 use App\Models\GeneralSetting;
+use App\Models\CostCenter;
 use App\Models\AccountDefaultSetting;
 use App\Models\User;
 use App\Myclass\SMS;
@@ -519,14 +520,25 @@ class SaleAPIController extends AppBaseController
             if($request->status != 'due'){
                 $sale->payments()->saveMany($payments);
             }
-            $accountTransactionAutoPosting = false;
+            $accountTransactionAutoPosting = true;
             if($accountTransactionAutoPosting){ 
+                
+                $CustomerLedger = CustomerLedger::orderBy('id', 'DESC')->where('customer_id',$request->customer_id)->first(); 
+                if(empty($CustomerLedger)) {
+                    $customer_closing_balance = 0;
+                    $closing_balance = $request->grand_total - $request->total_collect_amount;
+                }else{
+                    $customer_closing_balance = $CustomerLedger->closing_balance;
+                    $diff = $request->grand_total - $request->total_collect_amount;
+                    $closing_balance = ($customer_closing_balance + $diff);
+                } 
+
                 $customer_ledger_data = new CustomerLedger();
                 $customer_ledger_data->customer_id = $request->get('customer_id');
                 $customer_ledger_data->transaction_type = 'sale';
                 $customer_ledger_data->note = 'POS Sale ';
-                $customer_ledger_data->debit_amount = $request->grand_total;
-                $customer_ledger_data->credit_amount = $request->total_collect_amount;
+                $customer_ledger_data->sales_amount = $request->grand_total;  // debit_amount
+                $customer_ledger_data->payment_receive_amount = $request->total_collect_amount; // credit_amount
                 $customer_ledger_data->opening_balance = $customer_closing_balance; 
                 $customer_ledger_data->closing_balance = $closing_balance; 
                 $customer_ledger_data->transaction_date = date("Y-m-d");
@@ -563,8 +575,8 @@ class SaleAPIController extends AppBaseController
             return $this->sendResponse($saleInfo, 'Sale saved successfully');
 
         }catch(\Exception $e){
-            // \DB::rollback();
-            return $this->sendError($e->getTrace());
+            DB::rollback();
+            return $this->sendError($e->getMessage());
         }
 
 
@@ -589,30 +601,30 @@ class SaleAPIController extends AppBaseController
         ];
         // Cash Sales
         $account_default_setting = AccountDefaultSetting::where('company_id', $company_id)->first();
-        // $cash_in_hand_account_ledger  = getLedgerAccountById($account_default_setting->cash_in_hand_account);
-        // $cash_sales_account_ledger  = getLedgerAccountById($account_default_setting->cash_sales_account);
+        $cash_in_hand_account_ledger  = getLedgerAccountById($account_default_setting->cash_in_hand_account);
+        $cash_sales_account_ledger  = getLedgerAccountById($account_default_setting->cash_sales_account);
         // // Credit Sale
-        // $receivable_account_ledger  = getLedgerAccountById($account_default_setting->account_receivable_ledger);
-        // $credit_sales_account_ledger  = getLedgerAccountById($account_default_setting->credit_sales_account);
+        $receivable_account_ledger  = getLedgerAccountById($account_default_setting->account_receivable_ledger);
+        $credit_sales_account_ledger  = getLedgerAccountById($account_default_setting->credit_sales_account);
 
         // 1st Transaction
         if($data['sale_status'] == 'due'){
             $cash_ledger = "";
-            $account_receivable_ledger = $this->getLedgerData($company_id, 'ledger_code', '120201'); // dr assets // Accounts Receivables
+            $account_receivable_ledger = $receivable_account_ledger; // dr assets // Accounts Receivables
         }elseif ($data['sale_status'] == 'partial') {
-            $cash_ledger = $this->getLedgerData($company_id, 'ledger_code', '120701'); // dr assets ---
-            $account_receivable_ledger = $this->getLedgerData($company_id, 'ledger_code', '120201'); // dr assets // Accounts Receivables
+            $cash_ledger = $cash_in_hand_account_ledger;  // dr assets ---
+            $account_receivable_ledger = $receivable_account_ledger; // dr assets // Accounts Receivables
         }else{
-            $cash_ledger = $this->getLedgerData($company_id, 'ledger_code', '120701'); // dr assets --
+            $cash_ledger = $cash_in_hand_account_ledger; // dr assets --
             $account_receivable_ledger = "";
         }
-        $discount_ledger = $this->getLedgerData($company_id, 'ledger_code', '511701'); // dr expense // Warranty, Replacement & Discount
-        $cash_sale_ledger = $this->getLedgerData($company_id, 'ledger_code', '410101'); // cr income // Sales
-        $vat_payable_ledger = $this->getLedgerData($company_id, 'ledger_code', '210204'); // cr liability --
+        $discount_ledger = getLedgerAccountById($account_default_setting->customer_discount_account); // dr expense // Warranty, Replacement & Discount
+        $cash_sale_ledger = $cash_sales_account_ledger; // cr income // Sales
+        // $vat_payable_ledger = $this->getLedgerData($company_id, 'ledger_code', '210204'); // cr liability --
 
         // 2nd Transaction
-        $cogs_ledger = $this->getLedgerData($company_id, 'ledger_code', '511901'); // dr expense  // Cost Of Goods Sold
-        $inventory_ledger = $this->getLedgerData($company_id, 'ledger_code', '120101'); // cr assets  // Inventories
+        $cogs_ledger = getLedgerAccountById($account_default_setting->cogs_account); // dr expense  // Cost Of Goods Sold
+        $inventory_ledger = getLedgerAccountById($account_default_setting->inventory_account); // cr assets  // Inventories
 
         if($cash_ledger != "" && $account_receivable_ledger != "") {
 
@@ -722,21 +734,21 @@ class SaleAPIController extends AppBaseController
                 'created_at'    => date("Y-m-d H:i:s"),
                 'updated_at'    => date("Y-m-d H:i:s"),
             ]),
-            new AccountVoucherTransaction([
-                'company_id' => $company_id,
-                'cost_center_id' => $cost_center_id,
-                'vaccount_type'   => 'cr',
-                'ledger_id' => $vat_payable_ledger->id,
-                'ledger_code' => $vat_payable_ledger->ledger_code,
-                'debit' => 0,
-                'credit'    => $data['total_vat_amount'],
-                'reference_id'  => $reference_ledger_code,
-                'transaction_sl'    => 1,
-                'voucher_note'  => null,
-                'balance'   => 0,
-                'created_at'    => date("Y-m-d H:i:s"),
-                'updated_at'    => date("Y-m-d H:i:s"),
-            ]),
+            // new AccountVoucherTransaction([
+            //     'company_id' => $company_id,
+            //     'cost_center_id' => $cost_center_id,
+            //     'vaccount_type'   => 'cr',
+            //     'ledger_id' => $vat_payable_ledger->id,
+            //     'ledger_code' => $vat_payable_ledger->ledger_code,
+            //     'debit' => 0,
+            //     'credit'    => $data['total_vat_amount'],
+            //     'reference_id'  => $reference_ledger_code,
+            //     'transaction_sl'    => 1,
+            //     'voucher_note'  => null,
+            //     'balance'   => 0,
+            //     'created_at'    => date("Y-m-d H:i:s"),
+            //     'updated_at'    => date("Y-m-d H:i:s"),
+            // ]),
 
             //2nd Transaction
             new AccountVoucherTransaction([

@@ -70,216 +70,216 @@ class PurchaseOrderAPIController extends AppBaseController
      *
      * @return Response
      */
-//    public function store(CreatePurchaseOrderAPIRequest $request)
-//    {
-//        // For Purchase Products
-//        $products = json_decode($request->products);
-//
-//        //return gettype($request->get('is_single_po'));
-//
-//        if($request->get('is_single_po') == "true") {
-//
-//            $this->validate($request, [
-//                'supplier_id'   => 'required',
-//                'order_date'    => 'required',
-////            'delivery_date' => 'required',
-//                'reference_no'  => 'required',
-////            'start_date'    => 'required',
-////            'end_date'      => 'required',
-//            ]);
-//
-//            $product_array = [];
-//            $total_quantity = 0;
-//            $total_product_value = 0;
-//            $total_free_amount = 0;
-//            $total_discount_amount = 0;
-//            $total_product_amount = 0;
-//            $total_vat_amount = 0;
-//            if(count($products) > 0) {
-//
-//                foreach($products as $product) {
-//
-////                if($product->checked) {
-//                    if(($product->purchase_price > 0 && $product->purchase_price != '') && ($product->qty > 0 && $product->qty != '')) {
-//
-//                        $product_value = ($product->purchase_price * $product->qty);
-//                        $free_amount = ($product->purchase_price * $product->free_qty);
-//                        $discount_amount = ($product_value * $product->disc_percent) / 100;
-//                        $product_amount = $product_value - $discount_amount;
-//
-//                        $product_array[]    = new OrderRequisitionDetail([
-//                            'product_id'    => $product->id,
-//                            'product_unit_id'    => $product->product_unit_id,
-//                            'order_purchase_price'    => $product->purchase_price,
-//                            'order_quantity'   => $product->qty,
-//                            'order_discount_percent'  => $product->disc_percent,
-//                            'order_free_quantity'  => $product->free_qty,
-//                            'order_product_value'  => $product_value,
-//                            'order_discount_amount'  => $discount_amount,
-//                            'order_free_amount'  => $free_amount,
-//                            'order_vat_amount'  => $product->vat,
-//                            'order_amount'    => $product_amount,
-////                        'order_line_notes'    => $product->line_notes,
-//                        ]);
-//
-//                        $total_quantity += $product->qty;
-//                        $total_product_value += $product_value;
-//                        $total_discount_amount += $discount_amount;
-//                        $total_free_amount  += $free_amount;
-//                        $total_product_amount += $product_amount;
-//                        $total_vat_amount   += $product->vat;
-//                    }
-//                }
-//            }
-//
-//            if (empty($product_array)) {
-////            return $this->sendError('Please select/checked at list one products item');
-//                return $this->sendError('Please fill up at list one products item order qty getter then 0');
-//            }
-//
-//            $inputs = [
-//                'reference_no'  => $request->get('reference_no'),
-//                'supplier_id'   => $request->get('supplier_id'),
-//                'supplier_payment_type' => $request->get('supplier_payment_type'),
-//                'number_of_po' => $request->get('number_of_po'),
-//                'supply_schedule' => $request->get('supply_schedule'),
-//                'order_date' => customDateFormat($request->get('order_date')),
-//                'delivery_date' => customDateFormat($request->get('delivery_date')),
-//                'warehouse_id' => $request->get('warehouse_id') ?? 0,
-//                'delivery_to_outlet' => $request->get('outlet_id') ?? 0,
-//                'start_date' => $request->get('start_date'),
-//                'end_date' => $request->get('end_date'),
-//                'total_qty' => $total_quantity,
-//                'total_value' => $total_product_value,
-//                'commission_value' => $total_discount_amount,
-//                'total_vat' => $total_vat_amount,
-//                'total_free_amount' => $total_free_amount,
-//                'total_amount' => $total_product_amount,
-//            ];
-//
-//            DB::beginTransaction();
-//            try {
-//                $purchaseOrder = $this->purchaseOrderRepository->create($inputs);
-//                $purchase_product = $purchaseOrder->purchase_products()->saveMany($product_array);
-//                DB::commit();
-//
-//                return $this->sendResponse($purchaseOrder->toArray(), 'Purchase Order saved successfully');
-//            }catch (\Exception $e){
-//                DB::rollBack();
-//                return $this->sendError($e->getMessage());
-//            }
-//        }
-//        // For Multiple PO
-//        else{
-//
-//            $this->validate($request, [
-////                'supplier_id'   => 'required',
-//                'order_date'    => 'required',
-////            'delivery_date' => 'required',
-//                'reference_no'  => 'required',
-////            'start_date'    => 'required',
-////            'end_date'      => 'required',
-//            ]);
-//
-//            $supplier_array = [];
-//            $supplier_product_array = [];
-//            if(count($products) > 0) {
-//                foreach ($products as $product) {
-//                    if(($product->purchase_price > 0 && $product->purchase_price != '') && ($product->qty > 0 && $product->qty != '') && ($product->supplier_id != '' && $product->supplier_id != 0)) {
-//
-//                        if(!in_array($product->supplier_id, $supplier_array)) {
-//                            $supplier_array[]   = $product->supplier_id;
-//                        }
-//                        $supplier_product_array[$product->supplier_id][] = $product;
-//
-//                    }
-//                }
-//            }
-//
-//            if(empty($supplier_product_array)) {
-//                return $this->sendError('Product not available for purchase order');
-//            }
-//
-//            if(count($supplier_array) > 0) {
-//                DB::beginTransaction();
-//                try{
-//                    for($s=0; $s<count($supplier_array); $s++) {
-//                        $total_quantity = 0;
-//                        $total_product_value = 0;
-//                        $total_free_amount = 0;
-//                        $total_discount_amount = 0;
-//                        $total_product_amount = 0;
-//                        $total_vat_amount = 0;
-//                        $order_product_array    = [];
-//                        foreach ($supplier_product_array[$supplier_array[$s]] as $supplier_product) {
-//                            $product_value = ($supplier_product->purchase_price * $supplier_product->qty);
-//                            $free_amount = ($supplier_product->purchase_price * $supplier_product->free_qty);
-//                            $discount_amount = ($product_value * $supplier_product->disc_percent) / 100;
-//                            $product_amount = $product_value - $discount_amount;
-//
-//                            $order_product_array[]    = new OrderRequisitionDetail([
-//                                'product_id'    => $supplier_product->id,
-//                                'product_unit_id'    => $supplier_product->product_unit_id,
-//                                'order_purchase_price'    => $supplier_product->purchase_price,
-//                                'order_quantity'   => $supplier_product->qty,
-//                                'order_discount_percent'  => $supplier_product->disc_percent,
-//                                'order_free_quantity'  => $supplier_product->free_qty,
-//                                'order_product_value'  => $product_value,
-//                                'order_discount_amount'  => $discount_amount,
-//                                'order_free_amount'  => $free_amount,
-//                                'order_vat_amount'  => $supplier_product->vat,
-//                                'order_amount'    => $product_amount,
-////                                'order_line_notes'    => $product->line_notes,
-//                            ]);
-//
-//                            $total_quantity += $supplier_product->qty;
-//                            $total_product_value += $product_value;
-//                            $total_discount_amount += $discount_amount;
-//                            $total_free_amount  += $free_amount;
-//                            $total_product_amount += $product_amount;
-//                            $total_vat_amount   += $supplier_product->vat;
-//                        }
-//
-//
-//                        $inputs = [
-//                            'reference_no'  => $request->get('reference_no'),
-//                            'supplier_id'   => $supplier_array[$s],
-//                            'supplier_payment_type' => $request->get('supplier_payment_type'),
-//                            'number_of_po' => $request->get('number_of_po'),
-//                            'supply_schedule' => $request->get('supply_schedule'),
-//                            'order_date' => customDateFormat($request->get('order_date')),
-//                            'delivery_date' => customDateFormat($request->get('delivery_date')),
-//                            'warehouse_id' => $request->get('warehouse_id') ?? 0,
-//                            'delivery_to_outlet' => $request->get('outlet_id') ?? 0,
-//                            'start_date' => $request->get('start_date'),
-//                            'end_date' => $request->get('end_date'),
-//                            'total_qty' => $total_quantity,
-//                            'total_value' => $total_product_value,
-//                            'commission_value' => $total_discount_amount,
-//                            'total_vat' => $total_vat_amount,
-//                            'total_free_amount' => $total_free_amount,
-//                            'total_amount' => $total_product_amount,
-//                        ];
-//
-//                        $purchaseOrder = $this->purchaseOrderRepository->create($inputs);
-//                        $purchase_product = $purchaseOrder->purchase_products()->saveMany($order_product_array);
-//
-//                    }
-//
-//                    DB::commit();
-//                    return $this->sendSuccess('Purchase Orders Generate Successfully!');
-//                }catch(\Exception $e){
-//                    DB::rollBack();
-//                    return $this->sendError($e->getMessage());
-//                }
-//
-//
-//            }else{
-//                return $this->sendError('Please Select Supplier for all order product');
-//            }
-//
-//        }
-//    }
+        //    public function store(CreatePurchaseOrderAPIRequest $request)
+        //    {
+        //        // For Purchase Products
+        //        $products = json_decode($request->products);
+        //
+        //        //return gettype($request->get('is_single_po'));
+        //
+        //        if($request->get('is_single_po') == "true") {
+        //
+        //            $this->validate($request, [
+        //                'supplier_id'   => 'required',
+        //                'order_date'    => 'required',
+        ////            'delivery_date' => 'required',
+        //                'reference_no'  => 'required',
+        ////            'start_date'    => 'required',
+        ////            'end_date'      => 'required',
+        //            ]);
+        //
+        //            $product_array = [];
+        //            $total_quantity = 0;
+        //            $total_product_value = 0;
+        //            $total_free_amount = 0;
+        //            $total_discount_amount = 0;
+        //            $total_product_amount = 0;
+        //            $total_vat_amount = 0;
+        //            if(count($products) > 0) {
+        //
+        //                foreach($products as $product) {
+        //
+        ////                if($product->checked) {
+        //                    if(($product->purchase_price > 0 && $product->purchase_price != '') && ($product->qty > 0 && $product->qty != '')) {
+        //
+        //                        $product_value = ($product->purchase_price * $product->qty);
+        //                        $free_amount = ($product->purchase_price * $product->free_qty);
+        //                        $discount_amount = ($product_value * $product->disc_percent) / 100;
+        //                        $product_amount = $product_value - $discount_amount;
+        //
+        //                        $product_array[]    = new OrderRequisitionDetail([
+        //                            'product_id'    => $product->id,
+        //                            'product_unit_id'    => $product->product_unit_id,
+        //                            'order_purchase_price'    => $product->purchase_price,
+        //                            'order_quantity'   => $product->qty,
+        //                            'order_discount_percent'  => $product->disc_percent,
+        //                            'order_free_quantity'  => $product->free_qty,
+        //                            'order_product_value'  => $product_value,
+        //                            'order_discount_amount'  => $discount_amount,
+        //                            'order_free_amount'  => $free_amount,
+        //                            'order_vat_amount'  => $product->vat,
+        //                            'order_amount'    => $product_amount,
+        ////                        'order_line_notes'    => $product->line_notes,
+        //                        ]);
+        //
+        //                        $total_quantity += $product->qty;
+        //                        $total_product_value += $product_value;
+        //                        $total_discount_amount += $discount_amount;
+        //                        $total_free_amount  += $free_amount;
+        //                        $total_product_amount += $product_amount;
+        //                        $total_vat_amount   += $product->vat;
+        //                    }
+        //                }
+        //            }
+        //
+        //            if (empty($product_array)) {
+        ////            return $this->sendError('Please select/checked at list one products item');
+        //                return $this->sendError('Please fill up at list one products item order qty getter then 0');
+        //            }
+        //
+        //            $inputs = [
+        //                'reference_no'  => $request->get('reference_no'),
+        //                'supplier_id'   => $request->get('supplier_id'),
+        //                'supplier_payment_type' => $request->get('supplier_payment_type'),
+        //                'number_of_po' => $request->get('number_of_po'),
+        //                'supply_schedule' => $request->get('supply_schedule'),
+        //                'order_date' => customDateFormat($request->get('order_date')),
+        //                'delivery_date' => customDateFormat($request->get('delivery_date')),
+        //                'warehouse_id' => $request->get('warehouse_id') ?? 0,
+        //                'delivery_to_outlet' => $request->get('outlet_id') ?? 0,
+        //                'start_date' => $request->get('start_date'),
+        //                'end_date' => $request->get('end_date'),
+        //                'total_qty' => $total_quantity,
+        //                'total_value' => $total_product_value,
+        //                'commission_value' => $total_discount_amount,
+        //                'total_vat' => $total_vat_amount,
+        //                'total_free_amount' => $total_free_amount,
+        //                'total_amount' => $total_product_amount,
+        //            ];
+        //
+        //            DB::beginTransaction();
+        //            try {
+        //                $purchaseOrder = $this->purchaseOrderRepository->create($inputs);
+        //                $purchase_product = $purchaseOrder->purchase_products()->saveMany($product_array);
+        //                DB::commit();
+        //
+        //                return $this->sendResponse($purchaseOrder->toArray(), 'Purchase Order saved successfully');
+        //            }catch (\Exception $e){
+        //                DB::rollBack();
+        //                return $this->sendError($e->getMessage());
+        //            }
+        //        }
+        //        // For Multiple PO
+        //        else{
+        //
+        //            $this->validate($request, [
+        ////                'supplier_id'   => 'required',
+        //                'order_date'    => 'required',
+        ////            'delivery_date' => 'required',
+        //                'reference_no'  => 'required',
+        ////            'start_date'    => 'required',
+        ////            'end_date'      => 'required',
+        //            ]);
+        //
+        //            $supplier_array = [];
+        //            $supplier_product_array = [];
+        //            if(count($products) > 0) {
+        //                foreach ($products as $product) {
+        //                    if(($product->purchase_price > 0 && $product->purchase_price != '') && ($product->qty > 0 && $product->qty != '') && ($product->supplier_id != '' && $product->supplier_id != 0)) {
+        //
+        //                        if(!in_array($product->supplier_id, $supplier_array)) {
+        //                            $supplier_array[]   = $product->supplier_id;
+        //                        }
+        //                        $supplier_product_array[$product->supplier_id][] = $product;
+        //
+        //                    }
+        //                }
+        //            }
+        //
+        //            if(empty($supplier_product_array)) {
+        //                return $this->sendError('Product not available for purchase order');
+        //            }
+        //
+        //            if(count($supplier_array) > 0) {
+        //                DB::beginTransaction();
+        //                try{
+        //                    for($s=0; $s<count($supplier_array); $s++) {
+        //                        $total_quantity = 0;
+        //                        $total_product_value = 0;
+        //                        $total_free_amount = 0;
+        //                        $total_discount_amount = 0;
+        //                        $total_product_amount = 0;
+        //                        $total_vat_amount = 0;
+        //                        $order_product_array    = [];
+        //                        foreach ($supplier_product_array[$supplier_array[$s]] as $supplier_product) {
+        //                            $product_value = ($supplier_product->purchase_price * $supplier_product->qty);
+        //                            $free_amount = ($supplier_product->purchase_price * $supplier_product->free_qty);
+        //                            $discount_amount = ($product_value * $supplier_product->disc_percent) / 100;
+        //                            $product_amount = $product_value - $discount_amount;
+        //
+        //                            $order_product_array[]    = new OrderRequisitionDetail([
+        //                                'product_id'    => $supplier_product->id,
+        //                                'product_unit_id'    => $supplier_product->product_unit_id,
+        //                                'order_purchase_price'    => $supplier_product->purchase_price,
+        //                                'order_quantity'   => $supplier_product->qty,
+        //                                'order_discount_percent'  => $supplier_product->disc_percent,
+        //                                'order_free_quantity'  => $supplier_product->free_qty,
+        //                                'order_product_value'  => $product_value,
+        //                                'order_discount_amount'  => $discount_amount,
+        //                                'order_free_amount'  => $free_amount,
+        //                                'order_vat_amount'  => $supplier_product->vat,
+        //                                'order_amount'    => $product_amount,
+        ////                                'order_line_notes'    => $product->line_notes,
+        //                            ]);
+        //
+        //                            $total_quantity += $supplier_product->qty;
+        //                            $total_product_value += $product_value;
+        //                            $total_discount_amount += $discount_amount;
+        //                            $total_free_amount  += $free_amount;
+        //                            $total_product_amount += $product_amount;
+        //                            $total_vat_amount   += $supplier_product->vat;
+        //                        }
+        //
+        //
+        //                        $inputs = [
+        //                            'reference_no'  => $request->get('reference_no'),
+        //                            'supplier_id'   => $supplier_array[$s],
+        //                            'supplier_payment_type' => $request->get('supplier_payment_type'),
+        //                            'number_of_po' => $request->get('number_of_po'),
+        //                            'supply_schedule' => $request->get('supply_schedule'),
+        //                            'order_date' => customDateFormat($request->get('order_date')),
+        //                            'delivery_date' => customDateFormat($request->get('delivery_date')),
+        //                            'warehouse_id' => $request->get('warehouse_id') ?? 0,
+        //                            'delivery_to_outlet' => $request->get('outlet_id') ?? 0,
+        //                            'start_date' => $request->get('start_date'),
+        //                            'end_date' => $request->get('end_date'),
+        //                            'total_qty' => $total_quantity,
+        //                            'total_value' => $total_product_value,
+        //                            'commission_value' => $total_discount_amount,
+        //                            'total_vat' => $total_vat_amount,
+        //                            'total_free_amount' => $total_free_amount,
+        //                            'total_amount' => $total_product_amount,
+        //                        ];
+        //
+        //                        $purchaseOrder = $this->purchaseOrderRepository->create($inputs);
+        //                        $purchase_product = $purchaseOrder->purchase_products()->saveMany($order_product_array);
+        //
+        //                    }
+        //
+        //                    DB::commit();
+        //                    return $this->sendSuccess('Purchase Orders Generate Successfully!');
+        //                }catch(\Exception $e){
+        //                    DB::rollBack();
+        //                    return $this->sendError($e->getMessage());
+        //                }
+        //
+        //
+        //            }else{
+        //                return $this->sendError('Please Select Supplier for all order product');
+        //            }
+        //
+        //        }
+        //    }
 
     public function store(CreatePurchaseOrderAPIRequest $request)
     {
@@ -306,13 +306,13 @@ class PurchaseOrderAPIController extends AppBaseController
 
                 foreach($products as $product) {
 
-//                if($product->checked) {
+            //   if($product->checked) {
                     if($product->product_id != "" && ($product->tp > 0 && $product->tp != '') && ($product->order_qty > 0 && $product->order_qty != '')) {
 
                         $product_value = ($product->tp * $product->order_qty);
-//                        $free_amount = ($product->tp * $product->free_qty);
+                    //      $free_amount = ($product->tp * $product->free_qty);
                         $free_amount = 0;
-//                        $discount_amount = ($product_value * $product->disc_percent) / 100;
+                    //     $discount_amount = ($product_value * $product->disc_percent) / 100;
                         $discount_amount = ($product_value * 0) / 100;
                         $product_amount = $product_value - $discount_amount;
 
@@ -328,7 +328,7 @@ class PurchaseOrderAPIController extends AppBaseController
                             'order_free_amount'  => $free_amount,
                             'order_vat_amount'  => 0,
                             'order_amount'    => $product_amount,
-//                        'order_line_notes'    => $product->line_notes,
+                        //   'order_line_notes'    => $product->line_notes,
                         ]);
 
                         $total_quantity += $product->order_qty;

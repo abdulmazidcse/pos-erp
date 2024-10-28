@@ -271,6 +271,8 @@ class PurchaseReceiveAPIController extends AppBaseController
             // For Central Ledger
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
             $ledger_data    = getLedgerAccounts($company_id, 'grn', $specific_ledger); 
+
+            // dd($ledger_data);
             //   return response()->json($ledger_data);
             if(empty($ledger_data)) {
                 return $this->sendError('Please configure settings purchase transaction ledger');
@@ -296,7 +298,7 @@ class PurchaseReceiveAPIController extends AppBaseController
                     }else{
                         $reference_id = array_keys($ledger_data)[0];
                     }
-                    dd( $company_id, $cost_center_id, $account_ledger->id, $account_ledger->ledger_code,  $vaccount_type, $debit_amount, $credit_amount, $reference_id);
+                    // dd( $company_id, $cost_center_id, $account_ledger->id, $account_ledger->ledger_code,  $vaccount_type, $debit_amount, $credit_amount, $reference_id);
 
                     $transactions[] = new AccountVoucherTransaction([
                         'company_id' => $company_id,

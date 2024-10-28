@@ -108,16 +108,9 @@ class SupplierAPIController extends AppBaseController
             'payment_matured_days' => $pmd_rules,
             'commission_percent'    => $cp_rules,
             'logo_image'      => 'sometimes|image|max:2000|mimes:jpeg,png,jpg,gif,svg',
-            'supplier_payable_account' => 'required',
-            //            'supplier_discount_account' => 'required',
-            //            'supplier_advance_account' => 'required',
+            'supplier_payable_account' => 'required', 
 
-        ]);
-
-
-            //        return response()->json($request->all());
-
-            //        $input = $request->except(['supplier_payable_account', 'supplier_discount_account', 'supplier_advance_account']);
+        ]); 
         $input = $request->except(['supplier_payable_account']);
 
         if($request->payment_matured_days == '') {
@@ -134,47 +127,34 @@ class SupplierAPIController extends AppBaseController
             $input['logo_image'] = $fileName;
         }
         $company_id = checkCompanyId($request); 
+        $input['company_id'] =  $company_id;
         $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $supplier_payable_account_type = AccountType::where('id', $account_default_setting->supplier_payable_account_type)->first();
         //        $supplier_discount_account_type = AccountType::where('id', $account_default_setting->supplier_discount_account_type)->first();
         //        $supplier_advance_account_type = AccountType::where('id', $account_default_setting->supplier_advance_payment_account_type)->first();
 
         $payable_account_inputs = [
+            'company_id'   => $company_id,
             'ledger_code'   => $this->returnAccountCode( $company_id, $supplier_payable_account_type->id, 'dtype'),
             'ledger_name'   => $request->get('supplier_payable_account'),
             'type_id'   => $supplier_payable_account_type->parent_type_id,
             'detail_type_id'    => $supplier_payable_account_type->id,
-        ];
-
-        //        $discount_account_inputs = [
-        //            'ledger_code'   => $this->returnAccountCode($supplier_discount_account_type->id, 'dtype'),
-        //            'ledger_name'   => $request->get('supplier_payable_account'),
-        //            'type_id'   => $supplier_discount_account_type->parent_type_id,
-        //            'detail_type_id'    => $supplier_discount_account_type->id,
-        //        ];
-        //
-        //        $advance_account_inputs = [
-        //            'ledger_code'   => $this->returnAccountCode($supplier_advance_account_type->id, 'dtype'),
-        //            'ledger_name'   => $request->get('supplier_advance_account'),
-        //            'type_id'   => $supplier_advance_account_type->parent_type_id,
-        //            'detail_type_id'    => $supplier_advance_account_type->id,
-        //        ];
-
+        ]; 
         DB::beginTransaction();
         try {
             $payable_account_save   = AccountLedger::create($payable_account_inputs);
-        //            $discount_account_save   = AccountLedger::create($discount_account_inputs);
-        //            $advance_account_save   = AccountLedger::create($advance_account_inputs);
+            //            $discount_account_save   = AccountLedger::create($discount_account_inputs);
+            //            $advance_account_save   = AccountLedger::create($advance_account_inputs);
 
             $input['payable_ledger_id'] = $payable_account_save->id;
-        //            $input['discount_ledger_id'] = $discount_account_save->id;
-        //            $input['advance_ledger_id'] = $advance_account_save->id;
+            //            $input['discount_ledger_id'] = $discount_account_save->id;
+            //            $input['advance_ledger_id'] = $advance_account_save->id;
             $supplier = $this->supplierRepository->create($input);
-        //            $supplier->update([
-        //                'payable_ledger_id' => $payable_account_save->id,
-        //                'discount_ledger_id' => $discount_account_save->id,
-        //                'advance_ledger_id' => $advance_account_save->id,
-        //            ]);
+            //            $supplier->update([
+            //                'payable_ledger_id' => $payable_account_save->id,
+            //                'discount_ledger_id' => $discount_account_save->id,
+            //                'advance_ledger_id' => $advance_account_save->id,
+            //            ]);
 
             DB::commit();
             return $this->sendResponse($supplier->toArray(), 'Supplier saved successfully');

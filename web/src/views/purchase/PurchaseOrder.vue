@@ -406,8 +406,8 @@
                                     <table class="table po_invoice" style="border: 1px solid #000;">
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
-                                                <h5 class="text-uppercase">{{ (purchase_order.company) ? purchase_order.company.name : '24/7 Retail Shop Limited' }}</h5>
-                                                <p>{{ (purchase_order.company) ? purchase_order.company.address : 'Plot -394, Road -29, Mohakhali DOHS' }} </p>
+                                                <h5 class="text-uppercase">{{ (purchase_order.company) ? purchase_order.company.name : '' }}</h5>
+                                                <p>{{ (purchase_order.company) ? purchase_order.company.address : '' }} </p>
                                                 <p>Dhaka, Bangladesh</p>
                                                 <span class="invoice_logo">
                                                     <img src="assets/images/logo.png" alt="">
@@ -632,8 +632,8 @@
                                     <table class="table po_invoice" style="border: 1px solid #000;">
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
-                                                <h5 class="text-uppercase">{{ (order_item.company) ? order_item.company.name : '24/7 Retail Shop Limited' }}</h5>
-                                                <p>{{ (order_item.company) ? order_item.company.address : 'Plot -394, Road -29, Mohakhali DOHS' }} </p>
+                                                <h5 class="text-uppercase">{{ (order_item.company) ? order_item.company.name : '' }}</h5>
+                                                <p>{{ (order_item.company) ? order_item.company.address : '' }} </p>
                                                 <p>Dhaka, Bangladesh</p>
                                                 <span class="invoice_logo">
                                                     <img src="assets/images/logo.png" alt="">
