@@ -216,7 +216,7 @@
                                             </div>
                                         </div>
                                     </div> 
-                                    <div class="row">  
+                                    <div class="row" style="display: none;">  
                                         <div class="form-group col-md-4">
                                             <div class="mb-3"> 
                                                 <label for="district_id">District</label>

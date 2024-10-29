@@ -35,6 +35,7 @@ class CustomerLedger extends Model
 
     public $fillable = [
         'customer_id',
+        'company_id',
         'sale_id',
         'transaction_type',
         'note',

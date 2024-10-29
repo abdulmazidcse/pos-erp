@@ -2285,7 +2285,7 @@
               </div> -->
 
               <div id="legalcopy">
-                <p class="borderTop"><strong>System By: </strong>SSG-IT</p>
+                <p class="borderTop"><strong>System By: </strong>Brainstorm Thing</p>
               </div>
             </div>
             <!--End InvoiceBot-->

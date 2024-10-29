@@ -534,6 +534,7 @@ class SaleAPIController extends AppBaseController
                 } 
 
                 $customer_ledger_data = new CustomerLedger();
+                $customer_ledger_data->company_id = $company_id;
                 $customer_ledger_data->customer_id = $request->get('customer_id');
                 $customer_ledger_data->transaction_type = 'sale';
                 $customer_ledger_data->note = 'POS Sale ';

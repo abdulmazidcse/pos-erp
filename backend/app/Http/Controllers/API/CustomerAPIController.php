@@ -115,6 +115,7 @@ class CustomerAPIController extends AppBaseController
         $this->validate($request, [
             'customer_code' => 'required|unique:customers,customer_code',
             'customer_group_id' => 'required',
+            'company_id' => 'required',
             'name' => 'required',
             'phone' => [
                 'required',
@@ -129,11 +130,13 @@ class CustomerAPIController extends AppBaseController
         ]);
         $input = $request->except(['customer_receivable_account','emp_code']); 
         $company_id = checkCompanyId($request); 
+        $input['company_id'] = $company_id;
         $account_default_setting = AccountDefaultSetting::where('company_id',  $company_id)->first();
         $customer_receivable_account_type = AccountType::where('id', $account_default_setting->customer_receivable_account_type)->first();
 
 
         $receivable_account_inputs = [
+            'company_id' => $company_id,
             'ledger_code'   => $this->returnAccountCode($company_id, $customer_receivable_account_type->id, 'dtype'),
             'ledger_name'   => $request->get('customer_receivable_account').' ('.$request->get('phone').')',
             'type_id'   => $customer_receivable_account_type->parent_type_id,
