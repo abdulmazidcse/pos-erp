@@ -303,6 +303,12 @@
             style="margin-bottom: 0px"
           >
             <thead class="tableFloatingHeaderOriginal">
+              <tr class="border item-head" style="font-size: 20px" >
+                <th >Net Amount</th>                
+                <th class="text-center" > 
+                    {{ Number(netAmountCalculate).toLocaleString() }} 
+                </th>
+              </tr>
               <tr class="border item-head return_amount" >
                 <th >Return Amount</th>
                 <th :id="(Number(netAmountCalculate - totalCollections) < 0) ? 'return_amount': ''">
@@ -312,17 +318,7 @@
                 <span v-else>
                   0
                 </span> 
-                </th> 
-                <th
-                  rowspan="7"
-                  class="text-center align-middle border fc-darkblue"
-                  bgcolor="green"
-                >
-                  <p style="font-size: 20px">
-                    Net Amount <br />
-                    {{ Number(netAmountCalculate).toLocaleString() }}
-                  </p>
-                </th>
+                </th>  
               </tr>
               <tr class="border item-head">
                 <th>Total</th>

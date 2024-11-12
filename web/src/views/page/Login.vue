@@ -54,40 +54,125 @@
                     </div>
                   </form>
                   <p class="text-center">Not a member? 
-                    <a @click="toggleShowModal()" style="color: #d5d5a7;"
+                    <a @click="toggleModal()" style="color: #2B14ADFF;"
                       href="javascript:;">Sign Up</a></p>
                 </div>
               </div>
             </div>
           </div>
         </div>
+        <Modal @close="toggleModal()" :modalActive="modalActive">
+            <div class="modal-content scrollbar-width-thin">
+                <div class="modal-header"> 
+                    <h3>Register Form</h3>
+                    <button @click="toggleModal()" type="button" class="btn btn-default">X</button>
+                </div>
+                <form @submit.prevent="registerForm()" enctype="multipart/form-data" >
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="col-md-12">
+                              <div class="col-md-12">
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="name">Name *</label>
+                                        <input type="text" class="form-control border " @keypress="onkeyPress('name')" v-model="rForm.name" id="name" placeholder="Name" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errorRe.name">
+                                            {{errorRe.name[0]}}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="email">Email *</label>
+                                        <input type="email" class="form-control border " @keypress="onkeyPress('email')" v-model="rForm.email" id="email" placeholder="Email" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errorRe.email">
+                                            {{errorRe.email[0]}}
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="phoneNumber">Phone Number *</label>
+                                        <input type="text" class="form-control border " @keypress="onkeyPress('phoneNumber')" v-model="rForm.phoneNumber" id="phoneNumber" placeholder="Phone Number" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errorRe.phone">
+                                            {{errorRe.phone[0]}}
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="password">Password *</label>
+                                        <input type="password" class="form-control border " @keypress="onkeyPress('password')" v-model="rForm.password" id="password" placeholder="Password" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errorRe.password">
+                                            {{errorRe.email[0]}}
+                                        </div>
+                                    </div>
+                                </div> 
+                                <div class="form-group  ">
+                                    <div class="mb-3">
+                                        <label for="PasswordConfirmation">Password Confirmation *</label>
+                                        <input type="password" class="form-control border " @keypress="onkeyPress('password_confirmation')" v-model="rForm.password_confirmation" id="PasswordConfirmation" placeholder="Password Confirmation" autocomplete="off"> 
+                                        <div class="invalid-feedback" v-if="errorRe.password_confirmation">
+                                            {{errorRe.password_confirmation[0]}}
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>  
+                            </div>
+
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="submit" class="btn btn-primary " :disabled="disabled">
+                            <span v-show="isRSubmit">
+                                <i class="fas fa-spinner fa-spin" ></i>
+                            </span>{{btn}} 
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </Modal>
       </div>
-    </section>
+      
+    </section>    
     </transition>
 </template>
 
 <script>
-import {mapGetters, mapActions} from "vuex"; 
-import { ref, onMounted } from "vue";
+import {mapGetters, mapActions} from "vuex";  
 import Form from "vform";
 import axios from "axios"; 
+import Modal from "../helper/Modal.vue";  
 export default {
     name: "Login",
-    components: { 
+    components: {
+        Modal
     },
     data() {
         return { 
             errors: {},
+            errorRe: {},
             btn:'Create',
             items: [],
             isSubmit: false,
+            isRSubmit: false,
             loading:false,
             disabled: false,
             paswwordFieldType: 'password',
             checkPasswordView: false,
+            modalActive:false,
             form: new Form({ 
                 email: '',
                 password: '', 
+            }),
+
+            rForm: new Form({
+                name: '',
+                email: '',
+                phoneNumber: '',
+                user_code:'',
+                password: '',
+                password_confirmation: '',
             }),
 
         }
@@ -101,6 +186,17 @@ export default {
     methods: {
         toggleClass: function(e){
             alert('kk')
+        },
+
+        toggleModal: function() {
+            this.modalActive = !this.modalActive; 
+            if(!this.modalActive){
+                this.editMode = false;
+                this.btn='Create';
+            } 
+            this.errors = '';
+            this.isRSubmit = false;
+            this.rForm.reset();  
         },
         passwordView: function(e) {
             if(!this.checkPasswordView) {
@@ -125,6 +221,42 @@ export default {
                 this.checkPasswordView = false;
             }
         },
+        registerForm: function(e) { 
+            this.isRSubmit = true;
+            this.disabled = true; 
+
+            if ((this.rForm.phoneNumber != '') && (this.rForm.phoneNumber)) {
+              this.rForm.last8Digits = this.rForm.phoneNumber.substring(this.rForm.phoneNumber.length - 8);
+            }
+
+            const formData = new FormData(); 
+            formData.append('name', this.rForm.name);
+            formData.append('email', this.rForm.email);
+            formData.append('phone', this.rForm.phoneNumber); 
+            formData.append('user_code', this.rForm.last8Digits); 
+            formData.append('password', this.rForm.password); 
+            formData.append('password_confirmation', this.rForm.password_confirmation);              
+            let postEvent = axios.post(this.apiUrl+'/auth/register', formData,  this.headers);              
+            postEvent.then(res => {            
+                this.isRSubmit = false;
+                this.disabled = false;
+                if(res.status == 200){
+                    this.toggleModal(); 
+                    this.$toast.success(res.data.message); 
+                }else{
+                    this.$toast.error(res.data.message);
+                }
+            }).catch(err => {  
+                this.isRSubmit = false;
+                this.disabled = false;
+                this.$toast.error(err.response.data.message);
+                if(err.response.status == 422){
+                    this.errorRe = err.response.data 
+                }
+                console.log('this.errorRe ', err.response.data )
+                console.log('this.errorRe ', this.errorRe )
+            });
+        },
 
         submitForm: function(e) { 
             this.isSubmit = true;
@@ -133,13 +265,7 @@ export default {
             formData.append('email', this.form.email);
             formData.append('password', this.form.password);             
             var postEvent = axios.post(this.apiUrl+'/auth/login', formData, this.headers); 
-            postEvent.then(res => {   
-              
-              // console.log('res.data.data.user.outlet',res.data.data.user.outlet_id);
-              
-              // console.log('res.data.data', res.data.data.user.roles[0]);
-              // console.log('res.data.data', res.data.data.user);
-
+            postEvent.then(res => { 
                 if((res.data.data.user.roles[0] == 7) || (res.data.data.user.roles[0] == 3)) {
                     if((!res.data.data.user.outlet_id) || (res.data.data.user.outlet_id == 0)){
                         this.$toast.error(`Outlet not assigned, Please contact administrator!`);
@@ -147,13 +273,8 @@ export default {
                         this.disabled = false;
                         return false;
                     }
-                } 
-
-                if(res.status == 200){ 
-                    // res.data.data.user.roles[0]
-                    // this.$toast.success(res.data.message);  
-                    // this.$store.commit("UPDATE_USER",res.data.data);
-                    // this.$store.commit("UPDATE_USER_TOKEN",res.data.data.access_token); 
+                }  
+                if(res.status == 200){  
                     if(res.data.data.access_token){  
                         const api_url = this.apiUrl;
                         const auth_headers = {
@@ -186,20 +307,10 @@ export default {
                             this.isSubmit = false; 
                             this.disabled = false; 
                             //this.$router.push("/");
-                        });
-
-                        
-                      //this.makeQuerablePromise(dispatch);
-                      //console.log('dispatch',dispatch)
-                                        
-                      //this.$router.push("/");
-                      //window.location.href = "/"; 
+                        }); 
                       if(this.dataCheck) {
                         this.reRenderRoute = this.dataCheck;
-                      }
-
-                        // this.$router.push({ name: 'Dashboard' })
-                        // window.location.href = "/" 
+                      } 
                     } 
                 }else{
                     this.$toast.error(res.data.message);
@@ -213,7 +324,7 @@ export default {
                 this.disabled = false;
                 
                 if(err.response.status == 422){
-                    this.errors = err.response.data.errors 
+                  this.errors = err.response.data.errors 
                 }else{
                   this.$toast.error(err.response.data.error);
                 }

@@ -103,9 +103,7 @@
 </template>
 
 <script>
-import {mapGetters, mapActions} from "vuex";
-import Modal from "../helper/Modal.vue";
-import { ref, onMounted } from "vue";
+import Modal from "../helper/Modal.vue"; 
 import Form from "vform";
 import axios from "axios";
 export default {

@@ -381,7 +381,7 @@ export default {
             this.form.reset();
         },
         fetchCompanyData() {
-            axios.get(this.apiUrl + '/companies/', this.headerjson)
+            axios.get(this.apiUrl + '/companies', this.headerjson)
                 .then((res) => {
                     this.companies = res.data.data;
                 })

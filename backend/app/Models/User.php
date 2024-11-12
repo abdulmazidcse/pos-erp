@@ -10,8 +10,10 @@ use Laravel\Passport\HasApiTokens;
 use Spatie\Permission\Traits\HasRoles;
 use Illuminate\Database\Eloquent\SoftDeletes; 
 
-class User extends Authenticatable
-{
+use Illuminate\Auth\Notifications\VerifyEmail as VerifyEmailNotification;
+use App\Mail\VerifyEmail as VerifyEmailNotify;
+
+class User extends Authenticatable implements MustVerifyEmail {
     use SoftDeletes; 
     use HasApiTokens, HasFactory, Notifiable, HasRoles;
 
@@ -20,13 +22,13 @@ class User extends Authenticatable
      *
      * @var array
      */
-//    protected $fillable = [
-//        'name',
-//        'email',
-//        'phone',
-//        'company_id',
-//        'profile_image',
-//    ];
+    //    protected $fillable = [
+    //        'name',
+    //        'email',
+    //        'phone',
+    //        'company_id',
+    //        'profile_image',
+    //    ];
 
     protected $guarded = [];
 
@@ -58,6 +60,11 @@ class User extends Authenticatable
     public static $rules = [
 
     ];
+
+    public function sendEmailVerificationNotification()
+    {
+        $this->notify(new VerifyEmailNotification);
+    }
 
     // Relation
     public function company()

@@ -21,7 +21,12 @@ Route::group([
     Route::post('login', [App\Http\Controllers\API\AuthAPIController::class, 'login']);
     Route::get('login-with-token', [App\Http\Controllers\API\AuthAPIController::class, 'loginWithToken']);
     Route::post('unlockDiscount', [App\Http\Controllers\API\AuthAPIController::class, 'unlockDiscount']);
+  
+    Route::post('verify-otp', [App\Http\Controllers\API\AuthAPIController::class, 'verifyOtp']);
+    // Route::post('/email/resend', [App\Http\Controllers\API\AuthAPIController::class, 'resend'])->name('verification.resend');
 
+
+    Route::get('test-mail', [App\Http\Controllers\API\AuthAPIController::class,'testMail']);
     Route::post('send-otp', [App\Http\Controllers\API\AuthAPIController::class,'sendOTP']);
     Route::get('set-newpassword', [App\Http\Controllers\API\AuthAPIController::class,'newPassword']);
     Route::get('forgot-password', [App\Http\Controllers\API\AuthAPIController::class,'forgotPassword']);

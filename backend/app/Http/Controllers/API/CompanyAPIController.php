@@ -65,14 +65,12 @@ class CompanyAPIController extends AppBaseController
     public function store(CreateCompanyAPIRequest $request)
     { 
         $this->validate($request, [
-            'name'      => 'required|unique:companies,name',
+            'name'      => 'required',
             'address'   => 'required',
             'contact_person_name'   => 'required',
             'contact_person_number' => 'required',
             'status'                => 'required', 
             'logo'      => 'sometimes|image|max:2000|mimes:jpeg,png,jpg,gif,svg',
-        ], [
-            'name.unique' => 'This Company Already Exists',
         ]);
 
         $input = $request->all();
