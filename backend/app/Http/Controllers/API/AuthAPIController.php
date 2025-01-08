@@ -34,19 +34,19 @@ class AuthAPIController extends AppBaseController
 
     public function testMail(){
 
-        $mailer = new PHPMailerService();
-        $user = User::find('58');
-        $to = $user->email;
-        $subject = 'Test Email Subject';
-        $body = '<p>This is a test email sent using PHPMailer in Laravel!</p>';
+        // $mailer = new PHPMailerService();
+        // $user = User::find('58');
+        // $to = $user->email;
+        // $subject = 'Test Email Subject';
+        // $body = '<p>This is a test email sent using PHPMailer in Laravel!</p>';
 
-        $result = $mailer->sendEmail($to, $subject, $body);
+        // $result = $mailer->sendEmail($to, $subject, $body);
 
-        return $result ? 'Email sent successfully!' : 'Failed to send email.';
+        // return $result ? 'Email sent successfully!' : 'Failed to send email.';
 
         
-        // $user = User::find('58');
-        // event(new UserRegistered($user)); 
+        $user = User::find('58');
+        event(new UserRegistered($user)); 
     }
 
     public function store(Request $request)

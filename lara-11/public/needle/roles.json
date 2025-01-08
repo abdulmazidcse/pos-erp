@@ -1,0 +1,98 @@
+[
+    {
+        "type": "table",
+        "name": "roles", 
+        "data": [
+            {
+                "id": "1",
+                "name": "Super Admin",
+                "slug": "super-admin",
+                "description": "Access all permission...",
+                "guard_name": "api",
+                "created_at": "2022-02-22 05:12:40",
+                "updated_at": "2022-02-22 05:12:40"
+            },
+            {
+                "id": "2",
+                "name": "Admin",
+                "slug": "admin",
+                "description": "As  per requirement",
+                "guard_name": "api",
+                "created_at": "2022-02-22 09:54:14",
+                "updated_at": "2023-06-04 19:20:08"
+            },
+            {
+                "id": "3",
+                "name": "Sales Man",
+                "slug": "sales-man",
+                "description": "Outlet Sales Man",
+                "guard_name": "api",
+                "created_at": "2022-05-30 09:07:12",
+                "updated_at": "2022-05-30 09:07:12"
+            },
+            {
+                "id": "5",
+                "name": "Accounts & Finance",
+                "slug": "accounts-&-finance",
+                "description": null,
+                "guard_name": "api",
+                "created_at": "2022-05-31 04:50:08",
+                "updated_at": "2022-05-31 04:50:08"
+            },
+            {
+                "id": "7",
+                "name": "Shop Manager",
+                "slug": "shop-manager",
+                "description": "For Shop All Access",
+                "guard_name": "api",
+                "created_at": "2022-06-06 09:57:23",
+                "updated_at": "2022-06-06 09:57:23"
+            },
+            {
+                "id": "8",
+                "name": "Procurement Manager (Supply Chain)",
+                "slug": "procurement-mnager",
+                "description": "For Office",
+                "guard_name": "api",
+                "created_at": "2022-06-07 10:19:28",
+                "updated_at": "2022-06-07 11:57:45"
+            },
+            {
+                "id": "9",
+                "name": "Business Development",
+                "slug": "business-development",
+                "description": null,
+                "guard_name": "api",
+                "created_at": "2022-06-07 11:56:37",
+                "updated_at": "2022-06-07 11:56:37"
+            },
+            {
+                "id": "10",
+                "name": "Distribution (Supply Chain)",
+                "slug": "distribution-(supply-chain)",
+                "description": null,
+                "guard_name": "api",
+                "created_at": "2022-06-07 11:57:23",
+                "updated_at": "2022-06-07 11:57:23"
+            },
+            {
+                "id": "11",
+                "name": "Shop Supervisor",
+                "slug": "shop-supervisor",
+                "description": null,
+                "guard_name": "api",
+                "created_at": "2022-06-07 13:27:34",
+                "updated_at": "2022-06-07 13:27:34"
+            },
+            {
+                "id": "13",
+                "name": "IT",
+                "slug": "it",
+                "description": "Information Technology",
+                "guard_name": "api",
+                "created_at": "2023-09-08 16:18:58",
+                "updated_at": "2023-09-08 16:18:58"
+            }
+        ]
+    }
+]

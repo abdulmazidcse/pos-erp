@@ -1,0 +1,20 @@
+1 => php artisan migrate
+2 => php artisan optimize:clear
+3 => php artisan import:json-data  // php artisan import:json-data er23-2023-erps
+4 => php artisan passport:install
+5 => php artisan serve --port=8000
+
+# Master-Settings
+1 -> Fiscal Year
+2 -> Company setup
+3 -> Department setup
+4 -> warehouses data
+5 -> outlate data
+6 -> Accounts Ledger
+7 -> category data
+8 -> sub-category data
+9 -> color data
+10 -> size data
+11 -> product data
+12 -> Districts
+13 -> Areas

@@ -24,8 +24,9 @@ Route::group([
   
     Route::post('verify-otp', [App\Http\Controllers\API\AuthAPIController::class, 'verifyOtp']);
     // Route::post('/email/resend', [App\Http\Controllers\API\AuthAPIController::class, 'resend'])->name('verification.resend');
-
-
+ 
+    Route::get('google/redirect', [App\Http\Controllers\API\SocialController::class,'redirect'])->name('auth.google.redirect');
+    Route::get('google/callback', [App\Http\Controllers\API\SocialController::class,'callback'])->name('auth.google.callback');
     Route::get('test-mail', [App\Http\Controllers\API\AuthAPIController::class,'testMail']);
     Route::post('send-otp', [App\Http\Controllers\API\AuthAPIController::class,'sendOTP']);
     Route::get('set-newpassword', [App\Http\Controllers\API\AuthAPIController::class,'newPassword']);
@@ -450,6 +451,8 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
 
     Route::resource('general_settings', App\Http\Controllers\API\GeneralSettingAPIController::class);
 
+    Route::post('/check-version', [App\Http\Controllers\API\VersionController::class, 'checkVersion']);
+    
 });  
 
  
