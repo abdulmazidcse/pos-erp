@@ -264,7 +264,13 @@ export default {
             const formData = new FormData();  
             formData.append('email', this.form.email);
             formData.append('password', this.form.password);             
-            var postEvent = axios.post(this.apiUrl+'/auth/login', formData, this.headers); 
+            var postEvent = axios.post(this.apiUrl+'/auth/login', formData, {
+        withCredentials: true, // ✅ দরকার CORS credentials ট্রান্সফার করার জন্য
+        headers: {
+            'Accept': 'application/json', // ✅ Laravel JSON রেসপন্স expect করে
+            'Content-Type': 'multipart/form-data' // ✅ formData এর জন্য
+        }
+    }); 
             postEvent.then(res => { 
                 if((res.data.data.user.roles[0] == 7) || (res.data.data.user.roles[0] == 3)) {
                     if((!res.data.data.user.outlet_id) || (res.data.data.user.outlet_id == 0)){

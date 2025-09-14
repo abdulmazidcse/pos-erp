@@ -27,6 +27,10 @@ Route::get('/foo', function () {
     echo '<h1>Cache storage cleared</h1>'; 
 }); 
 
+Route::get('/cors-tester', function() {
+    return view('cors-tester');
+});
+
 Route::get('/{action}', function ($action) {
     $supportedActions = ['optimize', 'clear-all', 'clear', 'reset'];
     if (in_array($action, $supportedActions)) {

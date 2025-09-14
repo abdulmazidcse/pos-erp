@@ -60,8 +60,7 @@ import 'material-icons/iconfont/material-icons.css';
  
 window.Fire = createApp(App); 
 const app = createApp(App); 
-import VueformMultiselect from '@vueform/multiselect/';
-
+import VueformMultiselect from '@vueform/multiselect/'; 
 app.config.globalProperties.headers = {headers: {
                       'Authorization' : store.getters.token ? `Bearer ${store.getters.token}` : "",
                       'Content-Type': 'multipart/form-data' 
@@ -75,18 +74,18 @@ app.config.globalProperties.headerparams = {
                       'Content-Type': 'application/json' 
                     }; 
 
-if((location.host == 'localhost:8080') || (location.host == '127.0.0.1:8080')){ 
-  // let baseUrl =  "https://backend.quickpossolution.com"; 
+if((location.host == 'localhost:8081') || (location.host == '127.0.0.1:8081')){ 
+  // let baseUrl =  "https://poserp.24sevenbd.com/backend"; 
   let baseUrl =  "http://127.0.0.1:8000"; 
 	app.config.globalProperties.apiUrl = baseUrl+"/api";
 	app.config.globalProperties.baseUrl = baseUrl; 
 	app.config.globalProperties.baseUrlPrintCSS = baseUrl; 
 	app.config.globalProperties.sampleFileUrl = baseUrl; 
 } else {
-	app.config.globalProperties.apiUrl = "https://backend.quickpossolution.com/api";
-	app.config.globalProperties.baseUrl = "https://backend.quickpossolution.com";
-	app.config.globalProperties.baseUrlPrintCSS ="https://backend.quickpossolution.com/public";
-	app.config.globalProperties.sampleFileUrl = "https://backend.quickpossolution.com/public";
+	app.config.globalProperties.apiUrl = "https://poserp.24sevenbd.com/backend/api";
+	app.config.globalProperties.baseUrl = "https://poserp.24sevenbd.com/backend";
+	app.config.globalProperties.baseUrlPrintCSS ="https://poserp.24sevenbd.com/backend/public";
+	app.config.globalProperties.sampleFileUrl = "https://poserp.24sevenbd.com/backend/public";
 }  
 
 app.config.globalProperties.$createElement = '';

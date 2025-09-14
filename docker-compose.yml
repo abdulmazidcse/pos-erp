@@ -20,6 +20,7 @@ services:
       - db
     networks:
       - POS_ERP_network
+    command: sh -c "composer install && php-fpm"
   
   # Nginx for Laravel
   nginx:
@@ -44,7 +45,7 @@ services:
       context: ./web
       dockerfile: Dockerfile
     ports:
-      - "8080:8080"
+      - "8181:8080"
     volumes:
       - ./web:/app  # Bind mount the web folder
       - /app/node_modules  # Prevent overwriting node_modules

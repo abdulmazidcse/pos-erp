@@ -13,10 +13,25 @@ use Illuminate\Support\Facades\Route;
 | is assigned the "api" middleware group. Enjoy building your API!
 |
 */
+Route::get('/test', function() {
+    return response()->json([
+        'message' => 'CORS test successful',
+        'timestamp' => now()
+    ]);
+});
+Route::get('/test-cors', function() {
+    return response()->json([
+        'message' => 'CORS is working with Passport!',
+        'time' => now()->toDateTimeString(),
+        'auth' => auth()->check() ? 'Authenticated' : 'Not authenticated'
+    ]);
+})->middleware('auth:api'); // Test with Passport auth
 
-Route::group([
-    'prefix' => 'auth'
-], function () {
+Route::options('auth/login', function () {
+    return response()->json([], 200);
+});
+
+Route::group(['prefix' => 'auth', 'middleware' => ['api']], function () {
     Route::post('register', [App\Http\Controllers\API\AuthAPIController::class, 'store']);
     Route::post('login', [App\Http\Controllers\API\AuthAPIController::class, 'login']);
     Route::get('login-with-token', [App\Http\Controllers\API\AuthAPIController::class, 'loginWithToken']);
@@ -475,3 +490,7 @@ Route::resource('customersss', App\Http\Controllers\API\CustomerAPIController::c
 
 // Route::get('customerLedgersExport', [App\Http\Controllers\API\CustomerLedgerAPIController::class, 'customerLedgersExport']);
 
+
+
+Route::resource('import-stocks', App\Http\Controllers\API\ImportStockAPIController::class)
+    ->except(['create', 'edit']);
