@@ -235,7 +235,8 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
             // For Central Ledger
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
-            $ledger_data    = getLedgerAccounts('grn', $specific_ledger);
+            $company_id = auth()->user()->company_id ?? 1;
+            $ledger_data    = getLedgerAccounts($company_id,'grn', $specific_ledger);
 //            return response()->json($ledger_data);
 
             $transactions = [];
@@ -694,7 +695,8 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
 
             // For Central Ledger
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
-            $ledger_data    = getLedgerAccounts('grn', $specific_ledger);
+            $company_id = auth()->user()->company_id ?? 1;
+            $ledger_data    = getLedgerAccounts($company_id,'grn', $specific_ledger);
             $transactions = [];
             if(count($ledger_data) > 0) {
                 $i = 0;

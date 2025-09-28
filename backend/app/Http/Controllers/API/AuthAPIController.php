@@ -256,6 +256,7 @@ class AuthAPIController extends AppBaseController
         $token          = $userToken->token; 
         // $plainTextToken  = $userToken->plainTextToken(); 
         $user_all_permissions = $user->getAllPermissions();
+        // dd($user_all_permissions->toArray());
 
         $user_role_status = $user->roles->map(function ($item) {
             if($item->slug == "shop-manager" || $item->slug == "sales-man") {

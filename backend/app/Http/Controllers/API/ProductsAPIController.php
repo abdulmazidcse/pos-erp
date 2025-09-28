@@ -62,13 +62,21 @@ class ProductsAPIController extends AppBaseController
     {
         $user = auth()->user(); 
         $outlet_id = $request->get('outlet_id') ?? null; 
+        $company_id = checkCompanyId($request); 
         $query = $this->productsRepository->allQuery()->active();
+        // if ($user->hasRole('Super Admin')) {            
+        //     $query->when($outlet_id, function ($q, $outlet_id) {  
+        //         $q->where('outlet_id', $outlet_id);
+        //     });
+        // } else { 
+        //     $query->where('outlet_id',  $user->outlet_id);
+        // }  
         if ($user->hasRole('Super Admin')) {            
-            $query->when($outlet_id, function ($q, $outlet_id) {  
-                $q->where('outlet_id', $outlet_id);
+            $query->when($company_id, function ($q, $company_id) {  
+                $q->where('company_id', $company_id);
             });
         } else { 
-            $query->where('outlet_id',  $user->outlet_id);
+            $query->where('company_id',  $company_id);
         }  
         $products = $query->get();
         $return_data = ProductResource::collection($products);
@@ -94,8 +102,10 @@ class ProductsAPIController extends AppBaseController
 
         if (in_array('Super Admin', $roles)) { 
             $outlet_id  = $request->input('outlet_id');
+            $outlet_id  = $request->input('company_id');
         }else{
             $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+            $company_id  = $request->input('company_id') ? $request->input('company_id') : $user->company_id;
         }   
 
         $query = Product::with(['category' => function($query){
@@ -127,8 +137,8 @@ class ProductsAPIController extends AppBaseController
                 $query->where('brand_id', 'like',$brand_id); 
             });
         }
-        if(isset($outlet_id)) {
-            $query->where('outlet_id', $outlet_id);
+        if(isset($company_id)) {
+            $query->where('company_id', $company_id);
         }
 
         $products = $query->paginate($length);
@@ -175,7 +185,7 @@ class ProductsAPIController extends AppBaseController
                 });
             }
             
-            $query->where('products.outlet_id', $outlet_id);
+            $query->where('stock_products.outlet_id', $outlet_id);
               
 
             // $query->when($outlet_id, function ($q, $outlet_id) {  
@@ -240,11 +250,21 @@ class ProductsAPIController extends AppBaseController
 
     public function productForStoreRequisition(Request $request)
     {
-        $products = $this->productsRepository->all(
-            $request->except(['skip', 'limit']),
-            $request->get('skip'),
-            $request->get('limit')
-        );
+        // $products = $this->productsRepository->all(
+        //     $request->except(['skip', 'limit']),
+        //     $request->get('skip'),
+        //     $request->get('limit')
+        // );
+        // $return_data = RequisitionProductResource::collection($products);
+        
+        $company_id = checkCompanyId($request); 
+        $query = $this->productsRepository->allQuery();
+
+        if ($company_id) {
+            $query->where('company_id', $company_id);
+        }
+
+        $products = $query->get();
         $return_data = RequisitionProductResource::collection($products);
         return $this->sendResponse($return_data, 'Products retrieved successfully');
         //return $this->sendResponse($products->toArray(), 'Products retrieved successfully');
@@ -304,6 +324,16 @@ class ProductsAPIController extends AppBaseController
                 }
             } 
         }
+        $user = auth()->user();  
+        $roles = $user ? $user->roles()->pluck('name')->toArray() : array();  
+        
+        if (in_array('Super Admin', $roles)) { 
+            $outlet_id  = $request->input('outlet_id');
+            $outlet_id  = $request->input('company_id');
+        }else{
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
+            $company_id  = $request->input('company_id') ? $request->input('company_id') : $user->company_id;
+        }   
         
         $this->validate($request, [
             'product_type'  => 'required',
@@ -426,11 +456,14 @@ class ProductsAPIController extends AppBaseController
             } 
         }
         //return response()->json($request->user_define_barcode);
+        
+        $input['outlet_id'] = $outlet_id;
+        $input['company_id'] = $company_id;
 
         \DB::beginTransaction(); 
         $productStock[] = new StockProduct([
             'category_id' => $input['category_id'], 
-            'outlet_id' => $input['outlet_id'],
+            'outlet_id' => $outlet_id,
             'in_stock_quantity' => 0, 
             'in_stock_weight' => 0, 
             'stock_quantity' => 0, 

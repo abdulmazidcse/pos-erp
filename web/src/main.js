@@ -75,17 +75,17 @@ app.config.globalProperties.headerparams = {
                     }; 
 
 if((location.host == 'localhost:8081') || (location.host == '127.0.0.1:8081')){ 
-  // let baseUrl =  "https://poserp.24sevenbd.com/backend"; 
+  // let baseUrl =  "https://drmpos.24sevenbd.com/backend"; 
   let baseUrl =  "http://127.0.0.1:8000"; 
 	app.config.globalProperties.apiUrl = baseUrl+"/api";
 	app.config.globalProperties.baseUrl = baseUrl; 
 	app.config.globalProperties.baseUrlPrintCSS = baseUrl; 
 	app.config.globalProperties.sampleFileUrl = baseUrl; 
 } else {
-	app.config.globalProperties.apiUrl = "https://poserp.24sevenbd.com/backend/api";
-	app.config.globalProperties.baseUrl = "https://poserp.24sevenbd.com/backend";
-	app.config.globalProperties.baseUrlPrintCSS ="https://poserp.24sevenbd.com/backend/public";
-	app.config.globalProperties.sampleFileUrl = "https://poserp.24sevenbd.com/backend/public";
+	app.config.globalProperties.apiUrl = "https://drmpos.24sevenbd.com/backend/api";
+	app.config.globalProperties.baseUrl = "https://drmpos.24sevenbd.com/backend";
+	app.config.globalProperties.baseUrlPrintCSS ="https://drmpos.24sevenbd.com/backend/public";
+	app.config.globalProperties.sampleFileUrl = "https://drmpos.24sevenbd.com/backend/public";
 }  
 
 app.config.globalProperties.$createElement = '';
