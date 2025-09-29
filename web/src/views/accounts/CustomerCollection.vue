@@ -244,11 +244,13 @@
                                             <div>
                                                 <table class="table table-hover mt-3 fw-500">
                                                     <thead>
-                                                        <td style="width: 15%">Amount Code</td>
-                                                        <td style="width: 50%">Amount Hand</td>
-                                                        <td style="width: 15%">Cost Center</td>
-                                                        <td style="width: 10%" class="text-center">Debit</td>
-                                                        <td style="width: 10%" class="text-center">Credit</td>
+                                                        <tr>
+                                                            <td style="width: 15%">Amount Code</td>
+                                                            <td style="width: 50%">Amount Hand</td>
+                                                            <td style="width: 15%">Cost Center</td>
+                                                            <td style="width: 10%" class="text-center">Debit</td>
+                                                            <td style="width: 10%" class="text-center">Credit</td>
+                                                        </tr>   
                                                     </thead>
                                                     <tbody>
                                                         <tr v-for="(ledger_item, i) in vitem.ledger_items" :key="i">
@@ -260,10 +262,13 @@
                                                         </tr>
                                                     </tbody>
                                                     <tfoot>
+                                                        <tr>
                                                             <td colspan="3" class="text-center fw-500">Total Transaction</td>
                                                             <td style="text-align: right">{{ Number(vitem.total_debit_amount).toFixed(2) }}</td>
                                                             <td style="text-align: right">{{ Number(vitem.total_credit_amount).toFixed(2) }}</td>
+                                                        </tr>
                                                     </tfoot>
+
                                                 </table>
                                             </div>
                                             <div class="my-5 d-flex">

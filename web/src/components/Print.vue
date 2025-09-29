@@ -1,4 +1,7 @@
 <script>
+export default {
+  name: "PrintComponent"
+}
 // function addStyles(win, styles) {
   // console.log('styles',styles);
   //   styles.forEach((style) => {

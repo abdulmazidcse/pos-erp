@@ -236,6 +236,7 @@
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="6" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
@@ -245,6 +246,7 @@
                                                 <h5 style="text-align: center;" v-if="from_date != '' && to_date != ''">From {{ from_date }} TO {{ to_date }}</h5>
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
                                     <table style="width: 100%;" class="table-bordered table-centered table-nowrap">
                                         <thead>

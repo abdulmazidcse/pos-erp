@@ -120,7 +120,7 @@
                             </template> 
                             <template #body >  
                                 <tbody v-if="items.length > 0">
-                                    <tr class="border" v-for="(item, i) in items" v-if="items.length > 0">
+                                    <tr class="border" v-for="(item ) in items" v-if="items.length > 0">
                                       <td>{{ item.company? item.company.name : ''}} </td>
                                       <td>{{ item.product_name}} </td>
                                       <td>{{ item.product_native_name}} </td>
@@ -823,6 +823,7 @@
                                         <div class="col-md-12">
                                           <h3 class="mt-0">{{product.product_name}}  </h3>  
                                           <table class="table table-striped">
+                                            <tbody>
                                             <tr>
                                               <td scope="col">Cost Price</td>
                                               <td scope="col">Depo Price</td>
@@ -835,6 +836,7 @@
                                               <td>{{product.mrp_price}}</td>
                                               <td>{{product.abp_price}}</td>
                                             </tr>
+                                            </tbody>
                                           </table>
                                         </div>  
 
@@ -1287,9 +1289,7 @@ export default {
                 this.product_tags.push(fields);
               });
               this.form.fill(res.data.data);
-            })
-            .catch((response) => {  
-            })  
+            });  
             this.btn='Update';
             this.editMode = true;
             this.thumbnailPreview='';
@@ -1396,7 +1396,7 @@ export default {
                     this.errors = err.response.data.errors ; 
                 }
                 
-            }).finally(( res) => { 
+            }).finally((  ) => { 
               this.fetchItems(); 
             }); 
         },
@@ -1468,7 +1468,7 @@ export default {
         switchSelect(event){   
           this.fetchChildsCat(event)
         },
-        random_num(min=12,max=15){
+        random_num(){
           const d1 = new Date();
           const result = d1.getTime(); 
           this.form.product_code = result; 
@@ -1484,25 +1484,21 @@ export default {
                 this.colors = res.data.data.colors.map(({ id, name }) => ({ label: name, value: id })); 
                 this.sizes = res.data.data.sizes.map(({ id, name }) => ({ label: name, value: id }));  
                 this.producttax = res.data.data.taxes; 
-            })
-            .catch((response) => {  
-            }) 
+            });
         },
         fetchChildsCat(parent_id) {
             this.childs = [];
             axios.get(this.apiUrl+'/product_categories?parent_id='+parent_id, this.headerjson)
             .then((res) => { 
                 this.childs = res.data.data.map(({ id, name }) => ({ label: name, value: id })); 
-            })
-            .catch((err) => {  
-            }) 
+            });
         }, 
         handleFileUpload(){
             this.file = this.$refs.file.files[0];
             document.getElementById("excel-file").innerHTML = '<i class="fas fa-file-excel"></i> ' + this.file.name;
         }, 
 
-        uploadExcel: function(e) {  
+        uploadExcel: function( ) {  
             this.button_name = "Uploading...";
             const formData = new FormData();
             formData.append("file", this.file);
@@ -1565,7 +1561,7 @@ export default {
                   this.errors = err.response.data.errors ; 
               } 
             })
-            .finally((ress) => {
+            .finally(( ) => {
               this.loading = false; 
             }); 
         },
@@ -1586,7 +1582,7 @@ export default {
             .catch(errors => {
                 console.log(errors);
             })
-            .finally((fres) => {
+            .finally(( ) => {
                 this.loading = false;
             });
         },

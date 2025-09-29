@@ -35,12 +35,7 @@
                     <div class="row">
                         <div class="col-md-12">
                             <!-- Product Details -->
-                            <div class="card">
-                                <!-- <div class="card-header text-left">
-                                    Product Details
-                                    <span class="total_quantity">Requisition Quantity: <b>{{ totalQuantity }}</b></span>
-                                    <span class="approve_total_quantity">Approve Quantity: <b>{{ approveTotalQuantity }}</b></span>
-                                </div> -->
+                            <div class="card"> 
                                 <div class="card-body">
                                     <div style="padding: 0 15px;">
                                         <div class="requisition_details">
@@ -235,6 +230,7 @@
                                     <div style="padding: 0 15px;">
                                         <div class="requisition_details">
                                             <table class="table po_invoice">
+                                                <tbody>
                                                 <tr>
                                                     <td colspan="4" class="text-center" style="position: relative;">                                                 
                                                         <h5 class="text-uppercase">{{ (requisition.company) ? requisition.company.name : this.retailShopName}}</h5>
@@ -267,57 +263,8 @@
                                                     <td><label class="col-md-5 text-left text-bold">Note: </label></td>
                                                     <td><div class="col-md-7 text-left"> {{ requisition.remarks }} </div></td> 
                                                 </tr>
-                                            </table>   
-                                            <!-- <div class="row">
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Requisition No: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.requisition_no }} </div>
-                                                    </div> 
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Date: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.requisition_date }} </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Requisition Quantity: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.total_quantity }} </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Requisition Amount: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.total_amount }} </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Approve Quantity: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.total_approve_quantity }} </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Approve Amount: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.total_approve_amount }} </div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Status: </label>
-                                                        <div class="col-md-7 text-left" v-html="requisition.approve_status_name"></div>
-                                                    </div>
-                                                </div>
-                                                <div class="col-md-6">
-                                                    <div class="row">
-                                                        <label class="col-md-5 text-left text-bold">Note: </label>
-                                                        <div class="col-md-7 text-left"> {{ requisition.remarks }} </div>
-                                                    </div>
-                                                </div>
-                                            </div> -->
+                                                </tbody>
+                                            </table>
                                         </div> 
                                         <h5> Product Details</h5>
                                     </div>
@@ -370,10 +317,8 @@
     </transition>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
-import Form from 'vform'
+import {   mapActions } from "vuex";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 export default {
     name: 'PosLeftbar',
@@ -430,19 +375,11 @@ export default {
             .then((res) => {
                 this.items = res.data.data;
                 //console.log('companies res',res.data.data);
-            })
-            .catch((response) => { 
-                //console.log('companies => ',response.data) 
-            }).finally((ress) => {
+            }).finally(( ) => {
                 //console.log('companies finally',ress);
                 this.loading = false;
             });
-        },
-        
-        add: function(e) {
-            console.log('preventDefault', e)
-            //this.close()
-        },
+        }, 
         edit: function(item) { 
             this.$router.push({name: 'list-purchase-requisition-edit', params:{id:item.id}});
         },
@@ -455,10 +392,7 @@ export default {
                 this.requisition = res.data.data.requisition_data;
                 this.product_items = res.data.data.requisition_products;
                 this.toggleModal();
-            })
-            .catch((err) => {
-                // this.$toast.error(err.response.data.message);
-            })
+            }) 
         },
 
         requisitionPurchaseOrder: function(item)
@@ -476,35 +410,10 @@ export default {
                 cancelButtonCategory: '#d33',
                 confirmButtonText: 'Yes, delete it!'
             }).then((result) => { 
-                if (result.value) { 
-                    // axios.delete('http://127.0.0.1:8000/api/product_categories/'+item.id,{
-                    //     headers:{
-                    //       'Authorization' : '',
-                    //       'Content-Type': 'multipart/form-data' 
-                    //     }
-                    // }).then(res => {
-                    //     if(res.status == 200){  
-                    //         this.fetchIndexData();
-                    //         this.$toast.success(res.data.message); 
-                    //     }else{
-                    //         this.$toast.error(res.data.message);
-                    //     }
-                    //     console.log(res.data)
-                    // }).catch(err => {  
-                    //     this.$toast.error(err.response.data.message); 
-                    // }) 
-                }else{
-                    // this.$toast.error(`Hey! I'm here`);
-                    // this.$toast.warning(`Hey! I'm here`);
-                    // this.$toast.info(`Hey! I'm here`)
-                }
+                if (result.value) {      
+                } 
             }); 
-        },
-
-        // togglePrintablePrintModal() {
-        //     console.log('printableModalPrintActive', this.printableModalPrintActive)
-        //    // this.printableModalPrintActive = !this.printableModalPrintActive;
-        // },
+        }, 
         printItem: function (item) { 
             axios.get(this.apiUrl+'/store_requisitions/'+item.id, this.headers)
             .then((res) => {

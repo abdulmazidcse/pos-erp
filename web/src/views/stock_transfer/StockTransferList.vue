@@ -1,6 +1,6 @@
 <template>
-    <transition  >
-    <div class="container-fluid">
+    <transition name="fade" mode="out-in">
+    <div v-if="isVisible" class="container-fluid">
         <div class="row">
             <div class="col-12">
                 <div class="page-title-box">
@@ -185,18 +185,19 @@
     </transition>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
+// import { mapGetters, mapActions } from "vuex";
 import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
-import Form from 'vform'
+// import { ref, onMounted } from "vue";
+// import Form from 'vform'
 import axios from 'axios';
 export default {
-    name: 'PosLeftbar',
+    name: 'StockTransferList',
     components: {
         Modal
     },
     data() {
         return {
+            isVisible: true, 
             loading: true,
             isSubmit: false,
             showModal: false,
@@ -225,10 +226,7 @@ export default {
             axios.get(this.apiUrl+'/stock_transfers',this.headerjson)
             .then((res) => {
                 this.items = res.data.data;
-            })
-            .catch((err) => { 
-                //
-            }).finally((ress) => {
+            }).finally(( ) => {
                 //console.log('companies finally',ress);
                 this.loading = false;
             });
@@ -249,9 +247,7 @@ export default {
             })
         },
 
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
     },

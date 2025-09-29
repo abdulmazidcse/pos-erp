@@ -15,6 +15,7 @@
 
 <script>
 export default {
+  name: "AppModal",
   props: ["modalActive"],
   setup(props, { emit }) {
     const close = () => {

@@ -7,7 +7,9 @@
             <td class="text-right" style="text-align: right;">{{ Number(parseFloat(account.opening_balance ?? 0) + parseFloat(account.debit_amount) + parseFloat(account.credit_amount)).toFixed(2) }}</td>
         </tr>
     </tbody>               
-    <AccountProfitLoss v-if="hasChildren" v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 15)" :code_active="showCode"></AccountProfitLoss>
+    <template v-if="hasChildren">
+        <AccountProfitLoss v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 15)" :code_active="showCode"></AccountProfitLoss>
+    </template>
 </template>
 
 <script>

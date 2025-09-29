@@ -1,6 +1,6 @@
 
 <template>
-    <transition  >
+    <transition name="fade" mode="out-in">
     <div class="container-fluid">
         <div class="row">
             <div class="col-12">
@@ -27,78 +27,14 @@
         <div class="row">
             <div class="col-md-12 ">
                 <div class="card">
-                    <div class="card-body" v-if="!loading">
-                        <!-- <form id="purchase_order_form" @submit.prevent="submitForm()"> -->
-                            <!-- <div class="row">
-                                <div class="col-md-12">
-                                    <div class="row">
-                                        <div class="form-group col-md-4">
-                                            <label for="supplier_id">Supplier *</label>
-                                            <select class="form-control border" id="supplier_id" v-model="obj.supplier_id" @change="onChangeSupplier($event)">
-                                                <option value="">--- Select Supplier ---</option>
-                                                <option v-for="(supplier, index) in suppliers" :key="index" :value="supplier.id">{{ supplier.name }} [{{ supplier.phone }}]</option>
-                                            </select>
-                                            <div class="invalid-feedback" v-if="errors.supplier_id">
-                                                {{errors.supplier_id[0]}}
-                                            </div>
-                                        </div>
-
-                                        <div class="form-group col-md-4">
-                                            <label for="supplier_id">Purchase Order *</label>
-                                            <select class="form-control border" id="purchase_order_id" v-model="obj.purchase_order_id" @change="onchangePurchaseOrder($event)">
-                                                <option value="">--- Select ---</option>
-                                                <option value="direct">DIRECT</option>
-                                                <option v-for="(supplier_order, index) in supplier_orders" :key="index" :value="supplier_order.id">{{ supplier_order.reference_no }}</option>
-                                            </select>
-                                            <div class="invalid-feedback" v-if="errors.supplier_id">
-                                                {{errors.supplier_id[0]}}
-                                            </div>
-                                        </div>
-
-                                        
-                                        <div class="form-group col-md-4">
-                                            <label for="supplier_payment_type">Receive Date *</label>
-                                            <input type="text" class="form-control border" id="purchase_date" @change="onkeyPress('purchase_date')" v-model="obj.purchase_date" readonly>
-                                            <div class="invalid-feedback" v-if="errors.purchase_date">
-                                                {{errors.purchase_date[0]}}
-                                            </div>
-                                        </div>
-                                    </div> 
-                                </div>
-                            </div> -->
+                    <div class="card-body" v-if="!loading"> 
+                            
                             
                             <div class="row">
-                                <!-- <div class="form-group col-md-4">
-                                    <label for="reference_no">Reference No *</label>
-                                    <input type="text" class="form-control border" id="reference_no" @keypress="onkeyPress('reference_no')" v-model="obj.reference_no">
-                                    <div class="invalid-feedback" v-if="errors.reference_no">
-                                        {{errors.reference_no[0]}}
-                                    </div>
-                                </div>
+                                
 
-                                <div class="form-group col-md-4">
-                                    <label for="challan_no">Challan No *</label>
-                                    <input type="text" class="form-control border" id="challan_no" @keypress="onkeyPress('challan_no')" v-model="obj.challan_no">
-                                    <div class="invalid-feedback" v-if="errors.challan_no">
-                                        {{errors.challan_no[0]}}
-                                    </div>
-                                </div> -->
-
-                                <!-- <div class="form-group col-md-4">
-                                    <label for="outlet_id">Delivery To</label>
-                                    <select class="form-control border" id="outlet_id" v-model="obj.outlet_id">
-                                        <option value="">--- Select Outlet ---</option>
-                                        <option v-for="(outlet, index) in outlets" :key="index" :value="outlet.id">{{ outlet.name }}</option>
-                                    </select>
-                                </div> -->
-
-                                <!-- <div class="form-group col-md-3">
-                                    <label for="supplier_id">Delivery To</label>
-                                    <select class="form-control border" id="supplier_id">
-                                        <option value="">--- Select Supplier ---</option>
-                                        <option value="1">Halal & Brothers</option>
-                                    </select>
-                                </div> -->
+                               
+ 
 
                             </div>
 
@@ -133,22 +69,7 @@
                                             <tbody v-for="(product_item, i) in product_items" :key="i">
                                                 <tr> 
                                                     <td class="text-center">{{ i + 1 }}</td>
-                                                    <!-- <td class="text-center">
-                                                        <Multiselect
-                                                            class="form-control border outlet_id"
-                                                            mode="single"
-                                                            v-model="product_item.outlet_id"
-                                                            placeholder="Outlet"
-                                                            @change="addNewRow($event, i)"   
-                                                            :searchable="true" 
-                                                            :filter-results="true"
-                                                            :options="outlets"
-                                                            :classes="multiclasses"
-                                                            :close-on-select="true" 
-                                                            :min-chars="1"
-                                                            :resolve-on-load="false" 
-                                                        />
-                                                    </td> -->
+                                                     
                                                     <td class="text-center">
                                                         <Multiselect
                                                             class="form-control border supplier_id"
@@ -164,10 +85,7 @@
                                                             :min-chars="1"
                                                             :resolve-on-load="false" 
                                                         />
-                                                        <!-- <select id="supplier_id" class="form-control">
-                                                            <option value="">--- Select Supplier ---</option>
-                                                            <option v-for="(supplier, index) in suppliers" :key="index" :value="supplier.id">{{ supplier.name }}</option>
-                                                        </select> -->
+                                                         
                                                     </td>
                                                     <td class="text-center">
                                                         <Multiselect
@@ -184,10 +102,7 @@
                                                             :min-chars="1"
                                                             :resolve-on-load="false" 
                                                         />
-                                                        <!-- <select id="product_id" class="form-control">
-                                                            <option value="">--- Select Product ---</option>
-                                                            <option v-for="(product, index) in products" :key="index" :value="product.id">{{ product.name }}</option>
-                                                        </select> -->
+                                                         
                                                     </td>
                                                     <td class="text-center">
                                                         <input type="date" class="form-control" v-model="product_item.expiry_date" @change="addNewRow($event.target.value, i)">
@@ -306,15 +221,11 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal"; 
-import Form from 'vform'
-import axios from 'axios'; 
-import { ref, onUnmounted, getCurrentInstance, onMounted } from 'vue' 
- 
+<script> 
+import Modal from "./../helper/Modal";  
+import axios from 'axios';   
 export default {
-    name: 'Purchase Receive Board',
+    name: 'PurchaseReceiveBoard',
     components: {
         Modal
     },
@@ -383,9 +294,9 @@ export default {
                 this.obj.reference_no = res.data.data.reference_no; 
             })
             .catch((response) => { 
-                //console.log('companies => ',response.data) 
+                console.log('companies => ',response.data) 
             }).finally((ress) => {
-                //console.log('companies finally',ress);
+                console.log('companies finally',ress);
             });
         },
 
@@ -399,10 +310,10 @@ export default {
                 });
             })
             .catch((res) => {
-                
+                console.log('outlets => ',res)
             })
             .finally((res) => {
-
+                console.log('outlets finally',res);
             });
         },
 
@@ -416,9 +327,9 @@ export default {
                 }); 
             })
             .catch((response) => { 
-                //console.log('companies => ',response.data) 
+                console.log('companies => ',response.data) 
             }).finally((ress) => {
-                //console.log('companies finally',ress);
+                console.log('companies finally',ress);
             });
         },
 
@@ -457,26 +368,8 @@ export default {
         },
 
         addNewRow(value, index){
-            var item_length = this.product_items.length;
-
-            // var newRowAppend = true;
-            // if(item_length > 1) {
-            //     var prev_index = item_length - 2;
-            //     var obj_data = this.product_items[prev_index];
-            //     if(obj_data.outlet_id == "" || 
-            //         obj_data.supplier_id == "" || 
-            //         obj_data.product_id == "" || 
-            //         (obj_data.order_qty == 0 || obj_data.order_qty == "") ||
-            //         (obj_data.rcv_qty == 0 || obj_data.rcv_qty == "") ||
-            //         (obj_data.tp == 0 || obj_data.tp == "") ||
-            //         (obj_data.mrp == 0 || obj_data.mrp == "")
-            //     ){
-            //         newRowAppend =  false;
-            //     }else{
-            //         newRowAppend = true;
-            //     }
-            // }
-
+            console.log("value, index", value, index);
+            var item_length = this.product_items.length;  
             if(index == (item_length - 1)) {
                 this.product_items.push(
                     {
@@ -511,7 +404,7 @@ export default {
             this.product_items[index].mrp = p_mrp;
         },
 
-        submitForm: function(e) {  
+        submitForm: function() {  
             this.isSubmit = true;
             this.disabled = true;
             const formData = new FormData();
@@ -552,7 +445,7 @@ export default {
             });
         },
         
-        submitImportForm: function(e) {  
+        submitImportForm: function() {  
             this.isUploadSubmit = true;
             this.disabled_upload = true;
             const formData = new FormData();
@@ -590,7 +483,7 @@ export default {
             var self = this; //you need this because *this* will refer to Object.keys below`
 
             //Iterate through each object field, key is name of the object field`
-            Object.keys(this.obj).forEach(function(key,index) {
+            Object.keys(this.obj).forEach(function(key) {
                 self.obj[key] = '';
             });
 
@@ -598,21 +491,15 @@ export default {
         },
 
         validation: function (...fiels){ 
-            var obj = new Object(); 
-            var validate = false;
+            var obj = new Object();  
             for (var k in fiels){     // Loop through the object  
                 for (var j in this.form){  
                     if((j==fiels[k]) && (!this.form[j])) {  
                         obj[fiels[k]] = fiels[k].replace("_", " ")+' field is required';  // Delete obj[key]; 
                         this.errors = {...this.errors, ...obj};
-                    }else{
-                        validate = false;
-                    }
+                    } 
                 }              
-            }  
-            // var obj = new Object();
-            // obj[fiels] = fiels.replace("_", " ")+' field is required';  
-            // this.errors = {...this.errors, ...obj}; 
+            }   
         },
 
         onkeyPress: function(field) { 
@@ -626,20 +513,14 @@ export default {
             }  
         },
         
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
-    },
-
-    computed: {
-
     }, 
 
     watch: {
         product_items: {
-            handler: function(val, oldVal) {
+            handler: function(val) {
 
                 // console.log("items ==== ", val);
                 if(val.length > 0){

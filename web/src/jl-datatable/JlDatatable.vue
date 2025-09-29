@@ -1,6 +1,6 @@
 <template>
   <div>
-    <Header 
+    <jl-header 
       :lengthMenu="lengthMenu"
       :isLengthMenu="isLengthMenu"
       :menu="menu"
@@ -11,9 +11,9 @@
       @onFiltering="setFiltering"
     >
     <slot name="filter"></slot>  
-    </Header>
+    </jl-header>
     <div class="row">  
-      <Table
+      <jl-table
         :columns="columns"
         :data="data"
         :isSort="isSort"
@@ -26,7 +26,7 @@
         @onChangeSort="setSort" 
       > 
       <slot name="action"></slot> 
-      </Table> 
+      </jl-table> 
       <div class="tab-pane show active" v-if="isLoading">
         <div class="row"> 
             <div class="col-md-5">  
@@ -38,7 +38,7 @@
             </div>
         </div>
     </div>
-      <Footer
+      <jl-footer
         :metaData="metaData"
         :links="links"
         :language="lang"
@@ -208,9 +208,9 @@ export default {
     }
   },
   components: {
-    Header,
-    Table,
-    Footer
+    'jl-header': Header,
+    'jl-table': Table,
+    'jl-footer': Footer
   },
   data() {
     return {

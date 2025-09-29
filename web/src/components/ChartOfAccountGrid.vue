@@ -7,7 +7,9 @@
             <td>{{ account.account_type_name }}</td>
         </tr>
     </tbody>               
-    <GridView v-if="hasChildren" v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 10)"></GridView>
+    <template v-if="hasChildren">
+        <GridView v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 10)"></GridView>
+    </template>
 </template>
 
 <script>

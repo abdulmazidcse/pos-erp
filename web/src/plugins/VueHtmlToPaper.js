@@ -30,14 +30,14 @@ function addStyles(win, styles) {
   
         // If has localOptions
         // TODO: improve logic
-        if (!!localOptions) {
+        if (localOptions) {
           if (localOptions.name) name = localOptions.name;
           if (localOptions.specs) specs = localOptions.specs;
           if (localOptions.replace) replace = localOptions.replace;
           if (localOptions.styles) styles = localOptions.styles;
         }
   
-        specs = !!specs.length ? specs.join(",") : "";
+        specs = specs.length ? specs.join(",") : "";
   
         const element = window.document.getElementById(el);
   

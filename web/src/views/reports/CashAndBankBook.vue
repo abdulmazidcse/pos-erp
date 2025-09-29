@@ -160,6 +160,7 @@
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="2" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
@@ -169,6 +170,7 @@
                                                 <h4 style="text-align: center;">From {{ search_terms.from_date }} TO {{ search_terms.to_date }}</h4>  
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
                                     <table class="table table-bordered table-nowrap w-100" v-if="!loading">
                                         <thead class="table-light">
@@ -324,7 +326,7 @@ export default {
                 }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
             });
         }, 
@@ -370,10 +372,10 @@ export default {
                 var balance_amount = 0;
 
                 // newItemAry
-                this.items.filter((row, index) => { 
+                this.items.filter((row) => { 
                     if(row.recursion.length> 0){
                         this.row_available_balance = res.data.data.opening_balance;
-                        row.recursion.filter((child, cindex) => {
+                        row.recursion.filter((child) => {
                             child.vdate = row.vdate;
                             child.voucher_code = row.voucher_code;
                             child.global_note = row.global_note;
@@ -403,7 +405,7 @@ export default {
                 this.isSubmit = false;
                 this.disabled = false;
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
                 this.disabled = false;
             });
@@ -428,7 +430,7 @@ export default {
             }  
         },
 
-        showLedgerCode: function(event) {
+        showLedgerCode: function( ) {
             var checked_val = this.show_with_code;
             if(checked_val) {
                 this.codeActive = true;
@@ -453,13 +455,10 @@ export default {
         }
 
 
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
-    },
-    computed: {}
+    }, 
 }
 </script>
 <style scoped>

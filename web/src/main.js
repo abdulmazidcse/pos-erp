@@ -1,6 +1,7 @@
 import* as Vue from 'vue';
 // import { createApp } from 'vue/dist/vue.runtime.esm-bundler'
 import { createApp } from 'vue/dist/vue.esm-bundler';
+
 import { createStore } from 'vuex' 
 import recipeHelpers from "./helper.js";
 import App from './App.vue'
@@ -60,7 +61,8 @@ import 'material-icons/iconfont/material-icons.css';
  
 window.Fire = createApp(App); 
 const app = createApp(App); 
-import VueformMultiselect from '@vueform/multiselect/'; 
+import VueformMultiselect from '@vueform/multiselect';  
+
 app.config.globalProperties.headers = {headers: {
                       'Authorization' : store.getters.token ? `Bearer ${store.getters.token}` : "",
                       'Content-Type': 'multipart/form-data' 

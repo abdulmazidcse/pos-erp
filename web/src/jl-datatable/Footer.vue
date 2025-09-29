@@ -28,6 +28,7 @@
 
 <script> 
 export default {
+    name: 'JlDatatableFooter',
     props: {
         metaData: Object,
         links: Array,

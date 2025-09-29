@@ -10,13 +10,7 @@
                           <li class="breadcrumb-item active">Due Sale List </li> 
                       </ol>
                   </div>
-                  <div class="page-title-right float-right">
-                      <!-- <button type="button" class="btn btn-primary float-right" @click="onFilter">
-                        
-                      </button>
-                      <button type="button" class="btn btn-primary float-right" @click="toggleModal">
-                          Add New
-                      </button>  -->
+                  <div class="page-title-right float-right"> 
                   </div>
               </div>
           </div>
@@ -59,7 +53,7 @@
                           </template> 
                           <template #body >   
                               <tbody v-if="items.length > 0">
-                                  <tr class="border" v-for="(item, i) in items" v-if="items.length > 0">
+                                  <tr class="border" v-for="(item) in items" v-if="items.length > 0">
                                     <td>{{ item.id}} </td> 
                                     <td>{{ item.invoice_number }} </td>
                                     <td>{{ item.created_at}}</td>
@@ -169,6 +163,7 @@
                 <div id="bot">
                   <div id="table">
                     <table>
+                      <tbody v-if="invoice_info.sales_items.length == 0"> 
                       <tr class="tabletitle borderTop borderBottom">
                         <td class="item"><h2>Item Name</h2></td>
                         <td class="hours"><h2>Qty</h2></td>
@@ -263,6 +258,7 @@
                           <h2>{{ invoice_info.paid_amount }}</h2>
                         </td>
                       </tr>
+                      </tbody>
                     </table>
                   </div>
                   <!--End Table-->
@@ -270,19 +266,24 @@
                   <div id="legalcopy">
                     <h2 class="service borderBottom">Payment Info:</h2>
                     <table>
-                      <tr class="service borderBottom">
-                        <td>Description</td>
-                        <td>Amount</td>
-                      </tr>
-                      <tr
-                        class="service borderBottom"
-                        v-for="(item, i) in invoice_info.payments"
-                        v-if="invoice_info.payments.length > 0"
-                        :key="item.id"
-                      >
-                        <td>{{ item.paying_by }}</td>
-                        <td>{{ item.amount }}</td>
-                      </tr>
+                      <tbody v-if="invoice_info.payments.length == 0">
+                        <tr class="service borderBottom">
+                          <td colspan="2">No Payment Found!</td>
+                        </tr>
+                        <tr class="service borderBottom">
+                          <td>Description</td>
+                          <td>Amount</td>
+                        </tr>
+                        <tr
+                          class="service borderBottom"
+                          v-for="(item) in invoice_info.payments"
+                          v-if="invoice_info.payments.length > 0"
+                          :key="item.id"
+                        >
+                          <td>{{ item.paying_by }}</td>
+                          <td>{{ item.amount }}</td>
+                        </tr>
+                      </tbody>
                     </table>
                   </div>
                   <div id="legalcopy">
@@ -376,7 +377,7 @@
                         @change="payingBy($event, 0)"
                       >
                         <option
-                          v-for="(item, key, index) in paying_by"
+                          v-for="(item, key) in paying_by"
                           :key="key"
                           :value="item.value"
                           :disabled="checkItem(item.value)"
@@ -509,7 +510,7 @@
                         @change="payingBy($event, i + 1)"
                       >
                         <option
-                          v-for="(item, key, index) in paying_by"
+                          v-for="(item, key) in paying_by"
                           :key="key"
                           :value="item.value"
                           :disabled="checkItem(item.value)"
@@ -633,7 +634,7 @@
     </transition>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
+// import { mapGetters, mapActions } from "vuex";
 import { ref, reactive, onMounted, getCurrentInstance } from "vue";
 import Modal from "./../helper/Modal";  
 import Form from 'vform'   
@@ -839,9 +840,9 @@ export default {
         onEntriesFetched(){
           console.log('onEntriesFetched');
         }, 
-        handleEditBtn(event){ 
-          console.log('datatable', this.datatable)
-          let trID = event.target.parentElement.parentElement.parentElement.parentElement.id 
+        handleEditBtn( ){ 
+          // console.log('datatable', this.datatable)
+          // let trID = event.target.parentElement.parentElement.parentElement.parentElement.id 
         },
         handleDeleteBtn(event){ 
           let trID = event.target.parentElement.parentElement.parentElement.parentElement.id
@@ -884,7 +885,7 @@ export default {
             .catch(errors => {
                 console.log(errors);
             })
-            .finally((fres) => {
+            .finally(( ) => {
                 this.loading = false;
             });
         },
@@ -929,8 +930,8 @@ export default {
                 this.$toast.error(err.response.data.message); 
             })  
         },
-        checkAboveAmount: function (event, i) { 
-          let keyCode = event.keyCode;
+        checkAboveAmount: function (event) { 
+          // let keyCode = event.keyCode;
           var mask = document.getElementById(
             "payingby_" + event.target.id.split("_")[1]
           );
@@ -948,7 +949,7 @@ export default {
             }
           }
         },
-        payingBy(event, e) {
+        payingBy( e) {
           var mask = document.getElementById("amount_" + e);
           if (this.pform.payments[e].paid_by == "redeem_point") {
             mask.readOnly = true;
@@ -956,7 +957,7 @@ export default {
             mask.readOnly = false;
           }
         },
-        payingByAnother(event, e) {
+        payingByAnother( e) {
           if (this.pform.payments[e].paid_by != "cash") {
             this.paymentModal();
           }
@@ -968,7 +969,7 @@ export default {
             mask.readOnly = false;
           }
         },
-        redeemPointCheck: function (event, e) {
+        redeemPointCheck: function ( e) {
           if (this.pform.payments[e].redeem_point > this.customer.points) {
             this.pform.payments[e].amount = this.convartRate * this.customer.points;
             this.pform.payments[e].redeem_point = this.customer.points;

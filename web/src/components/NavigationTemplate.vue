@@ -28,20 +28,20 @@
                 
                   <a data-bs-toggle="collapse" :href="'#' + route.name" aria-expanded="false"  class="side-nav-link" v-if="route.children.length > 0" @click="checkParrentNav(route.name)">
                       <i v-if="route.icon_name" v-bind:class="route.icon_name"></i> 
-                      <span> &nbsp  &nbsp{{route.name}}  </span>
+                      <span>&nbsp;&nbsp;{{route.name}}</span>
                       <span class="menu-arrow"></span>
                   </a>
                   
                   <router-link :to="route.path" class="side-nav-link" v-else>
                     <i v-if="route.icon_name" v-bind:class="route.icon_name"></i>
-                    <span> &nbsp  &nbsp{{route.name}}  </span>
+                    <span> &nbsp;&nbsp;{{route.name}}  </span>
                   </router-link> 
 
                   <div class="collapse" :id="route.name">
                       <ul class="side-nav-second-level">
                           <li v-for="children in route.children" :key="children.name">
                             <router-link :to="children.path" >
-                              <span class="fa fa-user mr-1"></span> &nbsp {{children.name}}
+                              <span class="fa fa-user mr-1"></span> &nbsp;{{children.name}}
                             </router-link> 
                           </li> 
                       </ul>
@@ -57,16 +57,16 @@
   </div>   
 </template>
 <script>
-import {mapGetters} from "vuex"
-import { defineComponent } from 'vue'
-import { FadeInOut } from 'vue3-transitions'
-import About from "@/views/page/RolePermission.vue";  
+// import {mapGetters} from "vuex"
+// import { defineComponent } from 'vue'
+// import { FadeInOut } from 'vue3-transitions'
+// import About from "@/views/page/RolePermission.vue";  
 export default {
   name: 'NavigationTemplate',
   props: {
     msg: String
   },
-  components: { FadeInOut },
+  // components: { FadeInOut },
   data() {
     return {
       routes: [],

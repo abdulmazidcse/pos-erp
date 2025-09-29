@@ -25,10 +25,7 @@
             <div class="modal-content scrollbar-width-thin orderPreview">
                 <div class="modal-header"> 
                     <h3 style="width: 100%">Purchase Order View</h3>
-                    <button @click="toggleModal()" type="button" class="btn btn-default">X</button>
-                    <!-- <div class="title" style="text-align:center; width: 100%">
-                        
-                    </div> -->
+                    <button @click="toggleModal()" type="button" class="btn btn-default">X</button> 
                 </div>
                 <div class="modal-body">
                     <div class="row">
@@ -36,6 +33,7 @@
                             <div class="card">
                                 <div class="card-body">
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ (purchase_order.company) ? purchase_order.company.name : '' }}</h5>
@@ -159,6 +157,7 @@
                                                 </table>
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
                                 </div>
                                 
@@ -263,6 +262,7 @@
                                         <h3 style="width: 100%">Purchase Order View</h3>
                                     </div>
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ (purchase_order.company) ? purchase_order.company.name : this.retailShopName }}</h5>
@@ -374,6 +374,7 @@
                                                 </table>
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
                                 </div>                                
                             </div>
@@ -385,16 +386,9 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
-import Form from 'vform'
-import axios from 'axios';
-import html2canvas from 'html2canvas';
-import jspdf from 'jspdf';
-// let converter = require('number-to-words');
-
+<script> 
+import Modal from "./../helper/Modal";  
+import axios from 'axios';  
 export default {
     name: 'PosLeftbar',
     components: {
@@ -514,10 +508,7 @@ export default {
             .then((res) => {
                 this.items = res.data.data;
                 // console.log(res.data.data);
-            })
-            .catch((response) => { 
-                //console.log('companies => ',response.data) 
-            }).finally((ress) => {
+            }).finally(( ) => {
                 //console.log('companies finally',ress);
                 this.loading = false;
             });
@@ -545,16 +536,13 @@ export default {
         },
 
         validation: function (...fiels){ 
-            var obj = new Object(); 
-            var validate = false;
+            var obj = new Object();  
             for (var k in fiels){     // Loop through the object  
                 for (var j in this.form){  
                     if((j==fiels[k]) && (!this.form[j])) {  
                         obj[fiels[k]] = fiels[k].replace("_", " ")+' field is required';  // Delete obj[key]; 
                         this.errors = {...this.errors, ...obj};
-                    }else{
-                        validate = false;
-                    }
+                    } 
                 }              
             }  
             // var obj = new Object();
@@ -570,7 +558,7 @@ export default {
             }  
         },
 
-        deleteItem: function(item) {
+        deleteItem: function( ) {
             // console.log('item deleyt=>',item.id);
             this.$swal({
                 title: 'Are you sure?',
@@ -579,30 +567,7 @@ export default {
                 confirmButtonCategory: '#3085d6',
                 cancelButtonCategory: '#d33',
                 confirmButtonText: 'Yes, delete it!'
-            }).then((result) => { 
-                if (result.value) { 
-                    // axios.delete('http://127.0.0.1:8000/api/product_categories/'+item.id,{
-                    //     headers:{
-                    //       'Authorization' : '',
-                    //       'Content-Type': 'multipart/form-data' 
-                    //     }
-                    // }).then(res => {
-                    //     if(res.status == 200){  
-                    //         this.fetchIndexData();
-                    //         this.$toast.success(res.data.message); 
-                    //     }else{
-                    //         this.$toast.error(res.data.message);
-                    //     }
-                    //     console.log(res.data)
-                    // }).catch(err => {  
-                    //     this.$toast.error(err.response.data.message); 
-                    // }) 
-                }else{
-                    // this.$toast.error(`Hey! I'm here`);
-                    // this.$toast.warning(`Hey! I'm here`);
-                    // this.$toast.info(`Hey! I'm here`)
-                }
-            }); 
+            })  
         },
 
         togglePrintablePrintModal() {

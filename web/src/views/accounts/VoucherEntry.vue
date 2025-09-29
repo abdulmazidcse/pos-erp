@@ -1,425 +1,285 @@
 <template>
-    <transition>
-        <div class="container-fluid">
-            <div class="row">
-                <div class="col-12">
-                    <div class="page-title-box">
-                        <div class="page-title-right float-left">
-                            <ol class="breadcrumb m-0"> 
-                                <li class="breadcrumb-item active">Accounts </li>
-                                <li class="breadcrumb-item"><a href="javascript: void(0);">Voucher Entry</a></li>
-                                
-                            </ol>
-                        </div>
-                        <div class="page-title-right float-right "> 
-                            <button type="button" class="btn btn-dark float-right" @click="redirectRoute('/accounting/voucher-list')">
-                              <i class="mdi mdi-arrow-left-thin"></i> Back
-                            </button> 
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="row">
-                <div class="col-12"> 
-                    <div class="col-md-10">
-                        <div class="row">  
-                            <div class="col-md-6">
-                                <div class="">
-                                    <label for="outlet_id"> Company </label> 
-                                    <select class="form-control" @change="onChangeConpany($event.target.value)">
-                                        <option value="">--- Select Company ---</option>
-                                        <option v-for="(company, i) in companies" :key="i" :value="company.id">{{ company.name }}</option>
-                                    </select>
-                                </div>
-                            </div> 
-                        </div>
-                    </div> 
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-12 ">
-                    <div class="card">
-                        <div class="card-body">
-                            <div class="row">
-                                <form @submit.prevent="submitVoucherForm()" enctype="multipart/form-data" id="ventry_form" class="ventry_form" v-if="!loading">
-                                    <div class="col-md-12">
-                                        <div class="row">
-                                            <div class="col-md-2">
-                                                <div class="mb-3">
-                                                    <label for="vtype_value">Voucher Type *</label>
-                                                    <select class="form-control border" v-model="vtype_value" @change="onkeyPress('vtype_id'), onChangeVtype($event)">
-                                                        <option value="">--- Select Voucher Type ---</option>
-                                                        <option v-for="(entry_type, et) in entry_types" :key="et" :value="entry_type.label" :data-id="entry_type.id">{{ entry_type.name }}</option>
-                                                    </select>
-                                                    <div class="invalid-feedback" v-if="errors.vtype_id">
-                                                        {{ errors.vtype_id }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            
-                                            <div class="col-md-2">
-                                                <div class="mb-3">
-                                                    <label for="vcode">Voucher Code *</label>
-                                                    <input type="text" class="form-control border" v-model="vform.vcode" @input="onkeyPress('vcode')" placeholder="Enter Code" readonly />
-                                                    <div class="invalid-feedback" v-if="errors.vcode">  
-                                                        {{ errors.vcode }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-2">
-                                                <div class="mb-3">
-                                                    <label for="cost_center_id">Cost Center *</label>
-                                                    <select class="form-control border" id="cost_center_id" v-model="vform.cost_center_id" @change="onkeyPress('cost_center_id')">
-                                                            <option value="">--- Select Cost Center ---</option>
-                                                            <option v-for="(cost_center, cc) in cost_centers" :key="cc" :value="cost_center.id">{{ cost_center.center_name }}</option>
-                                                        </select>
-                                                    <div class="invalid-feedback" v-if="errors.cost_center_id">
-                                                        {{ errors.cost_center_id }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                            <!-- <div class="col-md-2">
-                                                <div class="mb-3">
-                                                    <label for="vnumber">Number </label>
-                                                    <input type="text" class="form-control border" v-model="vform.vnumber" @keypress="onkeyPress('vnumber')" placeholder="Enter Number" />
-                                                    <div class="invalid-feedback" v-if="errors.vnumber">
-                                                        {{ errors.vnumber }}
-                                                    </div>
-                                                </div>
-                                            </div> -->
-
-                                            <div class="col-md-3">
-                                                <div class="mb-3">
-                                                    <label for="vnumber">Date *</label>
-                                                    <input type="date" :min="active_min_date" :max="active_max_date" class="form-control border" v-model="vform.vdate" @keypress="onkeyPress('vdate')" />
-                                                    <div class="invalid-feedback" v-if="errors.vdate">
-                                                        {{ errors.vdate }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-3">
-                                                <div class="mb-3">
-                                                    <label for="fiscalyear_id">Fiscal Year *</label>
-                                                    <select class="form-control border" v-model="vform.fiscalyear_id" @change="onkeyPress('fiscalyear_id')">
-                                                        <option v-for="(fiscal_year, f) in fiscal_years" :key="f" :value="fiscal_year.id">{{ fiscal_year.start_date+' to '+fiscal_year.end_date }}</option>
-                                                    </select>
-                                                    <!-- <treeselect 
-                                                        v-model="ledger_id"
-                                                        :multiple="false" 
-                                                        :options="ledgers"
-                                                        :normalizer="normalizer"
-                                                        :value-consists-of="valueConsistsOf"
-                                                        :default-expand-level="Infinity"
-                                                        :search-nested="true"                                                
-                                                        placeholder='Select Ledger account'
-                                                        v-if="renderOptionComponent"
-                                                    /> -->
-                                                    <div class="invalid-feedback" v-if="errors.fiscal_year_id">
-                                                        {{ errors.fiscal_year_id }}
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-
-                                        <div class="row">
-                                            <div class="col-md-3">
-                                                <div class="mb-3" v-if="vtype_value == 'payment'">
-                                                    <label for="vtype_value">Payment Type *</label>
-                                                    <select class="form-control border" v-model="vform.vpayment_type" @change="onkeyPress('vpayment_type'), onChangeType($event)">
-                                                        <option value="cash">Cash</option>
-                                                        <option value="bank">Bank</option>
-                                                    </select>
-                                                    <div class="invalid-feedback" v-if="errors.vpayment_type">
-                                                        {{ errors.vpayment_type }}
-                                                    </div>
-                                                </div>
-
-                                                <div class="mb-3" v-else-if="vtype_value == 'receipt'">
-                                                    <label for="vtype_value">Receipt Type *</label>
-                                                    <select class="form-control border" v-model="vform.vreceipt_type" @change="onkeyPress('vreceipt_type'), onChangeType($event)">
-                                                        <option value="cash">Cash</option>
-                                                        <option value="bank">Bank</option>
-                                                    </select>
-                                                    <div class="invalid-feedback" v-if="errors.vreceipt_type">
-                                                        {{ errors.vreceipt_type }}
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            <div class="col-md-9">
-                                                <div class="row" v-if="vform.vpayment_type == 'bank' || vform.vreceipt_type == 'bank' || vtype_value == 'contra'">
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="cheque_no">Cheque Number *</label>
-                                                            <input type="text" class="form-control border" v-model="vform.cheque_no" @input="onkeyPress('cheque_no')" placeholder="Enter Cheque Number" />
-                                                            <div class="invalid-feedback" v-if="errors.cheque_no">  
-                                                                {{ errors.cheque_no }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-
-                                                    <div class="col-md-3">
-                                                        <div class="mb-3">
-                                                            <label for="cheque_date">Cheque Date *</label>
-                                                            <input type="date" class="form-control border" v-model="vform.cheque_date" @keypress="onkeyPress('cheque_date')" />
-                                                            <div class="invalid-feedback" v-if="errors.cheque_date">
-                                                                {{ errors.cheque_date }}
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                        </div>
-                                    </div>
-                        
-                                    <hr>
-
-                                    <div class="entry_table" style="position: relative;">
-                                        <button type="button" class="btn btn-info float-right" style="margin-bottom: 10px;" @click="addNewTransactionBlock()"><i class="mdi mdi-plus"></i> Add New Transaction</button>
-                                        <table class="table table-bordered table-centered table-nowrap w-100" v-for="(transaction_block, t) in vform.transaction_blocks" :key="t">
-                                            <thead class="table-light">
-                                                <tr v-if="t != 0" style="background: #fff !important">
-                                                    <th colspan="7" class="text-right" style="background: #fff !important"><button type="button" class="btn btn-light" @click="removeTransactionBlock(t)"><i class="mdi mdi-close"></i></button> </th> 
-                                                </tr>
-                                                <tr class="border success item-head">
-                                                    <!-- <th class="text-center" style="width: 10%">Entry Type </th>  -->
-                                                    <!-- <th class="text-center" style="width: 20%">Cost Center </th>  -->
-                                                    <!-- <th class="text-left" style="width: 10%">Dr/Cr </th>  -->
-                                                    <th class="text-center" style="width: 25%">Ledger</th>
-                                                    <th class="text-center" style="width: 10%">Debit</th>
-                                                    <th class="text-center" style="width: 10%">Credit</th>
-                                                    <th class="text-center" style="width: 15%">Naration</th>
-                                                    <!-- <th class="text-center" style="width: 15%">Balance</th> -->
-                                                    <th class="text-center" style="width: 5%">Actions</th>
-                                                </tr>
-                                            </thead>
-
-                                            <tbody>
-                                                <tr v-for="(account_item, i) in transaction_block.account_items" :key="i" >
-                                                    <!-- <td>
-                                                        <select class="form-control border" v-model="account_item.ventry_type" @change="onkeyPress('ventry_type')">
-                                                            <option value="">Select Type</option>
-                                                            <option value="cash">Cash</option>
-                                                            <option value="bank">Bank</option>
-                                                        </select>
-                                                    </td> -->
-                                                    <!-- <td>
-                                                        <select class="form-control border" v-model="account_item.cost_center_id" @change="onkeyPress('cost_center_id')">
-                                                            <option value="">--- Select Cost Center ---</option>
-                                                            <option v-for="(cost_center, cc) in cost_centers" :key="cc" :value="cost_center.id">{{ cost_center.center_name }}</option>
-                                                        </select>
-                                                    </td> -->
-                                                    <!-- <td>
-                                                        <select class="form-control border" v-model="account_item.ledger_type" @change="onkeyPress('ledger_type')">
-                                                            <option value="">--- Select Type ---</option>
-                                                            <option value="dr">Dr</option>
-                                                            <option value="cr">Cr</option>
-                                                        </select>
-                                                    </td> -->
-                                                    <td>                                                        
-                                                        <treeselect 
-                                                            v-model="account_item.ledger_id"
-                                                            :multiple="false" 
-                                                            :always-open="false"
-                                                            :options="ledgers"
-                                                            :normalizer="normalizer"
-                                                            :disable-branch-nodes="true"
-                                                            :value-consists-of="valueConsistsOf"
-                                                            :default-expand-level="Infinity"
-                                                            :search-nested="true"                                                
-                                                            placeholder='Select Ledger account'
-                                                            v-if="renderOptionComponent"
-                                                        />
-                                                        <!-- <select class="form-control border" v-model="account_item.ledger_id" @change="onkeyPress('ledger_id')">
-                                                            <option value="">--- Select Ledger ---</option>
-                                                        </select> --> 
-                                                    </td>
-                                                    <td> 
-                                                        <!-- <input type="number" step="any" class="form-control border" v-model="account_item.debit" @keyup="inputChange()" @keypress="onkeyPress('debit')" :readonly="(account_item.ledger_type == 'cr') ? true : false"> -->
-                                                        <input v-if="i==0" type="number" step="any" class="form-control border" v-model="account_item.debit" @keyup="inputChange(t, i)" @keypress="onkeyPress('debit')" :readonly="account_item.credit_active" @click="debitActive(t, i)">
-                                                        <input v-else type="number" step="any" class="form-control border" v-model="account_item.debit" @keyup="inputChange(t, i)" @keypress="onkeyPress('debit')" :readonly="account_item.credit_active">
-                                                    </td>
-                                                    <td>
-                                                        <input v-if="i==0" type="number" step="any" class="form-control border" v-model="account_item.credit" @keyup="inputChange(t, i)" @keypress="onkeyPress('credit')" :readonly="account_item.debit_active" @click="creditActive(t, i)">
-                                                        <input v-else type="number" step="any" class="form-control border" v-model="account_item.credit" @keyup="inputChange(t, i)" @keypress="onkeyPress('credit')" :readonly="account_item.debit_active">
-                                                    </td>
-                                                    <td>
-                                                        <input type="text" class="form-control border" v-model="account_item.note" @keypress="onkeyPress('note')">
-                                                    </td>
-                                                    <!-- <td class="text-right">
-                                                        {{ account_item.balance }}
-                                                    </td> -->
-                                                    <td class="text-center">
-                                                        <a v-if="i != 0 && i != 1" href="javascript:void(0)" class="text-danger" style="font-size: 18px;" @click="removeAccountItem(t, i)"> <i class="mdi mdi-delete-outline"></i></a>
-                                                    </td>
-                                                </tr>
-                                            </tbody>
-
-                                            <tfoot>
-                                                <tr>
-                                                    <td></td>
-                                                    <td class="bg-success text-right">{{ Number(transaction_block.total_debit_amount).toFixed(2) }}</td>
-                                                    <td class="bg-success text-right"> {{ Number(transaction_block.total_credit_amount).toFixed(2) }}</td>
-                                                    <td colspan="2"> 
-                                                        <a href="javascript:void(0)" class="text-primary float-right" style="font-size: 20px;" @click="addAccountItem(t)"> <i class="mdi mdi-plus-circle-outline"></i></a>
-                                                    </td>
-                                                </tr>
-                                            </tfoot>
-                                        </table>
-
-                                        <button v-if="vform.transaction_blocks.length > 1" type="button" class="btn btn-info float-right" style="overflow:hidden; clear: both;" @click="addNewTransactionBlock()"><i class="mdi mdi-plus"></i> Add New Transaction</button>
-                                    </div>
-                                    
-
-                                    <div class="col-md-12">
-                                        <div class="mb-3">
-                                            <label for="global_note"> Note *</label>
-                                            <textarea class="form-control border" rows="3" v-model="vform.global_note" @keypress="onkeyPress('global_note')"></textarea>
-                                            <div class="invalid-feedback" v-if="errors.global_note">
-                                                {{errors.global_note[0]}}
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-12">
-                                        <button type="submit" class="btn btn-primary float-right" :disabled="disabled"> 
-                                            <span v-show="isSubmit">
-                                                <i class="fas fa-spinner fa-spin" ></i>
-                                            </span>
-                                            <i class="mdi mdi-content-save-all"></i> Save
-                                        </button>
-                                        <button type="button" class="btn btn-danger float-right" style="margin-right: 5px;"> <i class="mdi mdi-close"></i> Cancel</button>
-                                    </div>
-                                </form>                        
-                            </div>
-                        </div>
-
-                        <div class="tab-pane show active" v-if="loading">
-                            <div class="row"> 
-                                <div class="col-md-5">  
-                                </div>
-                                <div class=" col-md-2"> 
-                                    <img src="../../assets/image/loading.gif" alt="Loading..." style="width:130px">
-                                </div>
-                                <div class="col-md-5">  
-                                </div>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>     
-            
-            
-            <!-- Modal For Print-->
-            <Modal @close="toggleVoucherPrintModal()" :modalActive="voucherModalPrintActive">
-                <div class="modal-content scrollbar-width-thin orderPreview">
-                    <div class="modal-header" style="text-align:right; display: block;"> 
-                        <button @click="toggleVoucherPrintModal()" type="button" class="btn btn-default">X</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="row">
-                            <div class="col-md-12">
-                                <div class="card">
-                                    <div class="card-body">
-                                        <div class="container" id="printArea">
-                                            <p class="text-uppercase text-center mt-2"><strong> {{ $store.getters.userData.user.outlet_name }}</strong></p>
-                                            <p class="text-uppercase text-center mt-2">{{ $store.getters.userData.user.outlet_address }}</p><br>
-                                            <hr class="m-zero">
-                                            <!-- <p class="text-center m-0 font-italic"><strong>Cash Received Voucher (Approval)</strong></p> -->
-                                            <p class="text-center m-0 font-italic fw-500">{{ vitem.vtype_name }} Voucher (Approval)</p>
-                                            <hr class="m-zero">
-                                            <div class="d-flex justify-content-between mt-fourty">
-                                                <div>
-                                                    <div class="d-flex">
-                                                        <p class="mr-fourty fw-500">Voucher#:</p>
-                                                    <p>{{ vitem.vcode }}</p>
-                                                    </div>
-                                                    <div class="d-flex">
-                                                        <p class="mr-fourty fw-500">Description:</p>
-                                                        <p>{{ vitem.global_note }}</p>
-                                                    </div>
-                                                </div>
-                                                <div class="d-flex">
-                                                    <p class="mr-fourty fw-500">Date:</p>
-                                                    <p>{{ vitem.vdate }}</p>
-                                                </div>
-                                            </div>
-                                            <div>
-                                                <table class="table table-hover mt-3 fw-500">
-                                                    <thead>
-                                                        <td style="width: 15%">Amount Code</td>
-                                                        <td style="width: 50%">Amount Hand</td>
-                                                        <td style="width: 15%">Cost Center</td>
-                                                        <td style="width: 10%" class="text-center">Debit</td>
-                                                        <td style="width: 10%" class="text-center">Credit</td>
-                                                    </thead>
-                                                    <tbody>
-                                                        <tr v-for="(ledger_item, i) in vitem.ledger_items" :key="i">
-                                                            <td>{{ ledger_item.ledger_code }}</td>
-                                                            <td>{{ ledger_item.ledger_head }}</td>
-                                                            <td>{{ ledger_item.cost_center_name }}</td>
-                                                            <td style="text-align: right">{{ Number(ledger_item.debit_amount).toFixed(2) }}</td>
-                                                            <td style="text-align: right">{{ Number(ledger_item.credit_amount).toFixed(2) }}</td>
-                                                        </tr>
-                                                    </tbody>
-                                                    <tfoot>
-                                                            <td colspan="3" class="text-center fw-500">Total Transaction</td>
-                                                            <td style="text-align: right">{{ Number(vitem.total_debit_amount).toFixed(2) }}</td>
-                                                            <td style="text-align: right">{{ Number(vitem.total_credit_amount).toFixed(2) }}</td>
-                                                    </tfoot>
-                                                </table>
-                                            </div>
-                                            <div class="my-5 d-flex">
-                                                <p class="mr-fourty">Taka in word:</p>
-                                                <number-to-word :number="Number(vitem.total_debit_amount).toFixed(2)" />
-                                                <!-- <p><strong>Twelve Thousand One Hundred Seventy Only</strong></p> -->
-                                            </div>
-                                            <div class="d-flex justify-content-between align-item-center">
-                                                <div class="text-center col-xs-4">
-                                                    <p class="m-zero">Khandakar Kudrat E Khuda</p>
-                                                    <hr class="m-zero">
-                                                    <p class="fw-500">Prepare By</p>
-                                                </div>
-                                                <div class="text-center col-xs-4">
-                                                    <p class="m-zero">&nbsp;</p>
-                                                    <hr class="m-zero">
-                                                    <p class="fw-500">Checked By</p>
-                                                </div>
-                                                <div class="text-center col-xs-4">
-                                                    <p class="m-zero">Khandakar Kudrat E Khuda</p>
-                                                    <hr class="m-zero">
-                                                    <p class="fw-500">Approved By</p>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                </div>
-
-                            </div>
-                        </div>
-                    </div>
-
-                </div>
-            </Modal>
+  <div class="container-fluid">
+    <div class="row">
+      <div class="col-12">
+        <div class="page-title-box">
+          <div class="page-title-right float-left">
+            <ol class="breadcrumb m-0">
+              <li class="breadcrumb-item active">Accounts </li>
+              <li class="breadcrumb-item">
+                <a href="javascript: void(0);">Supplier Ledger</a>
+              </li>
+            </ol>
+          </div>
+          <div class="page-title-right float-right">
+            <!-- <button type="button" class="btn btn-primary float-right" @click="toggleModal">
+              Add New
+            </button> -->
+          </div>
         </div>
-    </transition>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-12">
+        <div class="col-md-10">
+          <div class="row">
+            <div class="col-md-6">
+              <div>
+                <label for="outlet_id"> Company </label>
+                <select class="form-control" @change="fetchSuppliers($event.target.value)">
+                  <option value="">--- Select Company ---</option>
+                  <option v-for="(company, i) in companies" :key="i" :value="company.id">
+                    {{ company.name }}
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="col-md-12 ">
+        <div class="card">
+          <div class="card-header">
+            <h3 style="text-align: center;">Supplier Ledger</h3>
+          </div>
+
+          <div class="card-body">
+            <div class="row">
+              <div class="col-md-3">
+                <div>
+                  <label for="supplier_id"> Supplier *</label>
+                  <select
+                    class="form-control"
+                    id="supplier_id"
+                    v-model="search_terms.supplier_id"
+                    @change="onkeyPress('supplier_id')"
+                  >
+                    <option value="">--- Select Supplier ---</option>
+                    <option v-for="(supplier, i) in suppliers" :key="i" :value="supplier.id">
+                      {{ supplier.name }}
+                    </option>
+                  </select>
+                  <div class="invalid-feedback" v-if="errors.supplier_id">
+                    {{ errors.supplier_id[0] }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div>
+                  <label for="from_date"> From Date *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="from_date"
+                    v-model="search_terms.from_date"
+                    @change="onkeyPress('from_date')"
+                  />
+                  <div class="invalid-feedback" v-if="errors.from_date">
+                    {{ errors.from_date[0] }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div>
+                  <label for="to_date"> To Date *</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    id="to_date"
+                    v-model="search_terms.to_date"
+                    @change="onkeyPress('to_date')"
+                  />
+                  <div class="invalid-feedback" v-if="errors.to_date">
+                    {{ errors.to_date[0] }}
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-md-3">
+                <div class="mt-3">
+                  <button
+                    type="submit"
+                    class="btn-sm btn btn-primary"
+                    :disabled="disabled"
+                    @click="fetchSupplierLedgers()"
+                  >
+                    <span v-show="isSubmit">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                    Submit
+                  </button>
+                  <a
+                    href="javascript:void(0);"
+                    style="margin-left: 5px;"
+                    class="btn-sm btn btn-primary"
+                    @click.prevent="printItem(item)"
+                  >
+                    <i class="mdi mdi-printer-outline me-1"></i>
+                  </a>
+                  <a
+                    href="javascript:void(0);"
+                    style="margin-left: 5px;"
+                    class="btn-sm btn btn-primary"
+                    @click.prevent="downloading ? null : exportToExcel()"
+                  >
+                    <span v-show="downloading">
+                      <i class="fas fa-spinner fa-spin"></i>
+                    </span>
+                    <i class="mdi mdi-file-excel me-1"></i>
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header" v-if="items.length > 0">
+            <h4 style="text-align: center;">{{ supplier_name }}</h4>
+            <h4 style="text-align: center;">From {{ from_date }} TO {{ to_date }}</h4>
+          </div>
+
+          <div class="card-body">
+            <h4>Opening Balance: {{ opening_balance }}</h4>
+
+            <table
+              id="basic-datatable"
+              class="table table-striped dt-responsive nowarp w-100"
+              v-if="!loading"
+            >
+              <thead class="tableFloatingHeaderOriginal">
+                <tr class="success item-head">
+                  <th width="5%" style="text-align: center">SL </th>
+                  <th width="10%" style="text-align: center">Date </th>
+                  <th width="15%" style="text-align: center">Opening Balance</th>
+                  <th width="10%" style="text-align: center">PR. Amount</th>
+                  <th width="10%" style="text-align: center">Payment </th>
+                  <th width="10%" style="text-align: center">Return</th>
+                  <th width="10%" style="text-align: center">Discount</th>
+                  <th width="15%" style="text-align: center">Closing Balance</th>
+                </tr>
+              </thead>
+              <tbody v-if="items.length > 0">
+                <tr v-for="(item, index) in items" :key="index">
+                  <td style="text-align: center">{{ index + 1 }} </td>
+                  <td style="text-align: center">{{ item.transaction_date }} </td>
+                  <td style="text-align: center">{{ item.opening_balance }} </td>
+                  <td style="text-align: center">{{ item.purchase_receive_amount }} </td>
+                  <td style="text-align: center">{{ item.payment_amount }} </td>
+                  <td style="text-align: center">{{ item.return_amount }}</td>
+                  <td style="text-align: center">{{ item.discount_amount }}</td>
+                  <td style="text-align: center">{{ item.closing_balance }}</td>
+                </tr>
+              </tbody>
+              <!-- Example footer (if you want to add totals, make sure to wrap with <tr>) -->
+              <tfoot>
+                <tr>
+                  <td colspan="2" class="text-center fw-500">Totals</td>
+                  <td style="text-align: center">{{ totalOpeningBalance }}</td>
+                  <td style="text-align: center">{{ totalPurchaseReceiveAmount }}</td>
+                  <td style="text-align: center">{{ totalPaymentAmount }}</td>
+                  <td style="text-align: center">{{ totalReturnAmount }}</td>
+                  <td style="text-align: center">{{ totalDiscountAmount }}</td>
+                  <td style="text-align: center">{{ totalClosingBalance }}</td>
+                </tr>
+              </tfoot>
+            </table>
+
+            <div class="tab-pane show active" v-if="loading">
+              <div class="row">
+                <div class="col-md-5"></div>
+                <div class="col-md-2">
+                  <img
+                    src="../../assets/image/loading.gif"
+                    alt="Loading..."
+                    style="width: 130px"
+                  />
+                </div>
+                <div class="col-md-5"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <Modal @close="toggleModal()">
+          <div class="modal-content scrollbar-width-thin orderPreview">
+            <div class="modal-header">
+              <button @click="toggleModal()" type="button" class="btn btn-default">
+                X
+              </button>
+              <h3 style="width: 100%">Product Sales Report</h3>
+            </div>
+            <div class="modal-body" id="printArea">
+              <div class="table-responsive product_table">
+                <table class="table po_invoice">
+                    <tbody>
+                  <tr>
+                    <td colspan="2" class="text-center" style="position: relative;">
+                      <h5 class="text-uppercase">{{ retailShopName }}</h5>
+                      <p>{{ retailShopAddress }} </p>
+                      <p>Dhaka, Bangladesh</p>
+                      <h4 style="text-align: center;">Supplier Ledger</h4>
+                      <h4 style="text-align: center;">{{ supplier_name }}</h4>
+                      <h4 style="text-align: center;">From {{ from_date }} TO {{ to_date }}</h4>
+                    </td>
+                  </tr>
+                  </tbody>
+                </table>
+
+                <table
+                  style="width: 100%;"
+                  class="table-bordered table-centered table-nowrap"
+                >
+                  <thead class="tableFloatingHeaderOriginal">
+                    <tr class="success item-head">
+                      <th width="5%" style="text-align: center">SL </th>
+                      <th width="10%" style="text-align: center">Date </th>
+                      <th width="15%" style="text-align: center">Opening Balance</th>
+                      <th width="10%" style="text-align: center">PR. Amount</th>
+                      <th width="10%" style="text-align: center">Payment </th>
+                      <th width="10%" style="text-align: center">Return</th>
+                      <th width="10%" style="text-align: center">Discount</th>
+                      <th width="15%" style="text-align: center">Closing Balance</th>
+                    </tr>
+                  </thead>
+                  <tbody v-if="items.length > 0">
+                    <tr v-for="(item, index) in items" :key="index">
+                      <td style="text-align: center">{{ index + 1 }} </td>
+                      <td style="text-align: center">{{ item.transaction_date }} </td>
+                      <td style="text-align: center">{{ item.opening_balance }} </td>
+                      <td style="text-align: center">{{ item.purchase_receive_amount }} </td>
+                      <td style="text-align: center">{{ item.payment_amount }} </td>
+                      <td style="text-align: center">{{ item.return_amount }}</td>
+                      <td style="text-align: center">{{ item.discount_amount }}</td>
+                      <td style="text-align: center">{{ item.closing_balance }}</td>
+                    </tr>
+                  </tbody>
+                  <!-- Optional footer here, same rule: wrap with <tr> -->
+                </table>
+              </div>
+            </div>
+          </div>
+        </Modal>
+      </div>
+    </div>
+  </div>
 </template>
+
 <script>
 import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+// import { ref, onMounted } from "vue";
 import axios from 'axios';
 import Form from 'vform';
 import NumberToWord from './../page/NumberToWord.vue';   
 
 export default {
-    name: 'PosLeftbar',
+    name: 'VoucherEntry',
     components: {
         Modal,
         NumberToWord
@@ -887,9 +747,7 @@ export default {
             this.$htmlToPaper(document_id, options);
         },
 
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
     },

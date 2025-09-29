@@ -139,10 +139,12 @@
                                             <tr> 
                                                 <td>
                                                     <table class="w-100">
-                                                        <tr>
-                                                            <th width="70%" style="text-align: left;">SURPLUS/DEFICIT</th>
-                                                            <th width="30%" style="text-align: right;">{{ parseFloat(Number(income_balance) - Number(expense_balance)).toFixed(2) }}</th>
-                                                        </tr>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th width="70%" style="text-align: left;">SURPLUS/DEFICIT</th>
+                                                                <th width="30%" style="text-align: right;">{{ parseFloat(Number(income_balance) - Number(expense_balance)).toFixed(2) }}</th>
+                                                            </tr>
+                                                        </tbody>
                                                     </table>
                                                 </td>
                                             </tr>
@@ -176,15 +178,17 @@
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
                                     <table class="table po_invoice">
-                                        <tr>
-                                            <td colspan="2" class="text-center" style="position: relative;">
-                                                <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
-                                                <p>{{ this.retailShopAddress }} </p>
-                                                <p>Dhaka, Bangladesh</p> 
-                                                <h4 style="text-align: center;">Income Statement</h4> 
-                                                <h4 style="text-align: center;"> {{ (from_date) ? 'From '+ from_date : '' }} {{ (to_date) ? ' To '+ to_date : '' }}</h4>
-                                            </td>
-                                        </tr>
+                                        <tbody>
+                                            <tr>
+                                                <td colspan="2" class="text-center" style="position: relative;">
+                                                    <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
+                                                    <p>{{ this.retailShopAddress }} </p>
+                                                    <p>Dhaka, Bangladesh</p> 
+                                                    <h4 style="text-align: center;">Income Statement</h4> 
+                                                    <h4 style="text-align: center;"> {{ (from_date) ? 'From '+ from_date : '' }} {{ (to_date) ? ' To '+ to_date : '' }}</h4>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table> 
                                     <table class="table table-nowrap w-100" v-if="!loading"> 
                                         <tbody style="border-bottom: 0;">
@@ -235,10 +239,12 @@
                                             <tr> 
                                                 <td>
                                                     <table class="w-100">
-                                                        <tr>
-                                                            <th width="70%" style="text-align: left;">SURPLUS/DEFICIT</th>
-                                                            <th width="30%" style="text-align: right;">{{ parseFloat(Number(income_balance) - Number(expense_balance)).toFixed(2) }}</th>
-                                                        </tr>
+                                                        <tbody>
+                                                            <tr>
+                                                                <th width="70%" style="text-align: left;">SURPLUS/DEFICIT</th>
+                                                                <th width="30%" style="text-align: right;">{{ parseFloat(Number(income_balance) - Number(expense_balance)).toFixed(2) }}</th>
+                                                            </tr>
+                                                        </tbody>
                                                     </table>
                                                 </td>
                                             </tr>
@@ -256,7 +262,7 @@
 </template>
 <script>
 import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+// import { ref, onMounted } from "vue";
 import axios from 'axios';
 import Form from 'vform';
 
@@ -320,7 +326,7 @@ export default {
                 }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
             });
         }, 
@@ -343,7 +349,7 @@ export default {
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
                 this.isSubmit = false;
                 this.disabled = false;
@@ -367,7 +373,7 @@ export default {
             }  
         },
 
-        showLedgerCode: function(event) {
+        showLedgerCode: function( ) {
             var checked_val = this.show_with_code;
             if(checked_val) {
                 this.codeActive = true;

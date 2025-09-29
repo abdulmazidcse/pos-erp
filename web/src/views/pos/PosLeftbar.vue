@@ -132,6 +132,7 @@
                   <th width="5%">Action</th>
                 </tr>
               </thead>
+              <tbody>
               <tr
                 class="border"
                 v-for="(item, i) in cartItems"
@@ -251,6 +252,7 @@
                 <td  style="text-align: center"> 
                 </td>
               </tr>
+              </tbody>
             </table>
           </div>
         </div>
@@ -1413,6 +1415,7 @@
             <div id="bot">
               <div id="table">
                 <table>
+                  <tbody>
                   <tr class="borderTop borderBottom">
                     <td class="hours">Sl</td>
                     <td class="item"><h2>Item Name</h2></td>
@@ -1582,6 +1585,7 @@
                       />
                     </td> -->
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <!--End Table-->
@@ -1686,6 +1690,7 @@
             <div id="bot">
               <div id="table">
                 <table>
+                  <tbody>
                   <tr class="borderTop borderBottom">
                     <td class="hours">Sl</td>
                     <td class="item"><h2>Item Name</h2></td>
@@ -1859,6 +1864,7 @@
                       />
                     </td>
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <!--End Table-->
@@ -1916,6 +1922,7 @@
             <div id="bot">
               <div id="table">
                 <table >
+                  <tbody>
                   <tr class="borderTop borderBottom">
                     <td class="item"><h2>Item Name</h2></td> 
                     <td class="hours"><h2>Qty</h2></td>
@@ -2024,6 +2031,7 @@
                       <h2 class="text-right">{{ Number(netAmountCalculate).toFixed(0) }}</h2>
                     </td>
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <!--End Table-->
@@ -2031,6 +2039,7 @@
               <div id=" ">
                 <h2 class="service borderBottom">Payment Description:</h2>
                 <table>
+                  <tbody>
                   <tr class="service borderBottom">
                     <td>Description</td>
                     <td class="text-right">Amount</td>
@@ -2060,6 +2069,7 @@
                     </td>
                     <td class="text-right">{{ Math.abs(Number(netAmountCalculate - totalCollections)).toFixed(0) }}</td>
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <!-- <div id="legalcopy">
@@ -2143,10 +2153,12 @@
                 </p> 
               </div>
               <table  id="table" style="width: 100% !important;">
+                <tbody>
                 <tr class="service borderBottom">
                   <td> #{{ invoice_info.invoice_number }}</td>
                   <td class="text-right" style="text-align: right" >{{ invoice_info.created_at }}</td>
                 </tr> 
+                </tbody>
               </table>
 
             </div>
@@ -2154,6 +2166,7 @@
             <div id="bot" class="fnt10">
               <div id="table">
                 <table  style="width: 100% !important;">
+                  <tbody>
                   <tr class="  borderBottom borderTop">
                     <td class="item">Item Name</td>
                     <td class="hours">Qty</td>
@@ -2240,6 +2253,7 @@
                     <td class="Rate" colspan="3">Paid Amount</td>
                     <td class="payment text-right" style="text-align: right"> <string> {{ Number(invoice_info.paid_amount).toFixed(2) }} </string></td>
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <!--End Table-->
@@ -2247,6 +2261,7 @@
               <div class="col-md-12"  >
                 <p style="margin-bottom: 0px; margin-top:5px"> <strong>Payment Description :</strong> </p>
                 <table  id="table" style="width: 100% !important;">
+                  <tbody>
                   <tr class="service borderBottom">
                     <td>Description</td>
                     <td class="text-right" style="text-align: right" >Amount</td>
@@ -2260,6 +2275,7 @@
                     <td>{{ item.paying_by }}</td>
                     <td class="text-right" style="text-align: right">{{ Number(item.amount).toFixed(2) }}</td>
                   </tr>
+                  </tbody>
                 </table>
               </div>
               <div id="legalcopy" class="text-center">
@@ -2464,15 +2480,15 @@ export default {
       barcodeReaderModalActive.value = !barcodeReaderModalActive.value;
     };
 
-    let customer_id = computed(() => {
-      //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].customer_id : '';
-    });
-    let orderedDiscount = computed(() => {
-      //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].order_discount : 0;
-    });
-    let orderedTax = computed(() => {
-      //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].order_tax : 0;
-    }); 
+    // let customer_id = computed(() => {
+    //   //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].customer_id : '';
+    // });
+    // let orderedDiscount = computed(() => {
+    //   //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].order_discount : 0;
+    // });
+    // let orderedTax = computed(() => {
+    //   //return (store.getters.cartInfo.length > 0 ) ? JSON.parse(JSON.stringify(store.getters.cartInfo))[0].order_tax : 0;
+    // }); 
     const totalCartValue = computed(() => {
       return store.getters.cartItems.reduce(function (total, item) { 
         if (item.uom == 5) {
@@ -2666,8 +2682,8 @@ export default {
       addDiscountModal,
       discountModalActive,
       confirmModalActive,
-      orderedDiscount,
-      orderedTax,
+      // orderedDiscount,
+      // orderedTax,
       districtChange,
       addConfirmModal,
       rePrintModal,
@@ -2825,10 +2841,8 @@ export default {
       renderBarcodeReader: false,
       barcoderRrenderCounter: 0,
     };
-  },
-  props: {
-    props: ["cartItem"],
-  },
+  }, 
+  props: ["cartItem"], 
   methods: {
     replaceItem: function (item_id) {},
 
@@ -4018,96 +4032,93 @@ export default {
           order_discount = checkNumber ? parseFloat(this.form.order_discount) : 0;
         }
       }
-      this.pform.order_discount_value = order_discount;
-      return (this.special_discount = order_discount);
-    },
-    itemDiscount: function () {
-      // const percentage = typeof item.discount === 'string' ? item.discount.toString.split("%") : ''; 
-      // if (percentage.length > 1) {
-      //   order_discount = (item.quantity * parseFloat(percentage[0])) / 100;
-      // } else {
-      //   order_discount = parseFloat(item.discount * item.quantity);
-      // }
+    // No side effects in computed properties
+    return order_discount;
+  },
+  itemDiscount: function () {
+    // const percentage = typeof item.discount === 'string' ? item.discount.toString.split("%") : ''; 
+    // if (percentage.length > 1) {
+    //   order_discount = (item.quantity * parseFloat(percentage[0])) / 100;
+    // } else {
+    //   order_discount = parseFloat(item.discount * item.quantity);
+    // }
 
-      return store.getters.cartItems.reduce(function (total, item) {
-        return total + item.item_discount * item.quantity;
-      }, 0);
- 
-    },
+    return this.$store.getters.cartItems.reduce(function (total, item) {
+      return total + item.item_discount * item.quantity;
+    }, 0);
 
-    invoiceVat: function () {
-      let order_vat = 0;
-      let checkNumber = !isNaN(this.form.order_vat);
-      if (this.form.order_vat) {
-        let percentage = this.form.order_vat.split("%");
-        if (percentage.length > 1) {
-          order_vat = (this.totalCartValue * parseFloat(percentage[0])) / 100;
-        } else {
-          order_vat = checkNumber
-            ? (this.totalCartValue * parseFloat(this.form.order_vat)) / 100
-            : 0;
-        }
+  },
+
+  invoiceVat: function () {
+    let order_vat = 0;
+    let checkNumber = !isNaN(this.form.order_vat);
+    if (this.form.order_vat) {
+      let percentage = this.form.order_vat.split("%");
+      if (percentage.length > 1) {
+        order_vat = (this.totalCartValue * parseFloat(percentage[0])) / 100;
+      } else {
+        order_vat = checkNumber
+          ? (this.totalCartValue * parseFloat(this.form.order_vat)) / 100
+          : 0;
       }
-      this.pform.order_vat = order_vat;
-      return order_vat;
-    },
+    }
+    // No side effects in computed properties
+    return order_vat;
+  },
 
-    customer_discount: function () {
-      if(this.customer){
-        let customer_discount = (this.totalCartValue * parseFloat(this.customer.discount)) / 100;
-        this.pform.customer_discount = customer_discount;
-        return customer_discount ? customer_discount : 0;
-      }else{
-        return 0
-      }
-    },
-    customer_group_discount: function () {
-      // console.log("this.customers", this.customer);
-      if(this.customer){
-      let customer_group_discount = (this.totalCartValue * parseFloat(this.customer.group_discount)) / 100;
-      this.pform.customer_group_discount = customer_group_discount;
-      return customer_group_discount ? customer_group_discount : 0;
-      }else{
-        return 0;
-      }
-    },
-    totalCollections: function () {
-      return this.pform.payments.reduce(function (total, item) {
-        return total + parseFloat(item.amount);
-      }, 0);
-    },
-    netAmountCalculate: function () {
-      let totalDiscount = this.all_discount + this.specialDiscount + this.customer_group_discount + this.customer_discount + this.couponDiscoun;
-
-      let totalVatTax = this.invoiceVat + this.totalCartTax;
-      let result = this.totalCartValue + totalVatTax - totalDiscount;
-      this.pform.grand_total = result;        
-      this.pform.order_items_vat = this.totalCartTax;
-      this.pform.total_amount = this.totalCartValue;
-      this.pform.payments[0].amount = result.toFixed(); 
-      return result.toFixed();
-    },
-    totalQuantity: function () {
-      return this.items.reduce(function (total, item) {
-        return total + item.price;
-      }, 0);
-    },
-    totalSumm: function () {
-      return this.items.reduce(function (total, item) {
-        return total + item.price * item.qty;
-      }, 0);
-    },
-    salesReturnAmountSumVal: function () {
-      let sumTotal = this.return_replace.reduce(function (total, ritem) {
-        let item_discount = ritem.replace_discount * ritem.return_qty;
-        return total + ((ritem.replace_mrp_price * ritem.return_qty) - item_discount); 
-      }, 0);
-      this.sale_return_info.return_amount = sumTotal;
-      return sumTotal;
+  customer_discount: function () {
+    if(this.customer){
+      let customer_discount = (this.totalCartValue * parseFloat(this.customer.discount)) / 100;
+      // No side effects in computed properties
+      return customer_discount ? customer_discount : 0;
+    }else{
+      return 0
     }
   },
-  watch: {
-    'sale_return_info.return_amount': function (newVal, OldVal) {
+  customer_group_discount: function () {
+    // console.log("this.customers", this.customer);
+    if(this.customer){
+      let customer_group_discount = (this.totalCartValue * parseFloat(this.customer.group_discount)) / 100;
+      // No side effects in computed properties
+      return customer_group_discount ? customer_group_discount : 0;
+    }else{
+      return 0;
+    }
+  },
+  totalCollections: function () {
+    return this.pform.payments.reduce(function (total, item) {
+      return total + parseFloat(item.amount);
+    }, 0);
+  },
+  netAmountCalculate: function () {
+    let totalDiscount = this.all_discount + this.specialDiscount + this.customer_group_discount + this.customer_discount + this.couponDiscoun;
+
+    let totalVatTax = this.invoiceVat + this.totalCartTax;
+    let result = this.totalCartValue + totalVatTax - totalDiscount;
+    // No side effects in computed properties
+    return result.toFixed();
+  },
+  totalQuantity: function () {
+    return this.items.reduce(function (total, item) {
+      return total + item.price;
+    }, 0);
+  },
+  totalSumm: function () {
+    return this.items.reduce(function (total, item) {
+      return total + item.price * item.qty;
+    }, 0);
+  },
+  salesReturnAmountSumVal: function () {
+    let sumTotal = this.return_replace.reduce(function (total, ritem) {
+      let item_discount = ritem.replace_discount * ritem.return_qty;
+      return total + ((ritem.replace_mrp_price * ritem.return_qty) - item_discount); 
+    }, 0);
+    // No side effects in computed properties
+    return sumTotal;
+  }
+},
+watch: {
+  'sale_return_info.return_amount': function () {
       return this.return_replace.reduce(function (total, ritem) {
         return total + ritem.replace_mrp_price * ritem.return_qty;
         // this.sale_return_info.return_amount = total;

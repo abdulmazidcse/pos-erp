@@ -22,6 +22,7 @@
 import TableHeader from './TableHeader.vue';
 import TableBody from './TableBody.vue';
 export default {
+    name: 'JlTable',
     props: {
         columns: Array,
         data: Array,

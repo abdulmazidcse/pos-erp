@@ -144,11 +144,13 @@
                                                 <h3 style="text-align: center;">{{ vitem.vtype_name }} Voucher</h3>
                                             </div>
                                             <table class="table voucher_view">
+                                                <tbody>
                                                 <tr>
                                                     <td colspan="2">
                                                         <div class="row">
                                                             <div class="col-md-4">
                                                                 <table style="width: 100%">
+                                                                    <tbody>
                                                                     <tr>
                                                                         <td><b>Voucher Code</b></td>
                                                                         <td>:</td>
@@ -159,11 +161,13 @@
                                                                         <td>:</td>
                                                                         <td>{{ vitem.vtype_name }}</td>
                                                                     </tr>
+                                                                    </tbody>
                                                                 </table>
                                                             </div>
                                                             <div class="col-md-4"></div>
                                                             <div class="col-md-4">
                                                                 <table style="width: 100%">
+                                                                    <tbody>
                                                                     <tr style="text-align: right !important">
                                                                         <td><b>Voucher Date</b></td>
                                                                         <td>:</td>
@@ -174,6 +178,7 @@
                                                                         <td>:</td>
                                                                         <td>{{ vitem.print_date }}</td>
                                                                     </tr>
+                                                                    </tbody>
                                                                 </table>
                                                             </div>
                                                         </div>
@@ -212,13 +217,16 @@
                                                         </table>
                                                     </td>
                                                 </tr>
+                                                </tbody>
                                             </table>
                                             <table class="table table-bordered">
-                                                <tr>
-                                                    <td colspan="8">
-                                                        <p><b>Narration/Cheque Details: &nbsp;</b> {{ vitem.global_note }}</p>
-                                                    </td>
-                                                </tr>
+                                                <tbody>
+                                                    <tr>
+                                                        <td colspan="8">
+                                                            <p><b>Narration/Cheque Details: &nbsp;</b> {{ vitem.global_note }}</p>
+                                                        </td>
+                                                    </tr>
+                                                </tbody>
                                             </table>
                                         </div>
                                         
@@ -339,15 +347,14 @@ import Modal from "./../helper/Modal";
 import Datatable from '@/components/Datatable.vue';
 import Pagination from '@/components/Pagination.vue';
 import axios from 'axios'; 
-import NumberToWord from './../page/NumberToWord.vue';           
+// import NumberToWord from './../page/NumberToWord.vue';           
 import '@/assets/css/print.css';       
 export default {
-    name: 'PosLeftbar',
+    name: 'VoucherEntryList',
     components: {
         Modal,
         Datatable,
-        Pagination,
-        NumberToWord
+        Pagination, 
     },
     props:{
         language: {
@@ -608,7 +615,7 @@ export default {
             axios.get(url, {params:this.tableData, headers: this.headerparams})
             .then((response) => {
                 let data = response.data.data;
-                if(this.tableData.draw = data.draw) {
+                if(this.tableData.draw === data.draw) {
                     this.vitems = data.data.data;
                     this.configPagination(data.data);
                 }
@@ -647,9 +654,7 @@ export default {
         },
 
 
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
     },

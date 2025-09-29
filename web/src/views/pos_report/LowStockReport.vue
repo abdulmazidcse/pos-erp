@@ -197,15 +197,16 @@
                     <div class="modal-body " id="printArea" >
                         <div class="table-responsive product_table">
                             <table class="table po_invoice">
+                                <tbody>
                                 <tr>
                                     <td colspan="4" class="text-center" style="position: relative;">
                                         <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
                                         <p>{{ this.retailShopAddress }} </p>
                                         <p>Dhaka, Bangladesh</p> 
                                         <h5 style="width: 100%">Low Stock Report</h5>
-                                    </td>
-                                    
+                                    </td> 
                                 </tr>
+                                </tbody>
                             </table>
                             <table class="  table-bordered table-centered table-nowrap">
                                 <thead>

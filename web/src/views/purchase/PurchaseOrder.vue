@@ -404,6 +404,7 @@
                             <div class="card">
                                 <div class="card-body">
                                     <table class="table po_invoice" style="border: 1px solid #000;">
+                                        <tbody>
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ (purchase_order.company) ? purchase_order.company.name : '' }}</h5>
@@ -526,6 +527,7 @@
                                                 </table>
                                             </td>
                                         </tr>
+                                    </tbody>
                                     </table>
 
                                     <div class="buttons">
@@ -630,6 +632,7 @@
                             <div class="card">
                                 <div class="card-body">
                                     <table class="table po_invoice" style="border: 1px solid #000;">
+                                        <tbody>
                                         <tr>
                                             <td colspan="8" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ (order_item.company) ? order_item.company.name : '' }}</h5>
@@ -752,6 +755,7 @@
                                                 </table>
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
 
                                     <div class="buttons">
@@ -773,9 +777,9 @@
     </transition>
 </template>
 <script>
-import { mapGetters, mapActions } from "vuex";
+// import { mapGetters, mapActions } from "vuex";
 import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+// import { ref, onMounted } from "vue";
 import Form from 'vform'
 import axios from 'axios'; 
 
@@ -1059,10 +1063,7 @@ export default {
             })
             .catch((err) => {
                 this.$toast.error(err.response.data.message);
-            })
-            .finally((fresp) => {
-                // this.loading = false;
-            });
+            }) 
         },
 
         // Supplier Type
@@ -1070,12 +1071,7 @@ export default {
             axios.get(this.apiUrl+'/supplier_types', this.headerjson)
             .then((res) => {
                 this.supplier_types = res.data.data; 
-            })
-            .catch((response) => { 
-                //console.log('companies => ',response.data) 
-            }).finally((ress) => {
-                //console.log('companies finally',ress);
-            });
+            }) ;
         },
 
         // Supplier Data
@@ -1090,9 +1086,7 @@ export default {
             })
             .catch((err) => { 
                 console.log('err => ',err.response) 
-            }).finally((ress) => {
-                //console.log('companies finally',ress);
-            });
+            }) ;
         },
 
         onChangeSupplier(event){
@@ -1151,10 +1145,7 @@ export default {
             })
             .catch((err) => {
                 console.log("error => ", err.response);
-            })
-            .finally((res) => {
-
-            });
+            }) ;
         },
 
         onChangeWarehouse: function(event) {
@@ -1172,9 +1163,6 @@ export default {
             })
             .catch((err) => {
                 console.log("error", err.response);
-            })
-            .finally((res) => {
-
             });
         },
         
@@ -1202,24 +1190,7 @@ export default {
             .finally(() => {
                 this.loading = false;
             });
-        },
-
-        // onClickSupplierProduct()
-        // {
-        //     this.item_curr_supplier_id = '';
-        //     axios.post(this.apiUrl+'/purchase_orders/getProductData', {}, this.headerjson)
-        //     .then((res) => {
-        //         this.product_items = res.data.data.product_data;
-        //     })
-        //     .catch((err) => {
-        //         console.log("err", err.response);
-        //     })
-        //     .finally(() => {
-
-        //     });  
-        // },
-
-
+        },  
         // New Product Row Add
         addNewRow(value, index, change_field="") {
             var item_length = this.product_items.length;
@@ -1297,12 +1268,12 @@ export default {
             this.obj.total_amount = this.totalAmount;
         },
 
-        quantityChanged(index, value)
+        quantityChanged( )
         {            
 
         },
 
-        itemSupplierChange(supplier_id, index)
+        itemSupplierChange(supplier_id)
         {
             this.item_curr_supplier_id = '';
             if(supplier_id != "") {
@@ -1315,7 +1286,7 @@ export default {
             }
         },
         
-        submitForm: function(e) {  
+        submitForm: function( ) {  
             this.isSubmit = true;
             this.disabled = true;
 
@@ -1381,7 +1352,7 @@ export default {
             }
         },
 
-        submitMultiplePOForm: function(e) {  
+        submitMultiplePOForm: function( ) {  
             this.isFinalMPOSubmit = true;
             this.disabled = true;
             const formData = new FormData();
@@ -1417,7 +1388,7 @@ export default {
         resetForm() {
             var self = this; //you need this because *this* will refer to Object.keys below`
             //Iterate through each object field, key is name of the object field`
-            Object.keys(this.obj).forEach(function(key,index) {
+            Object.keys(this.obj).forEach(function(key) {
                 self.obj[key] = '';
             });
 
@@ -1425,16 +1396,13 @@ export default {
         },
 
         validation: function (...fiels){ 
-            var obj = new Object(); 
-            var validate = false;
+            var obj = new Object();  
             for (var k in fiels){     // Loop through the object  
                 for (var j in this.form){  
                     if((j==fiels[k]) && (!this.form[j])) {  
                         obj[fiels[k]] = fiels[k].replace("_", " ")+' field is required';  // Delete obj[key]; 
                         this.errors = {...this.errors, ...obj};
-                    }else{
-                        validate = false;
-                    }
+                    } 
                 }              
             }  
             // var obj = new Object();
@@ -1452,8 +1420,7 @@ export default {
         },
         
 
-    },
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
     },
@@ -1523,7 +1490,7 @@ export default {
     }, 
     watch: {
         product_items: {
-            handler: function(val, oldVal) {
+            handler: function(val) {
                 if(val.length > 1){
                     this.disabled = false;
                 }else{

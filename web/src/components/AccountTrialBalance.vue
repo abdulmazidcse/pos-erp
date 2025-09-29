@@ -16,7 +16,9 @@
             <td class="text-right">{{ account.closing_balance }}</td>
         </tr>
     </tbody>               
-    <AccountTrialBalance v-if="hasChildren" v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 15)" :code_active="showCode"></AccountTrialBalance>
+    <template v-if="hasChildren">
+        <AccountTrialBalance v-for="(child, c) in account.children" :key="c" :account="child" :level="(level + 1)" :spaces="(spaces + 15)" :code_active="showCode"></AccountTrialBalance>
+    </template>
 </template>
 
 <script>

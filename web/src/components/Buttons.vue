@@ -10,7 +10,7 @@
 </template>
 <script>
 export default {    
-    name: 'Buttons',
+    name: 'AppButtons',
     props: {
         row: Object,    
         column: Object    

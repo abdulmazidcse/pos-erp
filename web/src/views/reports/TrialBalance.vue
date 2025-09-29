@@ -131,6 +131,7 @@
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="2" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
@@ -140,6 +141,7 @@
                                                 <h4 style="text-align: center;">From {{ search_terms.from_date }} TO {{ search_terms.to_date }}</h4>  
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table>
                                     <table class="table table-bordered table-nowrap w-100" v-if="!loading">
                                         <thead class="table-light">
@@ -264,7 +266,7 @@ export default {
                 this.isSubmit = false;
                 this.disabled = false;
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
                 this.isSubmit = false;
                 this.disabled = false;
@@ -287,7 +289,7 @@ export default {
                 }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
             });
         },
@@ -300,7 +302,7 @@ export default {
             }  
         },
 
-        showLedgerCode: function(event) {
+        showLedgerCode: function( ) {
             var checked_val = this.show_with_code;
             if(checked_val) {
                 this.codeActive = true;

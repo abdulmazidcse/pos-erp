@@ -139,6 +139,7 @@
                                 <div class="modal-body " id="printArea" >
                                     <div class="table-responsive product_table">
                                         <table class="table po_invoice no-border"  >
+                                            <tbody>
                                             <tr style="border: none">
                                                 <td colspan="2" class="text-center" style="position: relative; border: none">
                                                     <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
@@ -147,6 +148,7 @@
                                                     <h4 style="text-align: center;">Daily Transaction From {{ from_date }} TO {{ to_date }}</h4>  
                                                 </td>
                                             </tr>
+                                            </tbody>
                                         </table>
                                         <table style="width: 100%;" class="table-bordered table-centered table-nowrap">
                                             <thead class="table-light">
@@ -252,7 +254,7 @@ export default {
                 }
             }).catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
             });
         },
@@ -277,7 +279,7 @@ export default {
                 this.disabled = false;
                 this.isSubmit = false;
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
             });
         },
@@ -315,13 +317,10 @@ export default {
         }
 
 
-    },
-
-    destroyed() {},
+    }, 
     mounted() {
         window.scrollTo(0, 0);
-    },
-    computed: {}
+    }, 
 }
 </script>
 <style scoped>

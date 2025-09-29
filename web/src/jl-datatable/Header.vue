@@ -36,6 +36,7 @@
 <script>
 import debounce from 'lodash/debounce';
 export default {
+    name: 'JlDatatableHeader',
     props: {
         lengthMenu: Array,
         menu: Number,

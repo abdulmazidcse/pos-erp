@@ -148,6 +148,7 @@
                             <div class="modal-body " id="printArea" >
                                 <div class="table-responsive product_table">
                                     <table class="table po_invoice">
+                                        <tbody>
                                         <tr>
                                             <td colspan="2" class="text-center" style="position: relative;">
                                                 <h5 class="text-uppercase">{{ this.retailShopName }}</h5>
@@ -157,6 +158,7 @@
                                                 <h4 style="text-align: center;" v-if="search_terms.as_on_date">As On Date {{ search_terms.as_on_date }} </h4>  
                                             </td>
                                         </tr>
+                                        </tbody>
                                     </table> 
                                     <table class="table table-nowrap w-100" v-if="!loading">  
                                         <tbody style="border-bottom: 0;">
@@ -216,8 +218,7 @@
     </transition>
 </template>
 <script>
-import Modal from "./../helper/Modal";
-import { ref, onMounted } from "vue";
+import Modal from "./../helper/Modal"; 
 import axios from 'axios';
 import Form from 'vform';
 
@@ -270,7 +271,7 @@ export default {
         {
             this.isSubmit = true;
             this.disabled = true;
-            this.fetchBalanceSheet(search_terms.companyId, this.search_terms.as_on_date);
+            this.fetchBalanceSheet(this.search_terms.companyId, this.search_terms.as_on_date);
         },
         filterComapany(companyId)
         {
@@ -310,7 +311,7 @@ export default {
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
-            }).finally((ress) => {
+            }).finally(( ) => {
                 this.loading = false;
                 this.isSubmit = false;
                 this.disabled = false;
@@ -334,7 +335,7 @@ export default {
             }  
         },
 
-        showLedgerCode: function(event) {
+        showLedgerCode: function( ) {
             var checked_val = this.show_with_code;
             if(checked_val) {
                 this.codeActive = true;

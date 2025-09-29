@@ -23,6 +23,7 @@ import imgSortAsc from '../assets/images/sort_asc.png';
 import imgSortDesc from '../assets/images/sort_desc.png';
 import imgSortBoth from '../assets/images/sort_both.png';
     export default {
+        name: 'DataTableComponent',
         props: ['columns', 'sortKey'],
         data() {
             return { 

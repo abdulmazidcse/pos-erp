@@ -248,6 +248,7 @@
               <div id="bot">
                 <div id="table">
                   <table>
+                    <tbody v-if="invoice_info.sales_items.length == 0">
                     <tr class="tabletitle borderTop borderBottom">
                       <td class="item"><h2>Item Name</h2></td>
                       <td class="hours text-center"><h2>Qty</h2></td>
@@ -358,6 +359,7 @@
                         <h2>{{ invoice_info.paid_amount }}</h2>
                       </td>
                     </tr>
+                    </tbody>
                   </table>
                 </div>
                 <!--End Table-->
@@ -365,19 +367,21 @@
                 <div id="legalcopy">
                   <h2 class="service borderBottom">Payment Info:</h2>
                   <table>
+                    <tbody v-if="invoice_info.payments.length == 0"> 
                     <tr class="service borderBottom">
                       <td>Description</td>
                       <td class="text-center">Amount</td>
                     </tr>
                     <tr
                       class="service borderBottom"
-                      v-for="(item, i) in invoice_info.payments"
+                      v-for="(item) in invoice_info.payments"
                       v-if="invoice_info.payments.length > 0"
                       :key="item.id"
                     >
                       <td>{{ item.paying_by }}</td>
                       <td class="text-right">{{ item.amount }}</td>
                     </tr>
+                    </tbody>
                   </table>
                 </div>
                 <div id="legalcopy">
@@ -411,8 +415,7 @@
     </div> 
   </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script> 
 import { ref } from "vue";
 import Modal from "./../helper/Modal";  
 import Form from 'vform'   
@@ -576,9 +579,9 @@ export default {
       onEntriesFetched(){
         console.log('onEntriesFetched');
       }, 
-      handleEditBtn(event){ 
+      handleEditBtn( ){ 
         console.log('datatable', this.datatable)
-        let trID = event.target.parentElement.parentElement.parentElement.parentElement.id 
+        // let trID = event.target.parentElement.parentElement.parentElement.parentElement.id 
       },
       handleDeleteBtn(event){ 
         let trID = event.target.parentElement.parentElement.parentElement.parentElement.id
@@ -635,7 +638,7 @@ export default {
           .catch(errors => {
               console.log(errors);
           })
-          .finally((fres) => {
+          .finally(() => {
               this.loading = false;
               this.isSubmit = false;
           });

@@ -29,6 +29,7 @@
 
 <script>
     export default { 
+        name: 'AppPagination',
         props: {
             pagination: Object, 
             language: Object
