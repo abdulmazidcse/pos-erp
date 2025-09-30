@@ -25,7 +25,8 @@ class PosProductResource extends JsonResource
     public $sales_platform_discount=0;
     public $all_discount        =0;
     public function toArray($request)
-    { 
+    {  
+        // dd($this->tax->value);
         return [
             'product_id'        => $this->id,
             'product_stock_id'  => $this->product_stock_id,

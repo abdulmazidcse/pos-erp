@@ -304,7 +304,6 @@ class PermissionAPIController extends AppBaseController
         $user_navigation_with_module = [];
         $navigation_with_module = [];
         $module_array = [];
-        // dd($parent_modules->toArray());
         if($parent_modules) {
             foreach ($parent_modules as $module) {
                 $sub_modules_array = [];
@@ -353,7 +352,7 @@ class PermissionAPIController extends AppBaseController
                     ];
 
                     $user_navigation_with_module[$module->name][] = [
-                        //'menu_details'  => $menu_index[$module->id] ?? '',
+                        'menu_details'  => $menu_index[$module->id] ?? '',
                         "name"=> $menu_index[$module->id]->name ?? "",
                         "slug"=> $menu_index[$module->id]->slug ?? "",
                         "url_path"=> $menu_index[$module->id]->url_path ?? "#",

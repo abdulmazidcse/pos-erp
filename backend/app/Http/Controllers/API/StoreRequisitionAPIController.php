@@ -53,7 +53,7 @@ class StoreRequisitionAPIController extends AppBaseController
     }
 
 
-    public function getRequisitionData()
+    public function getRequisitionData(Request $request)
     {
         $company_id = checkCompanyId($request);
         $requisition_data   = StoreRequisition::where('approve_status', 0)->orderBy('id', 'desc')->get();

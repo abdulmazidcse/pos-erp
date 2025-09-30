@@ -72,6 +72,7 @@
                                             <td>{{ item.user_code }} </td>
                                             <td>{{ item.phone }}</td>
                                             <td>{{ item.company_name }}</td>
+                                            <td>{{ item.outlet_name }}</td>
                                             <td>{{ item.roles ?  (item.roles[0] ?  item.roles[0].name : '') : '' }}</td>
                                             <td><span v-if="item.status==1" class="badge bg-success">Active</span>
                                                 <span v-if="item.status==0" class="badge bg-warning">In-Active</span>
@@ -440,6 +441,11 @@ export default {
             {
                label: 'Company',
                name: 'company_name',
+               width: '10%'
+            },
+            {
+               label: 'Outlet',
+               name: 'outlet_name',
                width: '10%'
             },
             {

@@ -158,12 +158,17 @@ class ProductsAPIController extends AppBaseController
             $outlet_id  = $request->input('outlet_id');
         }else{
             $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
-        }   
+        }  
+        return array(
+            $roles,
+            $outlet_id, 
+            $user,
+        );
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
             'stock_products.stock_quantity','stock_products.out_stock_quantity',
             'stock_products.expires_date', 'stock_products.id as product_stock_id', 'stock_products.outlet_id')
-            ->with('category','sub_category')
+            ->with(['category','sub_category'])
             ->join('stock_products','products.id','=','stock_products.product_id')
             ->groupBy('products.id','stock_products.expires_date','stock_products.outlet_id')
             ->where('stock_products.outlet_id', '!=', 0)

@@ -66,7 +66,7 @@ class UserAPIController extends AppBaseController
     }
 
     public function userList(Request $request){
-        $columns = ['id','name', 'email', 'user_code', 'profile_image', 'company_name', 'role'];
+        $columns = ['id','name', 'email', 'user_code', 'profile_image', 'company_name', 'outlet','role'];
 
         $length = $request->input('length') ? $request->input('length') : 10;
         $column = $request->input('column') ? $request->input('column') : '0';
@@ -75,8 +75,9 @@ class UserAPIController extends AppBaseController
 
         $query = User::with(['roles' => function($q){
                     $q->select('id', 'name');
-                }])->select('users.id','users.name', 'users.email', 'users.user_code', 'users.phone','users.company_id','users.profile_image', 'companies.name as company_name','users.status')
+                }])->select('users.id','users.name', 'users.email', 'users.user_code', 'users.phone','users.company_id','users.profile_image', 'companies.name as company_name', 'outlets.name as outlet_name','users.status')
                 ->leftJoin('companies','companies.id','=','users.company_id')
+                ->leftJoin('outlets','outlets.id','=','users.outlet_id')
                 ->orderBy($columns[$column], $dir);
 
         if($searchValue) {
@@ -84,6 +85,7 @@ class UserAPIController extends AppBaseController
                 $query->where('users.name', 'like', '%' .$searchValue. '%');
                 $query->orWhere('users.email', 'like', '%' .$searchValue. '%'); 
                 $query->orWhere('users.user_code', 'like', '%' .$searchValue. '%'); 
+                $query->orWhere('users.outlet', 'like', '%' .$searchValue. '%'); 
                 $query->orWhereHas('roles', function($w) use ($searchValue) {
                     $w->where('roles.name', 'like', '%' .$searchValue. '%');
                 });

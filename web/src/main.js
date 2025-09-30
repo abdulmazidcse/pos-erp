@@ -2,8 +2,8 @@ import* as Vue from 'vue';
 // import { createApp } from 'vue/dist/vue.runtime.esm-bundler'
 import { createApp } from 'vue/dist/vue.esm-bundler';
 
-import { createStore } from 'vuex' 
-import recipeHelpers from "./helper.js";
+// import { createStore } from 'vuex' 
+// import recipeHelpers from "./helper.js";
 import App from './App.vue'
 require('@/assets/css/icons.min.css')  
 require('@/assets/css/app.min.css')   
@@ -11,7 +11,7 @@ require('@/assets/css/style.css')
  
 import router from './router' 
 import store   from './store';  
-import { mapGetters, mapActions } from "vuex";
+// import { mapGetters, mapActions } from "vuex";
 import jQuery from 'jquery'
 // start for menu icon 
 import { FontAwesomeIcon } from "@fortawesome/vue-fontawesome";

@@ -40,15 +40,21 @@ class UserOutletAssignAPIController extends AppBaseController
             'outlets' => 'required',
         ]);
 
-//        return json_decode($request->get('outlets'));
+        // return json_decode($request->get('outlets'));
         $user_id    = $request->get('user_id');
-        $outlet_ids  = explode(",", $request->get('outlets'));
+        // $outlet_ids  = explode(",", $request->get('outlets'));
+        $outlet_ids = $request->get('outlets');
 
         $user = User::find($user_id);
         if(empty($user)) {
             return $this->sendError('User Do Not Find');
         }
-        $outlet_assign = $user->outlets()->sync($outlet_ids);
+        // return $outlet_ids;
+        // $outlet_assign = $user->outlets()->sync($outlet_ids);
+        $user->outlet_id = $outlet_ids;
+        // dd( $user,  $outlet_ids);
+        $outlet_assign = $user->update();
+
 
         if($outlet_assign) {
             return $this->sendSuccess('Outlet Assign Successfully Done');
