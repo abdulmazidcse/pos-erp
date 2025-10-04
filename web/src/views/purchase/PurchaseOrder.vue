@@ -83,7 +83,7 @@
                                 <div class="col-md-6">
                                     
                                     <div class="row">
-                                        <div class="col-md-6" style="display: none;">
+                                        <div class="col-md-6">
                                             <label for="warehouse_id" style="width: 100%;">Delivery Location to Warehouse</label>
                                             <select class="form-control border" id="warehouse_id" v-model="obj.warehouse_id" @change="onkeyPress('warehouse_id'), onChangeWarehouse" :disabled="obj.outlet_id != '' ? true : false">
                                                 <option value="">--- Select Warehouse ---</option>

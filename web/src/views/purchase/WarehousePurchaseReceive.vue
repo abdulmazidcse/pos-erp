@@ -12,10 +12,7 @@
                             
                         </ol>
                     </div>
-                    <div class="page-title-right float-right "> 
-                        <!-- <button type="button" class="btn btn-success float-right" style="margin-left: 7px;" @click="toggleImportModal">
-                            <i class="fas fa-plus"></i> Bulk Purchase Receive
-                        </button> -->
+                    <div class="page-title-right float-right ">  
                         <a href="/purchase-receive-list"><button type="button" class="btn btn-primary float-right">
                             Purchase Receive List
                         </button></a> 
@@ -143,52 +140,29 @@
                             <div class="card" style="margin-top: 20px;">
                                 <div class="card-header text-left">
                                     Product Details
-                                    <input type="hidden" v-model="obj.total_quantity">
-                                    <!-- <span class="total_quantity">Challan Total: <b>{{ totalAmount }}</b></span>
-                                    <span class="total_quantity" style="margin-right: 15px;">Challan Quantity: <b>{{ totalQuantity }}</b></span> -->
+                                    <input type="hidden" v-model="obj.total_quantity"> 
                                 </div>
-                                <div class="card-body">
-                                    <!-- <div class="form-group">
-                                        <input type="text" class="form-control border" id="search_product" placeholder="Search Product">
-                                    </div> -->
+                                <div class="card-body"> 
                                     <div class="product_table">
                                         <table class="table table-bordered table-centered table-nowrap w-100">
                                             <thead class="table-light">
-                                                <tr class="border success item-head">
-                                                    <!-- <th class="text-center" style="width: 5%"><input type="checkbox" v-model="product_all_checked" @change="checkedAll"></th>  -->
+                                                <tr class="border success item-head"> 
                                                     <th class="text-center" style="width: 5%">SL</th> 
-                                                    <th class="text-center" style="width: 25%">Name </th> 
-                                                    <!-- <th class="text-center">Barcode</th>  -->
-                                                    <!-- <th>WH STK</th>
-                                                    <th>LAST PO Qty</th>
-                                                    <th>LAST PUR. Qty</th>
-                                                    <th>PO Qty</th> -->
-                                                    <th class="text-center" style="width: 10%">UOM</th>
-                                                    <!-- <th>Remain Qty</th> -->
-                                                    <!-- <th>CPU</th> -->
+                                                    <th class="text-center" style="width: 25%">Name </th>  
+                                                    <th class="text-center" style="width: 10%">UOM</th> 
                                                     <th class="text-center" style="width: 10%">MRP</th>
-                                                    <th class="text-center" style="width: 7%" v-if="obj.purchase_order_id != 'direct'">Ord. Qty</th>
-                                                    <!-- <th class="text-center" style="width: 7%">Free Qty</th> -->
+                                                    <th class="text-center" style="width: 7%" v-if="obj.purchase_order_id != 'direct'">Ord. Qty</th> 
                                                     <th class="text-center" style="width: 7%">Rcv. Qty</th>
                                                     <th class="text-center" style="width: 7%">Rcv. Weight</th>
                                                     <th class="text-center" style="width: 10%">CP</th>
-                                                    <th class="text-center" style="width: 7%" v-if="obj.purchase_order_id != 'direct'">T.Rcv. Qty</th>
-                                                    <!-- <th class="text-center">Free Amount</th> -->
-                                                    <!-- <th class="text-center">Disc (%)</th> -->
-                                                    <!-- <th class="text-center">Disc Amt</th> -->
-                                                    <!-- <th class="text-center">VAT</th> -->
-                                                    <th class="text-center" style="width: 10%">Amount</th>
-                                                    <!-- <th>Profit(%)CPU</th>
-                                                    <th>Profit(%)MRP</th> -->
+                                                    <th class="text-center" style="width: 7%" v-if="obj.purchase_order_id != 'direct'">T.Rcv. Qty</th> 
+                                                    <th class="text-center" style="width: 10%">Amount</th> 
                                                     <th class="text-center"></th>
                                                     <th class="text-center" style="width: 3%" v-if="obj.purchase_order_id == 'direct'"></th>
                                                 </tr>
-                                            </thead>
-
-                                            <!-- <tbody v-if="product_items.length > 0"> -->
-                                            <tbody v-for="(product_item, i) in product_items" :key="i">
-                                                <tr v-if="is_expires != 1"> 
-                                                    <!-- <td class="text-center"><input type="checkbox" v-model="product_item.checked"></td> -->
+                                            </thead> 
+                                            <tbody v-for="(product_item, i) in product_items" :key="i" v-if="product_items.length > 0">
+                                                <tr v-if="is_expires != 1">  
                                                     <td class="text-center">{{ i + 1 }}</td>
                                                     <td class="text-center" style="word-wrap: break-word;" v-if="obj.purchase_order_id != 'direct'">{{ product_item.name }}</td>
                                                     <td class="text-center" v-else>
@@ -207,32 +181,21 @@
                                                             :resolve-on-load="false"
                                                             :hide-selected="true" 
                                                         />
-                                                    </td>
-                                                    <!-- <td class="text-center">{{ product_item.code }}</td> -->
-                                                    <!-- <td>{{ product_item.wh_stk }}</td>
-                                                    <td>{{ product_item.last_po_qty }}</td>
-                                                    <td>{{ product_item.last_purchase_qty }}</td>
-                                                    <td>{{ product_item.po_qty }}</td> -->
+                                                    </td> 
                                                     <td class="text-center">
                                                         <select id="punit_id" class="form-control" v-model="product_item.product_unit_id" @change="productUnitChange($event.target.value, i)">
                                                             <option value="">--- Select Unit--</option>
                                                             <option v-for="(unit, i) in units" :key="i" :value="unit.id"> {{ unit.unit_code }}</option>
 
                                                         </select>
-                                                    </td>
-                                                    <!-- <td class="text-center">{{ product_item.unit_code }}</td> -->
-                                                    <!-- <td>{{ product_item.remain_qty }}</td> -->
-                                                    <!-- <td>{{ product_item.cpu }}</td> -->
+                                                    </td>  
                                                     
                                                     <td class="text-center">
                                                         <input type="text" class="form-control" @keyup="inputChange()" v-if="obj.purchase_order_id != 'direct'" v-model="product_item.sale_price">
                                                         <input type="text" class="form-control" @keyup="inputChange()" v-else @focus="addNewRow($event, i)" v-model="product_item.sale_price">
                                                     </td>
-                                                    <td class="text-center" v-if="obj.purchase_order_id != 'direct'">{{ product_item.ord_qty }}</td>
-                                                    <!-- <td class="text-center">
-                                                        <input type="text" class="form-control" @keyup="inputChange()" v-if="obj.purchase_order_id != 'direct'" v-model="product_item.free_qty">
-                                                        <input type="text" class="form-control" @keyup="inputChange()" v-else @focus="addNewRow($event, i)" v-model="product_item.free_qty">
-                                                    </td> -->
+                                                    <td class="text-center" v-if="obj.purchase_order_id != 'direct'">{{product_item.ord_qty}}</td>
+                                                     
                                                     <td class="text-center">
                                                         <input type="text" class="form-control" @keyup="inputChange()" v-if="obj.purchase_order_id != 'direct'" v-model="product_item.rcv_qty">
                                                         <input type="text" class="form-control" @keyup="inputChange()" v-else @focus="addNewRow($event, i)" v-model="product_item.rcv_qty">
@@ -246,22 +209,15 @@
                                                         <input type="text" class="form-control" @keyup="inputChange()" v-else @focus="addNewRow($event, i)" v-model="product_item.purchase_price">
                                                     </td>                                       
                                                     <td class="text-center" v-if="obj.purchase_order_id != 'direct'">{{ parseFloat(parseFloat(product_item.prcv_qty) + parseFloat(product_item.rcv_qty))>0?parseFloat(parseFloat(product_item.prcv_qty) + parseFloat(product_item.rcv_qty)):parseFloat(product_item.prcv_qty)  }}</td>
-                                                    <!-- <td class="text-center">{{ product_item.free_qty * product_item.purchase_price }}</td> -->
-                                                    <!-- <td class="text-center"><input :readonly="!product_item.checked" type="text" class="form-control" @keyup="inputChange(product_item, 'percent')" v-model="product_item.disc_percent" style="width: 50px"></td> -->
-                                                    <!-- <td class="text-center"><input :readonly="!product_item.checked" type="text" class="form-control" @keyup="inputChange(product_item, 'flat')" v-model="product_item.disc_amount" style="width: 80px"></td> -->
-                                                    <!-- <td>{{ (((product_item.rcv_qty * product_item.purchase_price) * product_item.disc_percent) / 100) }}</td> -->
-                                                    <!-- <td class="text-center">{{ product_item.vat }}</td> -->
-                                                    <!-- <td class="text-center">{{ ((product_item.rcv_qty * product_item.purchase_price) - (((product_item.rcv_qty * product_item.purchase_price) * product_item.disc_percent) / 100)) + product_item.vat }}</td> -->
                                                     <td class="text-center" v-if="product_item.unit_code == 'kg' ">{{ parseFloat((product_item.rcv_weight * product_item.purchase_price) - (((product_item.rcv_weight * product_item.purchase_price) * 0) / 100)).toFixed(2) }}</td>
                                                     <td class="text-center" v-else>{{ parseFloat((product_item.rcv_qty * product_item.purchase_price) - (((product_item.rcv_qty * product_item.purchase_price) * 0) / 100)).toFixed(2) }}</td>
-
-                                                    <!-- <td>{{ product_item.profit_percent_cpu }}</td> -->
-                                                    <!-- <td>{{ product_item.profit_percent_mrp }}</td> -->
+ 
 
                                                     <td class="actions-btn">
                                                         <a href="#" v-if="!product_item.is_expirable" class="btn btn-primary btn-sm expireBtn btnDisabled"> Add Expire Date</a>
                                                         <a href="#" v-else class="btn btn-primary btn-sm expireBtn" @click.prevent="addExpireDate(product_item)"> Add Expire Date</a>
-                                                        <a href="#" class="btn btn-info btn-sm giftBtn" @click.prevent="addGiftItem(product_item)"> Add Gift</a>
+                                                        <a href="#" class="btn btn-info btn-sm giftBtn" @click.prevent="addGiftItem(product_item)"> Add Gift | {{ product_item.id }}</a>
+                                                        <a href="#" v-if="product_item.id" class="btn btn-info btn-sm giftBtn"  @click="toggleModal(product_item)"> Gen</a>
                                                     </td>
                                                     <td class="text-center" v-if="obj.purchase_order_id == 'direct'">
                                                         <a href="javascript:void(0)" class="text-danger" style="font-size: 17px" @click="deleteRow(i)" v-if="i != 0"><i class="mdi mdi-close"></i></a>
@@ -373,63 +329,64 @@
                     </div>
                 </div>
             </div>
-        </div>
+        </div> 
 
-        <!--Bulk Import Purchase Receive Modal -->
-        <!-- <Modal @close="toggleImportModal" :modalActive="importModal">
+        <Modal @close="toggleModal(modalSequenceProduct)" :modalActive="modalActive" >
             <div class="modal-content scrollbar-width-thin">
                 <div class="modal-header"> 
-                    <button @click="toggleImportModal" type="button" class="btn btn-default">X</button>
-                    <h5 style="text-align: right">Import Purchase Receive</h5>
+                    <h3>Sequences Add Or Edit</h3>
+                    <button @click="toggleModal(modalSequenceProduct)" type="button" class="btn btn-default">X</button>
                 </div>
-
-                <div class="modal-body">  
-                    <div class="row">
-                        <div class="col-md-12">
-                            <form role="form" @submit.prevent="submitImportForm()" enctype="multipart/form-data">
-                                <p style="font-size: 13px; font-style: italic;">The field labels marked with * are required input fields.</p>
-                                <p style="font-size: 16px;">The correct column order is (outlet_name*, supplier_name*, product_name*, expiry_date, order_qty*, free_qty, receive_qty*, tp*, mrp*) and you must follow this.</p>
-                                <p style="font-size: 16px;">Outlet, Supplier, and Product Must be enlisted Before Purchase Receive (if don't have)</p>
-                                
-                                <div class="row">
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label for="excel_file"> Upload EXCEL File *</label>
-                                            <input type="file" class="form-control" id="excel_file" ref="file" name="..." @change="purchaseReceiveImportFile(), onkeyPress('excel_file')">
-                                            
-                                            <div class="invalid-feedback" v-if="errors">
-                                                <p v-for="(error, i) in errors" :key="i">{{ error[0] }}</p>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    <div class="col-md-6">
-                                        <div class="mb-3">
-                                            <label> Sample File</label>
-                                            <a :href="samplefile_url" class="btn btn-info" style="display: block; width: 100%; clear:both;" download><i class="fas fa-download"></i> Download</a>
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <button type="submit" class="btn btn-primary" :disabled="disabled_upload">
-                                        <span v-show="isUploadSubmit">
-                                            <i class="fas fa-spinner fa-spin" ></i>
-                                        </span>Submit 
-                                    </button>
-                                </div>
-
-                            </form>
+                <form @submit.prevent="submitSequencesForm()" enctype="multipart/form-data" >
+                    <div class="modal-body">
+                        <div class="row">
+                            <div class="form-group col-md-4" style="display: inline-grid;padding-bottom: 20px;">
+                                <label for="prefix1">Sequence Prefix *</label><br>    </br>
+                                <input type="text" class="form-control border" v-model="sequencePrefix" id="prefix1" placeholder="Sequence Prefix" autocomplete="off" style="height: 26px; width: auto;">
+                            </div>
+                            <div class="form-group col-md-4" style="display: inline-grid;padding-bottom: 20px;">
+                                <label for="prefix2">Size *</label><br> </br>
+                                <select class="form-control border" v-model="size_id" id="is_expirable" style="height: 26px; width: auto; padding:inherit;">
+                                    <option value="">--- Select Size ---</option>
+                                    <option v-for="(size, index) in sizes.sizes" :key="index" :value="size.id">{{ size.name }}</option>
+                                </select>
+                            </div> 
+                            <div class="form-group col-md-4" style="display: inline-grid;padding-bottom: 20px;">
+                                <label for="prefix3">Expiry Date *</label><br>    </br>
+                                <input type="text" class="form-control border" v-model="expiry_date" id="prefix3" placeholder="Expiry Date" autocomplete="off" style="height: 26px; width: auto;">
+                            </div>
+                            <table>
+                                <tbody>
+                                    <tr v-for="(sequence, index) in modalSequenceProduct.sequences" :key="index"> 
+                                        <td style="padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" class="form-control border" v-model="sequence.sequence" placeholder="Sequence" autocomplete="off" style="height: 26px; width: auto;">
+                                        </td>
+                                        <td style="padding: 5px; border: 1px solid #ddd;">
+                                            <select class="form-control border" v-model="sequence.size_id" id="is_expirable"> 
+                                            <option v-for="(size, index) in sizes.sizes" :key="index" :value="size.id">{{ size.name }}</option>
+                                        </select>  
+                                        </td>
+                                        <td style="padding: 5px; border: 1px solid #ddd;">
+                                            <input type="text" class="form-control border" v-model="sequence.expiry_date" placeholder="Expiry Date" autocomplete="off" style="height: 26px; width: auto;">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <p @click="generateSequences(modalSequenceProduct)">Generate</p>
                         </div>
-                    </div>
-                </div>
-            </div>
-        </Modal> -->
 
-        <Modal
-        @close="barcodeReaderModal()"
-        :modalActive="barcodeReaderModalActive"
-        >
+                        <!-- Button row -->
+                        <div class="row mt-3">
+                            <div class="col text-end">
+                                <button class="btn btn-primary" @click="toggleModal(modalSequenceProduct)">Close & Save</button>
+                            </div>
+                        </div>
+                    </div> 
+                </form>
+            </div>
+        </Modal>
+
+        <Modal @close="barcodeReaderModal()" :modalActive="barcodeReaderModalActive" :width="800">
             <div class="modal-content scrollbar-width-thin barcodeReaderModal">
                 <div class="modal-header">
                 <h5>Barcode Reader</h5>
@@ -441,12 +398,8 @@
                     X
                 </button>
                 </div>
-                <div class="modal-body">
-                    <!-- <span style="font-size: x-large" v-if="!libLoaded">Loading Library...</span> -->
-                
-                <div id="videoWindow" class="video"></div>
-                <!-- <QuaggaScannerTest v-on:found="found" v-if="renderBarcodeReader"> </QuaggaScannerTest> -->
-                
+                <div class="modal-body"> 
+                    <div id="videoWindow" class="video"></div> 
                 </div>
 
                 <div class="modal-footer">
@@ -457,8 +410,7 @@
                         <button
                             type="button"
                             class="btn btn-sm btn-danger"
-                            @click="barcodeReaderModal()"
-                        >
+                            @click="barcodeReaderModal()" >
                             Close
                         </button>
                         </div>
@@ -471,26 +423,10 @@
     </div>
     </transition>
 </template>
-<script>
-import { mapGetters, mapActions } from "vuex";
+<script> 
 import Modal from "./../helper/Modal"; 
 import Form from 'vform'
-import axios from 'axios'; 
-import {
-  ref,
-  reactive,
-  toRefs,
-  computed,
-  inject,
-  onMounted,
-  getCurrentInstance,
-  onUpdated,
-  onUnmounted,
-  onBeforeMount,
-  onBeforeUnmount,
-  onBeforeUpdate,
-} from "vue";
-
+import axios from 'axios';   
 import Quagga from 'quagga'; 
  
 export default {
@@ -500,6 +436,9 @@ export default {
     },
     data() {
         return {
+            expiry_date: '',
+            size_id: '',
+            sequencePrefix: '',
             loading: true,
             isSubmit: false,
             isUploadSubmit: false,
@@ -507,7 +446,7 @@ export default {
             editMode:false,
             disabled: true,
             disabled_upload: false,
-            modalActive:false,
+            modalActive:false, 
             barcodeReaderModalActive:false,
             pscan_receive: false,
             importModal:false,
@@ -521,6 +460,7 @@ export default {
             warehouses: [],
             warehouse_disabled: false,
             units: [],
+            sizes: [],
             supplier:'',
             is_expires:false,
             products: [],
@@ -556,6 +496,9 @@ export default {
             barcoderRrenderCounter: 0,
             renderBarcodeReader: false,
             searchIteam: '',
+            modalSequenceProduct: {},
+            generateSequencesFor: [{'product_id': '', 'outlet_id': '', 'wherehouse_id': '', 'color_id': '', 'size_id':'', 'sequence': '','expiry_date': '', 'quantity': '', 'weight': ''}
+            ],
             
         };
     },
@@ -564,9 +507,9 @@ export default {
         this.fetchReferenceNo();
         this.fetchSuppliers();
         this.fetchUnits();
+        this.fetchSizes();
         this.fetchWarehouses();
-        this.fetchProducts();
-
+        this.fetchProducts(); 
     },
     methods: {
         toggleImportModal: function() {
@@ -575,6 +518,18 @@ export default {
             this.$refs.file.value=null;
             this.disabled_upload = true;
             this.errors = '';
+        },
+
+        toggleModal: function(product_item) {
+            // console.log("toggle modal", this.modalActive);
+            this.modalActive = !this.modalActive;
+            if(this.modalActive) {
+                this.modalSequenceProduct = product_item; 
+                // this.generateSequences(product_item);
+            }else{
+                // this.stopRead();
+            }
+            // console.log("toggle modal", this.modalActive);
         },
 
         barcodeReaderModal: function() {
@@ -686,6 +641,7 @@ export default {
                                 expires_data: [],
                                 is_gifts: false,
                                 gifts: [],
+                                sequences: [],
                                 is_expirable: expireable,
                             }
 
@@ -722,7 +678,7 @@ export default {
         fetchAuthUser() {
             axios.get(this.apiUrl+'/users/authUser', this.headerjson)
             .then((res) => {
-                console.log("auth user", res.data.data);
+                // console.log("auth user", res.data.data);
                 this.auth_user = res.data.data.user; 
                 this.auth_user_roles = res.data.data.user_roles; 
                 if(res.data.data.user_roles[0].slug != "warehouse-manager") {
@@ -764,6 +720,15 @@ export default {
             axios.get(this.apiUrl+'/units', this.headerjson)
             .then((res) => {
                 this.units = res.data.data; 
+            })
+            .catch((err) => { 
+                this.$toast.error(err.response.data.message);
+            });
+        },
+        fetchSizes() {
+            axios.get(this.apiUrl+'/products-helper', this.headerjson)
+            .then((res) => {
+                this.sizes = res.data.data; 
             })
             .catch((err) => { 
                 this.$toast.error(err.response.data.message);
@@ -868,6 +833,7 @@ export default {
                         expires_data: [],
                         is_gifts: false,
                         gifts: [],
+                        sequences: [],
                         is_expirable: false,
                     }
                 );
@@ -889,18 +855,7 @@ export default {
             let sub_category_id = (product) ? product.sub_category_id : 0;
             let expireable = (product) ? product.is_expirable : 0;
 
-            let unit_data = this.units.find(({id}) => id == unit_id);
-            // let unit_code = 'pcs';
-            // if(unit_id !='') {
-            //     axios.get(this.apiUrl+'/units/'+unit_id, this.headerjson)
-            //     .then((res) => {
-            //         unit_code = res.data.data.unit_code;
-            //     })
-            //     .catch((err) => { 
-            //         this.$toast.error(err.response.data.message);
-            //     });
-            // }
-
+            let unit_data = this.units.find(({id}) => id == unit_id); 
             this.product_items[index].code = p_code;
             this.product_items[index].name = p_name;
             this.product_items[index].product_unit_id = unit_id;
@@ -909,6 +864,7 @@ export default {
             this.product_items[index].purchase_price = p_tp;
             this.product_items[index].sale_price = p_mrp;
             this.product_items[index].is_expirable = (expireable == 1) ? true : false;
+            this.product_items[index].sequences = {};
 
 
         },
@@ -959,12 +915,10 @@ export default {
             }
         },
 
-        addExpireDate(product) 
-        {
+        addExpireDate(product) {
             if(!product.is_expires) {
                 product.is_expires = true;
             }
-
             var expire_item = {expire_date:'', expire_qty: 0};
             product.expires_data.push(expire_item);
         },
@@ -978,6 +932,7 @@ export default {
                 product.is_expires = false;
             }
         },
+
         expireQtyValidation: function(product, e) {
             var counter = 0;
             product.expires_data.filter(item => {
@@ -1002,6 +957,28 @@ export default {
             }
             var gift_item = {gift_name:'', gift_qty: 0};
             product.gifts.push(gift_item);
+        }, 
+        generateSequences: function(product){              
+            let rcvQty = parseInt(product.rcv_qty); 
+            this.generateSequencesFor = [];
+            for (let i = 0; i < rcvQty; i++) {
+                this.generateSequencesFor.push({
+                    product_id: product.id,
+                    outlet_id: '',
+                    wherehouse_id: this.obj.warehouse_id,
+                    color_id: '',
+                    size_id: this.size_id,
+                    sequence: `${this.sequencePrefix}-${i + 1}`,  // e.g., "2025*10*5-1"
+                    expiry_date: this.expiry_date,
+                    quantity: this.quantity,
+                    weight: this.weight
+                });
+            } 
+            this.sequencePrefix = ''; // Optional reset 
+            product.sequences = this.generateSequencesFor;
+        },
+        submitSequencesForm: function() { 
+            this.modalActive = false; 
         },
 
         deleteGift(product, index){
@@ -1012,22 +989,7 @@ export default {
             if(product.gifts.length == 0) {
                 product.is_gifts = false;
             }
-        },
-
-        // purchaseReceiveImportFile() {
-        //     this.importFile = this.$refs.file.files[0];
-        //     if(this.importFile != '') {
-        //         this.errors = ''
-        //     }
-        // },
-
-        // checkImportRequiredPrimary() {
-        //     if(this.$refs.file.value != "") {
-        //         this.disabled_upload = false;
-        //     }else{
-        //         this.disabled_upload = true;
-        //     }
-        // },
+        }, 
 
         submitForm: function(e) {  
             this.isSubmit = true;
@@ -1049,6 +1011,9 @@ export default {
             formData.append("additional_cost", this.order_data.additional_cost);
             formData.append("net_amount", this.order_data.net_amount);
             formData.append("products", JSON.stringify(this.product_items));
+
+            console.log("formData", formData);
+            // return false;
 
             this.$swal({
               title: "Are you sure confirm this purchase!",
@@ -1087,7 +1052,7 @@ export default {
 
                 }
 
-            }).finally((res) => {
+            }).finally(( ) => {
                 this.isSubmit = false;
                 this.disabled = false;
             })
