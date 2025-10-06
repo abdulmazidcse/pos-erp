@@ -159,11 +159,11 @@ class ProductsAPIController extends AppBaseController
         }else{
             $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
         }  
-        return array(
-            $roles,
-            $outlet_id, 
-            $user,
-        );
+//        return array(
+//            $roles,
+//            $outlet_id,
+//            $user,
+//        );
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
             'stock_products.stock_quantity','stock_products.out_stock_quantity',

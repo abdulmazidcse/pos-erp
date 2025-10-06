@@ -337,7 +337,7 @@ export default {
             if (this.items.length > 0) { 
                 var postEvent = axios.put(this.apiUrl + '/points_settings/' + this.form.id, this.form, this.headerjson);
             } else { 
-                var postEvent = axios.post(this.apiUrl + '/points_settings/', this.form, this.headerjson);
+                var postEvent = axios.post(this.apiUrl + '/points_settings', this.form, this.headerjson);
             }
 
             postEvent.then(res => {

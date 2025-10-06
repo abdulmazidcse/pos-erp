@@ -2797,15 +2797,17 @@ export default {
         coupons_code: "",
       }),
       pform: new Form({
+        // cost_center_id: '',
         order_discount: 0,
         order_vat: 0,
         order_items_vat: 0,
         sale_note: "",
         staff_note: "",
         customer_id: 1,
+        customer_name: "",
         items: "",
         total_amount: 0,
-        grand_total: "",
+        grand_total: 0,
         customer_discount: 0,
         customer_group_discount: 0,
         customer_group_id: '',
@@ -4093,10 +4095,9 @@ export default {
   netAmountCalculate: function () {
     let totalDiscount = this.all_discount + this.specialDiscount + this.customer_group_discount + this.customer_discount + this.couponDiscoun;
 
-    let totalVatTax = this.invoiceVat + this.totalCartTax;
-    let result = this.totalCartValue + totalVatTax - totalDiscount;
-    // No side effects in computed properties
-    return result.toFixed();
+      let totalVatTax = this.invoiceVat + this.totalCartTax;
+      let result = parseFloat(this.totalCartValue + totalVatTax - totalDiscount).toFixed(2); 
+      return parseFloat(result).toFixed(2); 
   },
   totalQuantity: function () {
     return this.items.reduce(function (total, item) {
@@ -4123,7 +4124,13 @@ watch: {
         return total + ritem.replace_mrp_price * ritem.return_qty;
         // this.sale_return_info.return_amount = total;
       }, 0)
-    }
+    },
+    netAmountCalculate(newValue) {
+      this.pform.grand_total = newValue;
+      this.pform.order_items_vat = this.totalCartTax;
+      this.pform.total_amount = parseFloat(this.totalCartValue).toFixed(2);
+      this.pform.payments[0].amount = newValue;
+    },
   }
 };
 </script>

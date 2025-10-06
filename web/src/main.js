@@ -76,7 +76,7 @@ app.config.globalProperties.headerparams = {
                       'Content-Type': 'application/json' 
                     }; 
 
-if((location.host == 'localhost:8081') || (location.host == '127.0.0.1:8081')){ 
+if((location.host == 'localhost:8080') || (location.host == '127.0.0.1:8080')){ 
   // let baseUrl =  "https://drmpos.24sevenbd.com/backend"; 
   let baseUrl =  "http://127.0.0.1:8000"; 
 	app.config.globalProperties.apiUrl = baseUrl+"/api";
