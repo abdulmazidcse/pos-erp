@@ -62,6 +62,8 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
         $start_date = $fiscal_year->start_date;
         $end_date   = $fiscal_year->end_date;
 
+        // response()->json($request->all());
+
         $this->validate($request, [
             'supplier_id' => 'required',
             'purchase_order_id' => 'required',
@@ -71,10 +73,10 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
             'warehouse_id'     => 'required|not_in:0',
         ]);
 
-//        return response()->json($request->all());
+        //return response()->json($request->all());
         // For Without purchase order to receive product
         if($request->purchase_order_id == "direct") {
-//            $outlet_id = auth()->user()->outlet_id ?? 1;
+            //$outlet_id = auth()->user()->outlet_id ?? 1;
             $warehouse_id = $request->get('warehouse_id');
 
             $products = json_decode($request->get('products'));
@@ -96,7 +98,9 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
             {
                 foreach ($products as $product) {
 
-//                    if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
+                    return $product->sequences;
+
+                    //if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
                     if($product->id != "" && $product->purchase_price >= 0  && ($product->sale_price != 0 && $product->sale_price != "") && (($product->rcv_qty != 0 && $product->rcv_qty != "")) || ($product->rcv_weight != 0 && $product->rcv_weight != "")) {
 
                         if($product->unit_code == 'kg') {
@@ -130,7 +134,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                             'receive_mrp_price'         => $product->sale_price,
                         ];
 
-//                        $receive_details_product_array[]   = new PurchaseReceiveDetails([
+                        // $receive_details_product_array[]   = new PurchaseReceiveDetails([
                         $receive_details_product_array[]   = [
                             'receive_product_id'        => $product->id,
                             'receive_product_unit_id'   => $product->product_unit_id,
@@ -188,6 +192,9 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                             }
                         }
                     }
+
+                    
+                    
                 }
             }
 
@@ -237,7 +244,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
             $specific_ledger = ($supplier->payable_accounts) ? $supplier : "";
             $company_id = auth()->user()->company_id ?? 1;
             $ledger_data    = getLedgerAccounts($company_id,'grn', $specific_ledger);
-//            return response()->json($ledger_data);
+            //  return response()->json($ledger_data);
 
             $transactions = [];
             if(count($ledger_data) > 0) {
