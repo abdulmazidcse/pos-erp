@@ -1,0 +1,45 @@
+<template>
+    <table class="table table-hover table-responsive align-middle">
+        <TableHeader 
+            :columns="columns"
+            :isSort="isSort"
+            :sortDt="sortDt"
+            @changeSort="setSort"
+        />
+        <TableBody 
+            :columns="columns" 
+            :data="data"
+            :language="language"
+            :isLoading="isLoading"
+            v-slot="scope"
+        >
+        <slot></slot> 
+        </TableBody>         
+    </table>
+
+</template>
+<script>
+import TableHeader from './TableHeader.vue';
+import TableBody from './TableBody.vue';
+export default {
+    name: 'JlTable',
+    props: {
+        columns: Array,
+        data: Array,
+        isSort: Boolean,
+        sortDt: Object,
+        language: Object,
+        isLoading: Boolean
+    },
+    emits: ['onChangeSort'],
+    components: {
+        TableHeader,
+        TableBody
+    },
+    methods: {
+        setSort(sort){            
+            this.$emit('onChangeSort', sort);
+        }, 
+    }
+}
+</script>

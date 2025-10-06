@@ -138,4 +138,9 @@ class WarehouseStockProduct extends Model
 
         return $warehouse_stock_products;
     }
+
+    public function sequences()
+    {
+        return $this->hasMany(WarehouseSequence::class, 'warehouse_stock_product_id', 'id');    
+    }
 }

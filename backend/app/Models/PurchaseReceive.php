@@ -77,5 +77,10 @@ class PurchaseReceive extends Model
         return $this->belongsTo(Supplier::class, 'supplier_id', 'id');
     }
 
+    public function sequences()
+    {
+        return $this->hasMany(ProductSequence::class, 'purchase_receive_id', 'id');
+    }
+
     
 }

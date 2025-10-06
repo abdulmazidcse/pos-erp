@@ -1,0 +1,25 @@
+# Switch Node version
+nvm use 20.19.5
+
+# Clean up
+rm -rf node_modules package-lock.json
+
+# Upgrade global Vue CLI
+npm uninstall -g @vue/cli
+npm install -g @vue/cli@latest
+
+# Upgrade local CLI service and plugins
+npm install --save-dev @vue/cli-service@^5.0.0 @vue/cli-plugin-babel@^5.0.0 @vue/cli-plugin-eslint@^5.0.0
+
+# Upgrade sass
+npm install -D sass-loader@^13.2.0 sass@^1.66.1
+
+# Remove incompatible Bootstrap Vue package
+npm uninstall bootstrap-vue
+
+# Upgrade dependencies
+npx npm-check-updates -u
+npm install
+
+# Run
+npm run serve

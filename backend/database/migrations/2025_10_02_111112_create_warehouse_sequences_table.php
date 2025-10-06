@@ -15,14 +15,20 @@ return new class extends Migration
             $table->id();
 
             $table->foreignId('product_id')->constrained('products')->index();
-            $table->foreignId('outlet_id')->nullable()->constrained('outlets')->index(); 
-            $table->foreignId('wherehouse_id')->nullable()->constrained('warehouses')->index(); 
+
+            $table->foreignId('outlet_id')->nullable()->index();
+            $table->foreign('outlet_id')->references('id')->on('outlets')->onDelete('cascade')->name('fk_warehouse_sequences_outlet_id');
+
+            $table->foreignId('warehouse_id')->nullable()->index();
+            $table->foreign('warehouse_id')->references('id')->on('warehouses')->onDelete('cascade')->name('fk_warehouse_sequences_warehouse_id');
+
             $table->foreignId('warehouse_stock_product_id')->nullable()->constrained('warehouse_stock_products');
             $table->foreignId('sales_id')->nullable()->constrained('sales');
             $table->foreignId('colors_id')->nullable()->constrained('colors');
             $table->foreignId('sizes_id')->nullable()->constrained('sizes');
 
-            $table->text('sequence')->nullable()->index();
+            $table->string('sequence', 100)->nullable()->index();
+
             $table->date('expiry_date')->nullable();
             $table->double('quantity')->default(0);
             $table->double('weight')->default(0);
@@ -33,7 +39,9 @@ return new class extends Migration
             $table->timestamps();
 
             // ✅ Composite (grouped) index
-            $table->index(['outlet_id', 'product_id', 'wherehouse_id', 'status']);
+            // $table->index(['outlet_id', 'product_id', 'warehouse_id', 'status']);
+            $table->index(['outlet_id', 'product_id', 'warehouse_id', 'status'], 'ws_outlet_product_ware_status_idx');
+
         });
 
     }

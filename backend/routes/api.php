@@ -463,7 +463,7 @@ Route::middleware(['auth:api', 'checkUserStatus'])->group(function () {
     Route::get('reports/collection-report', [App\Http\Controllers\API\ReportSalesAPIController::class, 'getCollectionReport']);
     Route::get('reports/product-sales-report', [App\Http\Controllers\API\ReportSalesAPIController::class, 'getProductSaleReport']);
     Route::get('reports/product-sales-report-excel-export', [App\Http\Controllers\API\ReportSalesAPIController::class, 'excelExportProductSalesReport']);
-
+    Route::post('check-sequences',[App\Http\Controllers\API\WarehousePurchaseReceiveAPIController::class,'checkSequenceNumber']);
     Route::resource('general_settings', App\Http\Controllers\API\GeneralSettingAPIController::class);
 
     Route::post('/check-version', [App\Http\Controllers\API\VersionController::class, 'checkVersion']);

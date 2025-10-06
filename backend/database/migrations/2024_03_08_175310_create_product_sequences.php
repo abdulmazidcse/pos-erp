@@ -14,18 +14,30 @@ class CreateProductSequences extends Migration
     public function up()
     {
         Schema::create('product_sequences', function (Blueprint $table) {
-            $table->bigIncrements('id'); 
-            $table->string('sequence', 100);
+            $table->id();
             $table->unsignedBigInteger('product_id');
-            $table->unsignedBigInteger('purchase_order_id');
-            $table->unsignedTinyInteger('status')->default(1)->comment('0=in stock|1=sold');
-            $table->unsignedBigInteger('sale_item_id');
+            $table->unsignedBigInteger('outlet_id')->nullable();
+            $table->unsignedBigInteger('stock_product_id')->nullable();
+            $table->unsignedBigInteger('sales_id')->nullable();
+            $table->unsignedBigInteger('colors_id')->nullable();
+            $table->unsignedBigInteger('sizes_id')->nullable();
+            $table->string('sequence')->nullable();
+            $table->date('expiry_date')->nullable();
+            $table->double('quantity')->default(0);
+            $table->double('weight')->default(0);
+            $table->double('sale_price')->nullable();
+            $table->double('purchases_price')->nullable();
+            $table->integer('status')->default(0);
             $table->timestamps();
-            $table->softDeletes();
 
-            $table->foreign(['product_id'])->references(['id'])->on('products')->onDelete('CASCADE');
-            $table->foreign(['purchase_order_id'])->references(['id'])->on('purchase_receives')->onDelete('CASCADE');
-            $table->foreign(['sale_item_id'])->references(['id'])->on('sale_items')->onDelete('CASCADE');
+            $table->index(['outlet_id', 'product_id', 'sequence', 'status'], 'ws_outlet_product_ware_status_idx');
+
+            // Optional foreign key constraints (uncomment if needed)
+            // $table->foreign('product_id')->references('id')->on('products');
+            // $table->foreign('outlet_id')->references('id')->on('outlets');
+            // $table->foreign('sales_id')->references('id')->on('sales');
+            // $table->foreign('colors_id')->references('id')->on('colors');
+            // $table->foreign('sizes_id')->references('id')->on('sizes');
         });
     }
 

@@ -1,0 +1,21 @@
+/** Voucher Print CSS */
+
+#printArea {
+    background: black;
+}
+.m-zero{
+    margin: 0px;
+}
+
+.mr-fourty{
+    margin-right: 40px;
+}
+
+.mt-fourty{
+    margin-top: 40px;
+}
+
+.font-italic{
+    font-weight: 400;
+    font-style: italic;
+}

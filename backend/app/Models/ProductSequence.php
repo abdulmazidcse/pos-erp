@@ -6,6 +6,34 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
 class ProductSequence extends Model
-{
+{ 
     use HasFactory;
+
+    protected $fillable = [
+        'product_id', 'outlet_id', 'purchase_receive_id', 'sales_id', 'colors_id', 'sizes_id' ,'sequence' , 'expiry_date', 'quantity',  'weight',  'sale_price' , 'purchases_price',  'status'
+    ];
+    public $timestamps = true;
+    public function outlet()
+    {
+        return $this->belongsTo(Outlet::class);
+    }
+    public function company()
+    {
+        return $this->belongsTo(Company::class);
+    }
+    public function warehouse()
+    {
+        return $this->belongsTo(Warehouse::class);
+    }
+    public function getNextSequence()
+    {
+        $nextNumber = $this->current_number + 1;
+        $formattedNumber = str_pad($nextNumber, $this->digit, '0', STR_PAD_LEFT);
+        return $this->prefix . $formattedNumber . $this->suffix;
+    }
+    public function incrementSequence()
+    {
+        $this->current_number += 1;
+        $this->save();
+    }
 }

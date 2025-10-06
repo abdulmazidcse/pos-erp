@@ -155,15 +155,16 @@ class ProductsAPIController extends AppBaseController
         $user = auth()->user();  
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
         if (in_array('Super Admin', $roles)) { 
-            $outlet_id  = $request->input('outlet_id');
+            $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : null;
         }else{
             $outlet_id  = $request->input('outlet_id') ? $request->input('outlet_id') : $user->outlet_id;
         }  
-//        return array(
-//            $roles,
-//            $outlet_id,
-//            $user,
-//        );
+        // return array(
+        //     $roles,
+        //     $outlet_id, 
+        //     $user,
+        // );
+        $sequences_setting = 1;
         $allow_checkout = 1;
         $query = Product::select('products.*','stock_products.in_stock_quantity',
             'stock_products.stock_quantity','stock_products.out_stock_quantity',
@@ -190,12 +191,12 @@ class ProductsAPIController extends AppBaseController
                 });
             }
             
-            $query->where('stock_products.outlet_id', $outlet_id);
+            // $query->where('stock_products.outlet_id', $outlet_id);
               
 
-            // $query->when($outlet_id, function ($q, $outlet_id) {  
-            //     return $q->where('products.outlet_id', $outlet_id);
-            // });
+            $query->when($outlet_id, function ($q, $outlet_id) {  
+                return $q->where('products.outlet_id', $outlet_id);
+            });
             
         // $query->when(((Auth::user()->outlet_id ) && (Auth::user()->outlet_id != '0')), function ($q) {
         //     return $q->where('products.outlet_id', Auth::user()->outlet_id);

@@ -222,7 +222,7 @@ if(!function_exists('checkOutletId'))
         $user = auth()->user();
         $roles = $user ? $user->roles()->pluck('name')->toArray() : array(); 
         if (in_array('Super Admin', $roles)) {             
-            $company_id  = Outlet::find($request->input('outlet_id'))->company_id;
+            $company_id  = Outlet::find($request->get('outlet_id'))->company_id;
         }else{
             $company_id  = $user->company_id;
         } 

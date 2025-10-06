@@ -20,6 +20,7 @@ use App\Models\SupplierLedger;
 use App\Models\WarehouseStockProduct;
 use App\Models\WarehouseStockProductGift;
 use App\Models\WarehouseStockProductLog;
+use App\Models\WarehouseSequence;
 use App\Repositories\PurchaseReceiveRepository;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -94,11 +95,28 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
             $total_discount_amount = 0;
             $total_rcv_amount = 0;
             $total_vat_amount = 0;
+            $WarehouseSequence = []; 
             if(count($products) > 0)
-            {
-                foreach ($products as $product) {
-
-                    return $product->sequences;
+            { 
+                foreach ($products as $product) {  
+                    foreach($product->sequences as $whSeq) {
+                        $WarehouseSequence[$product->id][] = new WarehouseSequence([
+                            'product_id' => $whSeq->product_id,
+                            'outlet_id' => 0,
+                            'warehouse_id' => $warehouse_id, 
+                            'sales_id' => null,
+                            'colors_id' => !empty($whSeq->color_id) ? $whSeq->color_id : null,
+                            'sizes_id'  => !empty($whSeq->size_id) ? $whSeq->size_id : null,
+                            'sequence' => $whSeq->sequence ?? null,
+                            'expiry_date' => $whSeq->expiry_date ?? null,
+                            'quantity' => 1,
+                            'weight' => 0,
+                            'sale_price' => $whSeq->sale_price ?? 0,
+                            'purchases_price' => $whSeq->purchases_price ?? 0,
+                            'status' => 0,
+                        ]);
+                    } 
+                    // WarehouseSequence::create($WarehouseSequence);
 
                     //if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
                     if($product->id != "" && $product->purchase_price >= 0  && ($product->sale_price != 0 && $product->sale_price != "") && (($product->rcv_qty != 0 && $product->rcv_qty != "")) || ($product->rcv_weight != 0 && $product->rcv_weight != "")) {
@@ -191,9 +209,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                 }
                             }
                         }
-                    }
-
-                    
+                    } 
                     
                 }
             }
@@ -321,8 +337,13 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                             'stock_quantity' => $product_expires_data[$purchaseProducts->id][$pe]['expire_quantity'],
                                             'expires_date' => $product_expires_data[$purchaseProducts->id][$pe]['expire_date'],
                                         ];
+                                        // dd($WarehouseSequence);
 
                                         $stock_new_products = WarehouseStockProduct::create($stock_new_inputs);
+                                        if(count($WarehouseSequence[$purchaseProducts->id]) > 0) {
+                                            $stock_new_products->sequences()->saveMany($WarehouseSequence[$purchaseProducts->id]);
+                                        }
+                                        // WarehouseSequence::create($WarehouseSequence); 
 
                                         // For average tp && Sale Price Update
                                         $pro_update_inputs = [
@@ -388,8 +409,11 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                                         'stock_quantity' => $product_array[$purchaseProducts->id]['receive_quantity'],
                                         'stock_weight' => $product_array[$purchaseProducts->id]['receive_weight'],
                                     ];
-
-                                    $create_new_stock = WarehouseStockProduct::create($new_stock_input);
+ 
+                                    $stock_new_products = WarehouseStockProduct::create($new_stock_input);
+                                        if(count($WarehouseSequence[$purchaseProducts->id]) > 0) {
+                                            $stock_new_products->sequences()->saveMany($WarehouseSequence[$purchaseProducts->id]);
+                                        }
 
                                     // For average tp && Sale Price Update
                                     $pro_update_inputs = [
@@ -546,7 +570,7 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
         // For Requisition Order Based Purchase Receive
         else{
             $purchase_order = PurchaseOrder::find($request->get('purchase_order_id'));
-//            $store_requisition = StoreRequisition::find($purchase_order->store_requisition_id);
+            // $store_requisition = StoreRequisition::find($purchase_order->store_requisition_id);
             $warehouse_id = $request->get('warehouse_id');
 
             $products = json_decode($request->get('products'));
@@ -719,12 +743,12 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
                         $vaccount_type = 'cr';
                     }
 
-//                    if($i == 0) {
-//                        $reference_id = NULL;
-//                    }else{
-//                        $reference_ledger = AccountLedger::where('ledger_code', '120101')->first();
-//                        $reference_id = $reference_ledger->id;
-//                    }
+                    //                    if($i == 0) {
+                    //                        $reference_id = NULL;
+                    //                    }else{
+                    //                        $reference_ledger = AccountLedger::where('ledger_code', '120101')->first();
+                    //                        $reference_id = $reference_ledger->id;
+                    //                    }
                     if($i == 0) {
                         $reference_id = NULL;
                     }else{
@@ -1014,6 +1038,13 @@ class WarehousePurchaseReceiveAPIController extends AppBaseController
             }
         }
 
+    }
+
+    public function checkSequenceNumber(Request $request)
+    {
+        $sequences = $request->get('sequences');
+        $purchase_receive = WarehouseSequence::whereIn('sequence', $sequences)->get();
+        return $this->sendResponse($purchase_receive->toArray(), 'Purchase Receive Sequence');
     }
 
     public function storeOld(Request $request)

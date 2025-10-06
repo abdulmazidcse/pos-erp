@@ -25,6 +25,7 @@ use App\Models\StockProductsLog;
 use App\Models\StoreRequisition;
 use App\Models\Supplier;
 use App\Models\SupplierLedger;
+use App\Models\ProductSequence;
 use App\Models\User;
 use App\Repositories\PurchaseReceiveRepository;
 use Carbon\Carbon;
@@ -124,9 +125,28 @@ class PurchaseReceiveAPIController extends AppBaseController
             $total_discount_amount = 0;
             $total_rcv_amount = 0;
             $total_vat_amount = 0; 
+            $productSequences = [];  
             if(count($products) > 0)
-            {
-                foreach ($products as $product) {
+            {  
+                foreach ($products as $product) {  
+                    
+                    foreach($product->sequences as $whSeq) {
+                        $productSequences[$product->id][] = new ProductSequence([
+                            'product_id' => $whSeq->product_id,
+                            'outlet_id' => !empty($whSeq->outlet_id) ? $whSeq->outlet_id : null,
+                            'warehouse_id' => !empty($whSeq->wherehouse_id) ? $whSeq->wherehouse_id : null, 
+                            'sales_id' => null,
+                            'colors_id' => !empty($whSeq->color_id) ? $whSeq->color_id : null,
+                            'sizes_id'  => !empty($whSeq->size_id) ? $whSeq->size_id : null,
+                            'sequence' => $whSeq->sequence ?? null,
+                            'expiry_date' => $whSeq->expiry_date ?? null,
+                            'quantity' => 1,
+                            'weight' => 0,
+                            'sale_price' => $whSeq->sale_price ?? 0,
+                            'purchases_price' => $whSeq->purchases_price ?? 0,
+                            'status' => 0,
+                        ]);
+                    }
                     //  if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "")) {
                     if($product->id != "" && $product->purchase_price >= 0  && ($product->sale_price != 0 && $product->sale_price != "") && (($product->rcv_qty != 0 && $product->rcv_qty != "")) || ($product->rcv_weight != 0 && $product->rcv_weight != "")) {
                          
@@ -554,6 +574,11 @@ class PurchaseReceiveAPIController extends AppBaseController
                                 }
                             }
 
+                            
+                            if(count($productSequences[$ex_product_id]) > 0) {
+                                $purchase_receive_save->sequences()->saveMany($productSequences[$ex_product_id]);
+                            }
+
                         }
 
                     }
@@ -616,9 +641,27 @@ class PurchaseReceiveAPIController extends AppBaseController
             $total_discount_amount = 0;
             $total_rcv_amount = 0;
             $total_vat_amount = 0;
+            $productSequences = [];
             if(count($products) > 0)
             {
                 foreach ($products as $product) {
+                    foreach($product->sequences as $whSeq) {
+                        $productSequences[$product->id][] = new ProductSequence([
+                            'product_id' => $whSeq->product_id,
+                            'outlet_id' => !empty($whSeq->outlet_id) ? $whSeq->outlet_id : null,
+                            'warehouse_id' => !empty($whSeq->wherehouse_id) ? $whSeq->wherehouse_id : null, 
+                            'sales_id' => null,
+                            'colors_id' => !empty($whSeq->color_id) ? $whSeq->color_id : null,
+                            'sizes_id'  => !empty($whSeq->size_id) ? $whSeq->size_id : null,
+                            'sequence' => $whSeq->sequence ?? null,
+                            'expiry_date' => $whSeq->expiry_date ?? null,
+                            'quantity' => 1,
+                            'weight' => 0,
+                            'sale_price' => $whSeq->sale_price ?? 0,
+                            'purchases_price' => $whSeq->purchases_price ?? 0,
+                            'status' => 0,
+                        ]);
+                    }
 
                     if($product->id != "" && ($product->purchase_price != 0 && $product->purchase_price != "") && ($product->sale_price != 0 && $product->sale_price != "") && ($product->rcv_qty != 0 && $product->rcv_qty != "") || ($product->rcv_weight != 0 && $product->rcv_weight != "")) {
 
@@ -1043,6 +1086,10 @@ class PurchaseReceiveAPIController extends AppBaseController
 
                                 $product_gifts_save = ProductGift::create($pg_insert_inputs);
                             }
+                        }
+
+                        if(count($productSequences[$ex_product_id]) > 0) {
+                            $purchase_receive_save->sequences()->saveMany($productSequences[$ex_product_id]);
                         }
 
                         // Order Details Update

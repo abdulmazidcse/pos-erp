@@ -4095,9 +4095,13 @@ export default {
   netAmountCalculate: function () {
     let totalDiscount = this.all_discount + this.specialDiscount + this.customer_group_discount + this.customer_discount + this.couponDiscoun;
 
-      let totalVatTax = this.invoiceVat + this.totalCartTax;
-      let result = parseFloat(this.totalCartValue + totalVatTax - totalDiscount).toFixed(2); 
-      return parseFloat(result).toFixed(2); 
+    let totalVatTax = this.invoiceVat + this.totalCartTax;
+    let result = parseFloat(this.totalCartValue + totalVatTax - totalDiscount).toFixed(2);
+    this.pform.grand_total = result;        
+    this.pform.order_items_vat = this.totalCartTax;
+    this.pform.total_amount = parseFloat(this.totalCartValue).toFixed(2);
+    this.pform.payments[0].amount = parseFloat(result).toFixed(2); 
+    return parseFloat(result).toFixed(2);
   },
   totalQuantity: function () {
     return this.items.reduce(function (total, item) {
