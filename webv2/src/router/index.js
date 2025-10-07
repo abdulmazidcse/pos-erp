@@ -1,62 +1,7 @@
 import { createWebHistory, createRouter } from "vue-router";
-import store from '../store/'
-
-import Home from "@/views/Home.vue"; 
-import Pos from "@/views/Pos.vue";  
-import Brand from "@/views/page/Brand.vue"; 
-import ProductCategory from "@/views/page/ProductCategory.vue"; 
-import Product from "@/views/product/Product.vue"; 
-import Notification from "@/views/Notifications.vue"; 
-import Districts from "@/views/page/Districts.vue";  
-import Company from "@/views/page/Company.vue";  
-import Department from "@/views/page/Department.vue";  
-import Outlet from "@/views/page/Outlet.vue";   
-import Unit from "@/views/page/Unit.vue";  
-import Role from "@/views/page/Role.vue";  
-import RolePermission from "@/views/page/RolePermission.vue";  
-import User from "@/views/page/User.vue";  
+import store from '../store/' 
 import Login from "@/views/page/Login.vue";  
-import AppLogin from "@/views/page/LoginFromApp.vue";  
-import Warehouse from "@/views/page/Warehouse.vue";  
-import Customer from "@/views/page/Customer.vue";  
-import CustomerLedger from "@/views/page/CustomerLedger.vue";  
-import SupplierType from "@/views/page/SupplierType.vue";   
-import CustomerGroup from "@/views/page/CustomerGroup.vue";   
-import Supplier from "@/views/page/Supplier.vue";  
-import PurchaseOrder from "@/views/purchase/PurchaseOrder.vue";  
-import PurchaseOrderEdit from "@/views/purchase/PurchaseOrderEdit.vue";  
-import PurchaseOrderList from "@/views/purchase/PurchaseOrderList.vue";  
-import PurchaseReceive from "@/views/purchase/PurchaseReceive.vue";  
-import PurchaseReceiveWarehouse from "@/views/purchase/WarehousePurchaseReceive.vue";  
-import PurchaseReceiveList from "@/views/purchase/PurchaseReceiveList.vue";  
-import PurchaseOrderApprovalList from "@/views/purchase/PurchaseOrderApprovalList.vue";  
-import StorePurchaseRequisition from "@/views/purchase_requisition/StorePurchaseRequisition.vue";  
-import StorePurchaseRequisitionEdit from "@/views/purchase_requisition/StorePurchaseRequisitionEdit.vue";  
-import StoreRequisitionList from "@/views/purchase_requisition/StoreRequisitionList.vue";  
-import StoreRequisitionApprovalList from "@/views/purchase_requisition/StoreRequisitionApprovalList.vue";  
-import StoreRequisitionPurchaseOrder from "@/views/purchase_requisition/StoreRequisitionPurchaseOrder.vue";  
-import StoreRequisitionPurchaseOrderEdit from "@/views/purchase_requisition/StoreRequisitionPurchaseOrderEdit.vue"; 
-import Sizes from "@/views/page/Sizes.vue";  
-import Colors from "@/views/page/Colors.vue";  
-import Taxes from "@/views/page/Taxes.vue";  
-import Attributes from "@/views/page/Attributes.vue";  
-import AttributeValue from "@/views/page/AttributeValue.vue";  
-import MobileWallet from "@/views/page/MobileWallet.vue";  
-import ExpiryBoard from "@/views/expire_product/ExpiryBoard.vue";
-import StockTransfer from "@/views/stock_transfer/StockTransfer.vue";
-import StockTransferList from "@/views/stock_transfer/StockTransferList.vue";
-import StockManagementList from "@/views/stock/StockManagement.vue";
-import StockInOut from "@/views/stock/StockInOut.vue";
-import Coupons from "@/views/page/Conpons.vue";  
-import RewardsPoints from "@/views/rewards-points/RewardsPoints.vue";  
-import PointsSettings from "@/views/rewards-points/PointsSettings.vue";  
-import OrderTatalPoints from "@/views/rewards-points/OrderTatalPoints.vue";  
-import InventoryBoard from "@/views/inventory/InventoryBoard.vue";
-import SupplierLedger from "@/views/accounts/SupplierLedger.vue";
-import Sales from "@/views/sales/PosSales.vue";
-import BankAccountList from "@/views/account_settings/BankAccount.vue";
-import DiscountSettings from "@/views/sales/DiscountSettings.vue";
-
+import AppLogin from "@/views/page/LoginFromApp.vue";   
 
 import PurchaseReceiveBoard from "@/views/purchase/PurchaseReceiveBoard.vue";
 import PermissionModule from "@/views/menu_and_permissions/ModuleOrMenu.vue";
@@ -126,7 +71,106 @@ route_list_array.push(
     name: 'VoucherEdit',
     component: VoucherEdit,
     icon_name: 'fas fa-folder',
-  } 
+  },
+   {
+    path: '/service',
+    name: 'ServiceModule',
+    component: () => import('../layouts/ServiceLayout.vue'),
+    children: [
+      {
+        path: 'dashboard',
+        name: 'ServiceDashboard',
+        component: ServiceDashboard,
+        meta: { title: 'সার্ভিস ড্যাশবোর্ড' }
+      },
+      {
+        path: 'complaint',
+        name: 'ComplaintRegister',
+        component: ComplaintRegister,
+        meta: { title: 'অভিযোগ রেজিস্টার' }
+      },
+      {
+        path: 'warranty-check',
+        name: 'WarrantyCheck',
+        component: WarrantyCheck,
+        meta: { title: 'ওয়ারেন্টি চেক' }
+      },
+      {
+        path: 'assignment',
+        name: 'TechnicianAssignment',
+        component: TechnicianAssignment,
+        meta: { title: 'টেকনিশিয়ান অ্যাসাইনমেন্ট' }
+      },
+      {
+        path: 'execution',
+        name: 'ServiceExecution',
+        component: ServiceExecution,
+        meta: { title: 'সার্ভিস এক্সিকিউশন' }
+      },
+      {
+        path: 'billing',
+        name: 'BillingSection',
+        component: BillingSection,
+        meta: { title: 'বিলিং' }
+      },
+      {
+        path: 'delivery',
+        name: 'DeliveryHandover',
+        component: DeliveryHandover,
+        meta: { title: 'ডেলিভারি ও হ্যান্ডওভার' }
+      },
+      {
+        path: 'history',
+        name: 'ServiceHistory',
+        component: ServiceHistory,
+        meta: { title: 'সার্ভিস হিস্ট্রি' }
+      },
+      {
+        path: 'ticket/:id',
+        name: 'TicketDetails',
+        component: () => import('../components/ServiceModule/TicketDetails.vue'),
+        meta: { title: 'টিকিট বিস্তারিত' }
+      }
+    ]
+  }
+  // {
+  //   path: '/complaint',
+  //   name: 'complaint-register',
+  //   component: ComplaintRegister ,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // {
+  //   path: '/warranty-check',
+  //   name: 'warranty-check',
+  //   component: WarrantyCheck ,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // { path: '/assignment', 
+  //   name: 'assignment', 
+  //   component: TechnicianAssignment,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // { path: '/execution', 
+  //   name: 'execution', 
+  //   component: ServiceExecution,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // { path: '/billing', 
+  //   name: 'billing', 
+  //   component: BillingSection,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // { path: '/delivery', 
+  //   name: 'delivery', 
+  //   component: DeliveryHandover,
+  //   icon_name: 'fas fa-folder',
+  // },
+  // { path: '/history', 
+  //   name: 'history', 
+  //   component: ServiceHistory,
+  //   icon_name: 'fas fa-folder',
+  // },
+     
 
 )
 
